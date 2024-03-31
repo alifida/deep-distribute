@@ -1,0 +1,102 @@
+ {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+
+<meta charset="utf-8">
+
+
+<title>Dashboard</title> {% block title %}{% endblock %} {% block meta %}{% endblock %}
+
+	<link rel="stylesheet" href="{% static "css/custom.css" %}?version=1.8">
+ 	<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{% static "lib/fontawesome-free/css/all.min.css" %}?version=1.8">
+  <!-- Ionicons -->
+   
+  <!-- Tempusdominus Bbootstrap 4 -->
+  <link rel="stylesheet" href="{% static "lib/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css" %}">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="{% static "lib/icheck-bootstrap/icheck-bootstrap.min.css" %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static "lib/adminlte/adminlte.css" %}?version=1.8">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="{% static "lib/overlayScrollbars/css/OverlayScrollbars.min.css" %}">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="{% static "lib/daterangepicker/daterangepicker.css" %}">
+  <link rel="stylesheet" href="{% static "lib/bootstrap/css/bootstrap-select.css" %}">
+  <!-- summernote -->
+  <link rel="stylesheet" href="{% static "lib/summernote/summernote-bs4.css" %}">
+  
+  <link rel="stylesheet" href="{% static "lib/datatables-bs4/css/dataTables.bootstrap4.min.css" %}">
+  <link rel="stylesheet" href="{% static "lib/datatables-responsive/css/responsive.bootstrap4.min.css" %}">
+  <link rel="stylesheet" href="{% static "lib/datatables/Buttons-1.6.5/css/buttons.dataTables.min.css" %}">
+   
+
+  <link rel="stylesheet" href="{% static "lib/sweetalert2/sweetalert2.min.css" %}">
+  <link rel="stylesheet" href="{% static "lib/toastr/toastr.min.css" %}">
+  
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+
+
+
+
+
+
+<!-- Bootstrap CSS 
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<!-- Font Awesome CSS - ->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+-->
+
+</head>
+<body class="sidebar-mini layout-fixed control-sidebar-slide-open  sidebar-collapse text-sm">
+	<script src="{% static "lib/jquery/jquery.min.js" %}"></script>
+	<script src="{% static "lib/jquery/jquery-ui.min.js" %}"></script>
+	
+	<script src="{% static "lib/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+	<script src="{% static "lib/bootstrap/js/bootstrap-select.min.js" %}"></script>
+	
+	<script src="{% static "lib/adminlte/adminlte.js" %}"></script>
+	
+	<script src="{% static "lib/daterangepicker/daterangepicker.js" %}"></script>
+	<script src="{% static "lib/overlayScrollbars/js/jquery.overlayScrollbars.min.js" %}"></script>
+	
+	
+	<script src="{% static "lib/datatables/jquery.dataTables.min.js" %}"></script>
+	<script src="{% static "lib/datatables-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+	<script src="{% static "lib/datatables-responsive/js/dataTables.responsive.min.js" %}"></script>
+	<script src="{% static "lib/datatables-responsive/js/responsive.bootstrap4.min.js" %}"></script>
+
+
+
+<script src="{% static "lib/datatables/Buttons-1.6.5/js/dataTables.buttons.min.js" %}"></script>
+<script src="{% static "lib/datatables/Buttons-1.6.5/js/buttons.colVis.min.js" %}"></script>
+<script src="{% static "lib/datatables/jszip/jszip.min.js" %}"></script>
+<script src="{% static "lib/datatables/Buttons-1.6.5/js/buttons.html5.min.js" %}"></script>
+<script src="{% static "lib/datatables/Buttons-1.6.5/js/buttons.print.min.js" %}"></script>
+
+
+
+	<script src="{% static "lib/sweetalert2/sweetalert2.min.js" %}"></script>
+	<script src="{% static "lib/toastr/toastr.min.js" %}"></script>
+	
+	
+	<script src="{% static "js/custom.js" %}?version=1.8"></script>
+<body>
+
+
+	<div class="wrapper">
+		{% if user.is_authenticated %} {% include "wrapper/top_section.html" %} {% endif %} 
+		{% if user.is_authenticated %} {% include "wrapper/left_section.html" %} {% endif %} 
+	
+		{% block content %}{% endblock %} 
+		{% include "wrapper/bottom_section.html" %}
+		{% include "wrapper/server_messages.html" %}
+	</div>
+	<script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
+</body>
+</html>

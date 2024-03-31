@@ -1,0 +1,17 @@
+{% extends "registration/registration_base.html" %} {% load i18n %} {% block content %}
+
+<div class="bg-info vh-100">
+	<br /> <br /> <br />
+	<div class="col-sm-12 col-md-6 col-lg-6 center padding-30">
+		<div class="card bg-white  mx-auto padding-20 shadow center-inner">
+			<div class="card-body">
+				<p>
+					{% trans "Successfully logged out" %}. <a href="{% url 'auth_login' %}">{% trans "Login again" %}</a>
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,67 @@
+{% extends "wrapper/base.html" %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-8 padding-10">
+                            <h2 class="left">Training Jobs</h2>
+                        </div>
+                        <div class="col-4 padding-10">
+                            <a href="{% url 'training_job_create' %}" class="btn btn-primary btn-sm right" data-toggle="tooltip" data-placement="top" title="Create New Job"><i class="nav-icon fas fa-plus"></i> &nbsp; New Job</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table table-hover table-responsive-md">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Started At</th>
+                                        <th scope="col">Ended At</th>
+                                        <th scope="col">Algorithm</th>
+                                        <th scope="col">Dataset</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in jobs %}
+                                    <tr>
+                                        <th scope="row">{{ forloop.counter }}</th>
+                                        <td>{{ job.job_name }}</td>
+                                        <td>{{ job.status }}</td>
+                                        <td>{{ job.started_at|date:"Y-m-d H:i" }}</td>
+                                        <td>{{ job.ended_at|date:"Y-m-d H:i" }}</td>
+                                        <td>{{ job.algo }}</td>
+                                        <td>{{ job.dataset_img.data_name }}</td>
+                                        <td>
+                                            <a href="{% url 'training_job_update' job.id %}" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="top" title="Edit"><i class="nav-icon fa fa-edit"></i></a>
+                                            {% if job.status == status_running %}
+                                            <a href="{% url 'stop_training' job.id %}" class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Stop"><i class="nav-icon fa fa-times"></i></a>
+                                            {% endif %}
+                                            
+                                            {% comment %} <a href="{% url 'training_job_delete_confirm' job.id %}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Delete"><i class="nav-icon fa fa-trash"></i></a> {% endcomment %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="8">No training jobs found.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "registration/registration_base.html" %} {% load i18n %} {% block content %}{% load static %}
+<div class="bg-info vh-100">
+<br />
+<br />
+<br />
+{% if user.is_authenticated %}
+	<script type="text/javascript">
+		window.location.replace("{% url 'welcome' %}");
+	</script>
+
+{% endif %}
+
+
+ 
+
+	
+<div class="card bg-white  mx-auto padding-20 shadow" style="max-width: 400px;">
+	<h1 class="blink" style="text-align:center">GPU Live Server</h1>
+
+				<img class="img-responsive" src="{% static "img/pa_logo_sm.jpg" %}" alt="">
+			
+		<!--	<div class="col-lg-10">
+				<h3 class="card-title1 justify-inner">The Predictive Analytical
+					lab is working on Healthcare Domain for improving Sindh healthcare
+					and it is distributed in sub modules. The different module
+					summarizes the details of the all five programs including Lady
+					Health worker Program (LHW), Expanded Program on Immunization
+					(EPI), Nutrition Support Program (NSP), Mother New Born and Child
+					Health and Tuberculosis (TB).</h3>
+
+			</div>  -->
+
+	
+
+	
+	</div>
+
+
+
+ 
+	<br />
+
+
+
+
+
+
+
+
+
+
+<div class="card bg-white  mx-auto padding-20 shadow" style="max-width: 400px;">
+
+	<div class="card-body">
+		<h3 class="card-title1 center-inner">Login</h3>
+
+		<form method="post" action="">
+			{% csrf_token %}
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="form-group">
+							<label for="id_username">Username</label>
+							<div class="input-group ">
+								<div class="input-group-prepend">
+									<span class="input-group-text"> <i class="fa fa-user"></i>
+									</span>
+								</div>
+								<input type="text" class="form-control" placeholder="username" name="username" id="id_username" aria-label="Username" aria-describedby="basic-addon1">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputEmail1">Password</label>
+							<div class="input-group mb-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="id_password"> <i class="fa fa-lock"></i>
+									</span>
+								</div>
+								<input name="password" id="id_password" type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="basic-addon1">
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-12 mb-3">
+						<a class="card-text right" href="{% url 'auth_password_reset' %}">{% trans "Forgot your password?" %}</a>
+					</div>
+					<div class="col-lg-12 ">
+						<a class="left hide" href="{% url 'registration_register' %}">{% trans "Register" %}</a> 
+						<input type="submit" value="{% trans 'Log in' %}" class="btn btn-danger right " /> 
+						<input type="hidden" name="next" value="{% firstof next next '/dashboard/' %}" />
+					</div>
+					<div class="col-lg-12 mb-3"></div>
+				</div>
+			</div>
+
+
+		</form>
+
+
+
+
+
+
+
+
+	</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+{% endblock %} {% comment %} **registration/login.html** It's your responsibility to provide the login form in a template called registration/login.html by default. This template gets passed four template context variables: ``form`` A Form object representing the login form. See the forms documentation for more on Form objects. ``next`` The URL to redirect to after successful login. This may contain a query string, too. ``site`` The current Site, according to the SITE_ID setting. If you don't have the site framework installed, this will be set to an instance of RequestSite, which derives the site name and domain from the current HttpRequest. ``site_name`` An alias for site.name. If you don't have the site framework installed, this will be set to the value of request.META['SERVER_NAME'].
+For more on sites, see The "sites" framework. {% endcomment %}

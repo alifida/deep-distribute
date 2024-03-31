@@ -1,0 +1,26 @@
+
+
+
+{% if messages %}
+<ul class="messages hide-imp">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% if messages %}
+<script>
+    $(document).ready(function() {
+        var messagesHtml = "<div class='padding-0'>";
+        var messageType = "";
+        {% for message in messages %}
+        messageType = messageType || "{{ message.tags }}"; // Keep the type of the first message
+        messagesHtml += "<p  class='v-padding-10' style='margin-top:10px;'>{{ message|escapejs }}</p>";
+        {% endfor %}
+        messagesHtml += "</div>";
+
+        show_alert(messageType, messagesHtml);
+    });
+</script>
+{% endif %}
+

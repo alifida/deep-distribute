@@ -1,0 +1,75 @@
+{% extends "wrapper/base.html" %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content">
+        <div class="container-fluid" >
+            <div class="row">
+                <div class="col-12" >
+                    <div class="row">
+                        <div class="col-8 padding-10">
+                            <h2 class="left">Datasets</h2>
+                        </div>
+                        <div class="col-4  padding-10">
+                            <a href="{% url 'create_dataset' %}" class="btn btn-primary btn-sm right"  data-toggle="tooltip" data-placement="top" title="Upload New Dataset"><i class="nav-icon fas fa-plus"></i> &nbsp; New Dataset</a>  
+                            {% comment %} <button onclick=" ajax_submit('{% url 'create_dataset' %}','dataset_working_area')" class="btn btn-primary btn-sm right">New Dataset</button> {% endcomment %}
+                           
+                        </div>
+                    </div>
+                    <div class="card ">
+                        <div class="card-body">
+                    <table class="table table-hover table-responsive-md">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Meta Info</th>
+                                <th scope="col">Processed At</th>
+                                <th scope="col">Delete At</th>
+                                <th scope="col">Status</th>
+                                <th scope="col"><span class='right'>Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dataset in datasets %}
+                                <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ dataset.data_name }}</td>
+                                    <td>{{ dataset.metainfo }}</td>
+                                    <td>{{ dataset.processed_at }}</td>
+                                    <td>{{ dataset.delete_at }}</td>
+                                    <td>{{ dataset.status }}</td>
+                                    <td>
+                                        <!-- Example actions -->
+                                        <span class='right'>
+                                            <a href="{% url 'start_training' dataset.id %}" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="top" title="Train"><i class="nav-icon fas fa-microscope"></i></a>
+                                            <a href="{% url 'edit_dataset' dataset.id %}" class="btn btn-success btn-sm"  data-toggle="tooltip" data-placement="top" title="Edit"><i class="nav-icon fa fa-edit"></i></a>
+                                            <a href="{% url 'view_dataset' dataset.id %}" class="btn btn-primary btn-sm" data-toggle="tooltip" data-placement="top" title="View"><i class="nav-icon fa fa-eye"></i></a>
+                                            <a href="{% url 'delete_dataset_confirm' dataset.id %}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Delete"><i class="nav-icon fa fa-trash"></i></a>
+                                        </span>
+                                        
+
+                                        
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7">No datasets found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+ 
+
+
+{% endblock %}

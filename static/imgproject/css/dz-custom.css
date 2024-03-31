@@ -1,0 +1,45 @@
+.dropzone {
+  width: 98%;
+  margin: 1%;
+  border: 2px dashed #929292 !important;
+  border-radius: 5px;
+  transition: .2s; }
+
+.dropzone.dz-drag-hover {
+  border: 2px solid #929292 !important; }
+
+.dz-message.needsclick img {
+  width: 100px;
+  display: block;
+  margin: auto;
+  opacity: .6;
+  margin-bottom: 15px;
+}
+
+.dz-message.needsclick p {
+	color:#666666;
+	text-align:center;
+	font-weight: bold; 
+	font-size:medium;
+}
+
+span.plus {
+  display: none; }
+
+.dropzone.dz-started .dz-message {
+  display: inline-block !important;
+  width: 120px;
+  float: right;
+  border: 1px solid rgba(238, 238, 238, 0.36);
+  border-radius: 30px;
+  height: 120px;
+  margin: 16px;
+  transition: .2s; }
+  .dropzone.dz-started .dz-message span.text {
+    display: none; }
+  .dropzone.dz-started .dz-message span.plus {
+    border: 2px dashed #c0c0c0 !important;
+    display: block;
+    font-size: 70px;
+    color: #AAA;
+    line-height: 110px; }

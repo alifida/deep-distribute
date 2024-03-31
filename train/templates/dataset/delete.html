@@ -1,0 +1,64 @@
+
+
+
+    {% extends "wrapper/base.html" %} {% block content %} {% load static %}
+        <div class="content-wrapper">
+	        <div class="full-width v-padding-2"></div>
+	            <section class="content">
+		            <div class="container-fluid ">
+                        <div class="container mt-5">
+                            <div class="col-8 padding-10">
+                                <h2>Delete Dataset</h2> 
+                            </div>
+                            <div class="row padding-0">
+                                <div class="col-12 center-inner padding-0 ">
+                                    <div class="alert alert-danger">
+                                        <h5>
+                                            Are you sure to delete the following?
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <dl class="row">
+                                        <dt class="col-sm-3">Name</dt>
+                                        <dd class="col-sm-9">{{ dataset.data_name }}</dd>
+
+                                        <dt class="col-sm-3">Meta Information</dt>
+                                        <dd class="col-sm-9">{{ dataset.metainfo }}</dd>
+
+                                        <dt class="col-sm-3">Processed At</dt>
+                                        <dd class="col-sm-9">{{ dataset.processed_at }}</dd>
+
+                                        <dt class="col-sm-3">Delete At</dt>
+                                        <dd class="col-sm-9">{{ dataset.delete_at }}</dd>
+
+                                        <dt class="col-sm-3">Status</dt>
+                                        <dd class="col-sm-9">{{ dataset.status }}</dd>
+                                    </dl>
+                                    
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row">
+                                         
+                                        <div class="col-12 center-inner">
+                                            <form action="{% url 'delete_dataset' dataset.id %}" method="post" enctype="multipart/form-data">
+                                                <a href="{% url 'list_dataset' %}" class="btn btn-primary"   data-toggle="tooltip" data-placement="top" title="Cancel Changes"><i class="nav-icon fa fa-times"></i> &nbsp; No (Cancel)</a>
+                                                <button type="submit" class="btn btn-danger"   data-toggle="tooltip" data-placement="top" title="Delete Dataset"> <i class="nav-icon fa fa-trash" ></i> &nbsp; Yes (Delete)</a>
+                                                    {% csrf_token %}
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>           
+                    
+    {% endblock%}
+            

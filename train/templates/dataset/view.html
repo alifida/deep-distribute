@@ -1,0 +1,68 @@
+{% extends "wrapper/base.html" %} {% block content %} {% load static %}
+
+ 
+        <div class="content-wrapper">
+	
+	        <div class="full-width v-padding-2"></div>
+	
+
+	            <section class="content">
+		            <div class="container-fluid ">
+
+
+            
+            
+                        <div class="container mt-5">
+                             
+                            <div class="row">
+                                <div class="col-8 padding-10">
+                                    <h2>Dataset Details</h2> 
+                                </div>
+                                <div class="col-4  padding-10">
+                                    <a href="{% url 'training_job_list' %}" class="btn btn-primary btn-sm right"  data-toggle="tooltip" data-placement="top" title="Training"><i class="nav-icon fas fa-plus"></i> &nbsp; Training</a>  
+                                </div>
+                            </div>
+
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <dl class="row">
+                                        <dt class="col-sm-3">Name</dt>
+                                        <dd class="col-sm-9">{{ dataset.data_name }}</dd>
+
+                                        <dt class="col-sm-3">Meta Information</dt>
+                                        <dd class="col-sm-9">{{ dataset.metainfo }}</dd>
+
+                                        <dt class="col-sm-3">Processed At</dt>
+                                        <dd class="col-sm-9">{{ dataset.processed_at }}</dd>
+
+                                        <dt class="col-sm-3">Delete At</dt>
+                                        <dd class="col-sm-9">{{ dataset.delete_at }}</dd>
+
+                                        <dt class="col-sm-3">Status</dt>
+                                        <dd class="col-sm-9">{{ dataset.status }}</dd>
+
+                                        <!-- Additional fields as necessary -->
+                                    </dl>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row">
+                                        <div class="col-12 center-inner ">
+                                            <a href="{% url 'edit_dataset' dataset.id %}" class="btn btn-primary"   data-toggle="tooltip" data-placement="top" title="Edit Dataset"><i class="nav-icon fa fa-edit"></i> &nbsp; Edit</a>
+                                            <a href="{% url 'delete_dataset_confirm' dataset.id %}" class="btn btn-danger"   data-toggle="tooltip" data-placement="top" title="Delete Dataset"><i class="nav-icon fa fa-trash"></i> &nbsp; Delete</a>
+                                        </div>
+                                    </div>        
+                                </div>
+                            </div>
+                        </div>
+            
+            
+
+
+                    </div>
+                </section>
+            </div>
+        </div>           
+                    
+    {% endblock%}
+            

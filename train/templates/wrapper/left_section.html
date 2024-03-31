@@ -1,0 +1,37 @@
+{% load static %}
+<aside class="main-sidebar sidebar-dark-info elevation-4  ">
+	<!-- Brand Logo -->
+	<a href="{% url 'home' %}" class="brand-link"> <img src="{% static "img/deep-distribute.png" %}" alt="Predictive LAB" class="brand-image img-circle elevation-3"> 
+	<span class="brand-text font-weight-light">Predictive LAB</span>
+	</a>
+
+	<!-- Sidebar -->
+	<div class="sidebar">
+		<!-- Sidebar user panel (optional) -->
+		 
+		<!-- Sidebar Menu -->
+		<nav class="mt-2">
+			<ul class="nav nav-pills nav-sidebar flex-column nav-compact nav-flat nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
+				<li class="nav-item">
+					<a href="{% url 'home' %}" class="nav-link"> <i class="nav-icon fas fa-tachometer-alt"></i>
+						<p>Dashboard</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{% url 'list_dataset' %}" class="nav-link"> <i class="nav-icon fas fa-database"></i>
+						<p>Datasets</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="{% url 'training_job_list' %}" class="nav-link"> <i class="nav-icon fas fa-microscope"></i>
+						<p>Tranings</p>
+					</a>
+				</li>
+				 
+				 
+			</ul>		 
+		</nav>
+		<!-- /.sidebar-menu -->
+	</div>
+	<!-- /.sidebar -->
+</aside>

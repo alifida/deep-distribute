@@ -1,0 +1,59 @@
+{% extends "wrapper/base.html" %} {% block content %} {% load static %}
+
+ 
+<div class="content-wrapper">
+    <div class="full-width v-padding-2"></div>
+	
+	<section class="content">
+		<div class="container-fluid ">
+            <div class="container mt-5">
+                <div class="col-8 padding-10">
+                    <h2>Upload Dataset</h2> 
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ form.data_name.label_tag }}
+                                {{ form.data_name }}
+                                {{ form.data_name.errors }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.data_path.label_tag }}
+                                {{ form.data_path }}
+                                {{ form.data_path.errors }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.metainfo.label_tag }}
+                                {{ form.metainfo }}
+                                {{ form.metainfo.errors }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.status.label_tag }}
+                                {{ form.status }}
+                                {{ form.status.errors }}
+                            </div>
+                            <div class="row">
+                                <div class="col-12 center-inner ">
+                                    <a href="{% url 'list_dataset' %}" class="btn btn-danger btn-sm "   data-toggle="tooltip" data-placement="top" title="Cancel Changes"><i class="nav-icon fa fa-times"></i> &nbsp; Cancel</a>
+                                    <button type="submit" class="btn btn-success btn-sm "  data-toggle="tooltip" data-placement="top" title="Save Changes"><i class="nav-icon fa fa-check"></i> &nbsp; Save</button>
+                                </div>
+                            </div>
+                            
+                        </form>
+                    </div>
+                </div>
+            </div>
+    
+    
+
+
+        </div>
+    </section>
+</div>
+
+
+{% endblock%}
+

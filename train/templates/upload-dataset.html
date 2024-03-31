@@ -1,0 +1,31 @@
+ 
+{% extends "wrapper/base.html" %} {% block content %} {% load static %}
+
+ 
+<div class="content-wrapper">
+	<!-- Content Header (Page header) -->
+	<div class="full-width v-padding-2"></div>
+	
+
+	<section class="content">
+		<div class="container-fluid ">
+            <h2>Upload Dataset</h2>
+             
+            
+               <form id="data-set-upload-form" method="post" enctype="multipart/form-data" 
+                   onsubmit="event.preventDefault(); ajax_submit('/train/upload-ds-zip/', 'upload_image_status', 'data-set-upload-form', 'POST')"
+                   >
+                   {% csrf_token %}
+                   <input type="file" name="zip_file" id="zip_dataset" accept=".zip">
+                   <input type="submit" value="Upload" >
+                   <div id="upload_image_status"></div>
+               </form>
+
+			
+			 
+		</div>
+	</section>
+</div>
+ 
+
+{% endblock%}

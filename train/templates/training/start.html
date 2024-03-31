@@ -1,0 +1,94 @@
+{% extends "wrapper/base.html" %} {% block content %} {% load static %}
+
+ 
+<div class="content-wrapper">
+    <div class="full-width v-padding-2"></div>
+	
+	<section class="content">
+		<div class="container-fluid ">
+            <div class="container mt-5">
+                <div class="col-8 padding-10">
+                    <h2>Create/Update Training Job</h2> 
+                </div>
+
+                <div class="card">
+                            
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.job_name.label_tag }}
+                                        {{ form.job_name }}
+                                        {{ form.job_name.errors }}
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.status.label_tag }}
+                                        {{ form.status }}
+                                        {{ form.status.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.started_at.label_tag }}
+                                        {{ form.started_at }}
+                                        {{ form.started_at.errors }}
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.ended_at.label_tag }}
+                                        {{ form.ended_at }}
+                                        {{ form.ended_at.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.algo.label_tag }}
+                                        {{ form.algo }}
+                                        {{ form.algo.errors }}
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.dataset_img.label_tag }}
+                                        {{ form.dataset_img }}
+                                        {{ form.dataset_img.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <button type="submit" class="btn btn-success btn-sm"><i class="nav-icon fa fa-save"></i> &nbsp; Save</button>
+                                    <a href="{% url 'training_job_list' %}" class="btn btn-danger btn-sm"><i class="nav-icon fa fa-times"></i> &nbsp; Cancel</a>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        
+                    </div>
+                </div>
+            </div>
+    
+    
+
+
+        </div>
+    </section>
+</div>
+
+
+{% endblock%}
+
+
+ 
