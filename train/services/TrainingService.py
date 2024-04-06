@@ -26,8 +26,8 @@ class TrainingService:
 
         # Define the cluster specification (adjust as necessary)
         cluster_spec = tf.train.ClusterSpec({
-            "worker": ["localhost:2222"],
-            "ps": ["ps0.example.com:2222", "ps1.example.com:2222"]
+            "worker": ["192.168.10.71:2222","192.168.10.106:2222"],
+            "ps": ["192.168.10.106:2222"]
         })
 
         # Create a cluster resolver and strategy
