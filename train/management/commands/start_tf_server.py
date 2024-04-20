@@ -10,10 +10,10 @@ class Command(BaseCommand):
         index = int(os.getenv('NODE_INDEX', '0'))  # Default to 0 if not set
 
         # Define the cluster specification
-        cluster_spec_dict = {
-            "worker": ["localhost:2222"],
-            "ps": ["ps0.example.com:2222", "ps1.example.com:2222"]
-        }
+        cluster_spec_dict = tf.train.ClusterSpec({
+            "worker": ["192.168.10.106:2222", "192.168.10.71:2222",],
+            "ps": ["192.168.10.106:2223"]
+        })
         cluster_spec = tf.train.ClusterSpec(cluster_spec_dict)
 
         # Create a cluster resolver
