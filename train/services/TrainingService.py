@@ -1,5 +1,7 @@
 import os
 import tensorflow as tf
+from tensorflow.keras.callbacks import TensorBoard
+from datetime import datetime
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Model
@@ -23,12 +25,17 @@ class TrainingService:
         # Configure the strategy
         node_type = os.getenv('NODE_TYPE', 'worker')  # Read from environment variable
         index = int(os.getenv('NODE_INDEX', '0'))  # Read from environment variable
-        tf.debugging.set_log_device_placement(True)
+        tf.debugging.set_log_device_placement(True) # TODO Remove in production
+        print("*********************TODO Remove in production************************")
+        print(" tf.debugging.set_log_device_placement(True)")
+        print("**********************************************************************")
+
+        print("*********************************************")
         print("====================1")
-        print()
-        # Define the cluster specification (adjust as necessary)
+        
+        # Define the cluster specification
         cluster_spec = tf.train.ClusterSpec({
-            "worker": ["192.168.10.106:2222", "192.168.10.71:2222",],
+            "worker": ["192.168.10.106:2222", "192.168.10.71:2222"],
             "ps": ["192.168.10.106:2223"]
         })
         print("====================2")
@@ -52,6 +59,14 @@ class TrainingService:
             dataset_path = job.dataset_img.extracted_path
             print('Dataset Path: ' + dataset_path)
             print("====================4")
+            if not os.path.exists(dataset_path):
+                print(f"Dataset path {dataset_path} does not exist.")
+                return  # Exit if the dataset path is invalid
+
+
+             # Setup TensorBoard logging
+            log_dir = f"logs/fit/{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+            tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
             print()
             # Load the ResNet50 model pre-trained on ImageNet
             base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
@@ -87,7 +102,7 @@ class TrainingService:
         terminate_on_flag_callback = TerminateOnFlagCallback(job.id)
 
         # Train the model with the callback
-        model.fit(train_generator, epochs=10, callbacks=[terminate_on_flag_callback])
+        model.fit(train_generator, epochs=10, callbacks=[tensorboard_callback, terminate_on_flag_callback])
         print("====================8")
         print()
         # Update the job status in the database
