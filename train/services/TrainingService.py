@@ -30,6 +30,7 @@ class TrainingService:
             cluster_spec=cluster_spec, rpc_layer="grpc"
         )
         strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
+        coordinator = tf.distribute.experimental.coordinator.ClusterCoordinator(strategy)
 
         with strategy.scope():
             dataset_path = job.dataset_img.extracted_path
@@ -52,29 +53,25 @@ class TrainingService:
             model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', 'Precision', 'Recall', 'MeanSquaredError'])
 
             train_datagen = ImageDataGenerator(rescale=1./255)
-            train_generator = TrainingService.distribute_datasets(strategy, dataset_path, train_datagen)
+            train_generator = coordinator.create_per_worker_dataset(lambda: TrainingService.distribute_datasets(strategy, dataset_path, train_datagen))
 
             terminate_on_flag_callback = TerminateOnFlagCallback(job.id)
-            model.fit(train_generator, epochs=10, callbacks=[tensorboard_callback, terminate_on_flag_callback])
+            coordinator.schedule(lambda: model.fit(train_generator, epochs=10, callbacks=[tensorboard_callback, terminate_on_flag_callback]))
 
+            coordinator.join()
             training_job = TrainingJobDAO.get(job.id)
             if training_job.status == JobStatus.RUNNING.value:
                 TrainingJobDAO.update(job.id, status=JobStatus.COMPLETED.value, ended_at=datetime.now())
-    
+
     @staticmethod
     def distribute_datasets(strategy, dataset_path, train_datagen):
         """ Prepare and distribute datasets using a tf.function within TensorFlow's distributed strategy. """
-        @tf.function
-        def dataset_fn(input_context):
-            batch_size = input_context.get_per_replica_batch_size(global_batch_size)
-            return train_datagen.flow_from_directory(
-                dataset_path,
-                target_size=(150, 150),
-                batch_size=batch_size,
-                class_mode='binary')
-
-        global_batch_size = 20
-        return strategy.distribute_datasets_from_function(dataset_fn)
+        batch_size = 20
+        return train_datagen.flow_from_directory(
+            dataset_path,
+            target_size=(150, 150),
+            batch_size=batch_size,
+            class_mode='binary')
 
 class TerminateOnFlagCallback(Callback):
     def __init__(self, job_id):
