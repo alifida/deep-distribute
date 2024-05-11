@@ -23,25 +23,40 @@ class TrainingService:
         # Configure the strategy
         node_type = os.getenv('NODE_TYPE', 'worker')  # Read from environment variable
         index = int(os.getenv('NODE_INDEX', '0'))  # Read from environment variable
-
+        tf.debugging.set_log_device_placement(True)
+        print("====================1")
+        print()
         # Define the cluster specification (adjust as necessary)
         cluster_spec = tf.train.ClusterSpec({
             "worker": ["192.168.10.106:2222", "192.168.10.71:2222",],
             "ps": ["192.168.10.106:2223"]
         })
-
+        print("====================2")
+        print()
         # Create a cluster resolver and strategy
-        strategy = tf.distribute.experimental.ParameterServerStrategy(
-            tf.distribute.cluster_resolver.SimpleClusterResolver(
-                cluster_spec=cluster_spec, rpc_layer="grpc"))
+        # strategy = tf.distribute.experimental.ParameterServerStrategy(
+        #     tf.distribute.cluster_resolver.SimpleClusterResolver(
+        #         cluster_spec=cluster_spec, rpc_layer="grpc"))
 
+        try:
+        # Create a cluster resolver and strategy
+            strategy = tf.distribute.experimental.ParameterServerStrategy(
+                tf.distribute.cluster_resolver.SimpleClusterResolver(
+                    cluster_spec=cluster_spec, rpc_layer="grpc"))
+        except Exception as e:
+            print("Error initializing ParameterServerStrategy:", e)
+            raise
+        print("====================3")
+        print()
         with strategy.scope():
             dataset_path = job.dataset_img.extracted_path
             print('Dataset Path: ' + dataset_path)
-
+            print("====================4")
+            print()
             # Load the ResNet50 model pre-trained on ImageNet
             base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
-
+            print("====================5")
+            print()
             # Freeze the layers of the base model
             for layer in base_model.layers:
                 layer.trainable = False
@@ -58,7 +73,8 @@ class TrainingService:
             # Compile the model
             model.compile(optimizer='adam', loss='binary_crossentropy',
                           metrics=['accuracy', 'Precision', 'Recall', 'MeanSquaredError'])
-
+        print("====================6")
+        print()
         # Set up your dataset
         train_datagen = ImageDataGenerator(rescale=1./255)
         train_generator = train_datagen.flow_from_directory(
@@ -66,12 +82,14 @@ class TrainingService:
             target_size=(150, 150),
             batch_size=20,  # Adjust batch size to your needs
             class_mode='binary')
-
+        print("====================7")
+        print()
         terminate_on_flag_callback = TerminateOnFlagCallback(job.id)
 
         # Train the model with the callback
         model.fit(train_generator, epochs=10, callbacks=[terminate_on_flag_callback])
-
+        print("====================8")
+        print()
         # Update the job status in the database
         training_job = TrainingJobDAO.get(job.id)
         if training_job.status == JobStatus.RUNNING.value:
