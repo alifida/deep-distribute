@@ -52,7 +52,8 @@ class TrainingService:
             model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', 'Precision', 'Recall', 'MeanSquaredError'])
 
             train_datagen = ImageDataGenerator(rescale=1./255)
-            train_generator = train_datagen.flow_from_directory(dataset_path, target_size=(150, 150), batch_size=20, class_mode='binary')
+            #train_generator = train_datagen.flow_from_directory(dataset_path, target_size=(150, 150), batch_size=20, class_mode='binary')
+            train_generator = TrainingService.distribute_datasets(strategy, dataset_path)
 
             terminate_on_flag_callback = TerminateOnFlagCallback(job.id)
             model.fit(train_generator, epochs=10, callbacks=[tensorboard_callback, terminate_on_flag_callback])
@@ -60,6 +61,25 @@ class TrainingService:
             training_job = TrainingJobDAO.get(job.id)
             if training_job.status == JobStatus.RUNNING.value:
                 TrainingJobDAO.update(job.id, status=JobStatus.COMPLETED.value, ended_at=datetime.now())
+    
+    
+    @staticmethod
+    def distribute_datasets(strategy, dataset_path):
+        """ Prepare and distribute datasets using a tf.function within TensorFlow's distributed strategy. """
+        @tf.function
+        def dataset_fn(input_context):
+            batch_size = input_context.get_per_replica_batch_size(global_batch_size)
+            # Adjust the dataset and batch size according to the input context
+            train_datagen = ImageDataGenerator(rescale=1./255)
+            return train_datagen.flow_from_directory(
+                dataset_path,
+                target_size=(150, 150),
+                batch_size=batch_size,
+                class_mode='binary')
+
+        global_batch_size = 20
+        # This will now correctly use the strategy to distribute the dataset
+        return strategy.distribute_datasets_from_function(dataset_fn)
 
 class TerminateOnFlagCallback(Callback):
     def __init__(self, job_id):
