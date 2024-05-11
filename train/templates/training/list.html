@@ -42,6 +42,7 @@
                                         <td>{{ job.dataset_img.data_name }}</td>
                                         <td>
                                             <a href="{% url 'training_job_update' job.id %}" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="top" title="Edit"><i class="nav-icon fa fa-edit"></i></a>
+                                            <a href="{% url 'training_job_delete' job.id %}" class="btn btn-danger btn-sm " data-toggle="tooltip" data-placement="top" title="Delete"><i class="nav-icon fa fa-trash"></i></a>
                                             {% if job.status == status_running %}
                                             <a href="{% url 'stop_training' job.id %}" class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Stop"><i class="nav-icon fa fa-times"></i></a>
                                             {% endif %}

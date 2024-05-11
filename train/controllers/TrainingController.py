@@ -44,13 +44,16 @@ def edit(request, job_id=None):
 
 @login_required
 def delete(request, job_id):
-    if request.method == 'POST':
+    TrainingJobService.delete(job_id)   
+    messages.success(request, "Training Job Deleted successfully.")
+    return util.redirect('training_job_list')
+    '''if request.method == 'POST':
         TrainingJobService.delete(job_id)   
         messages.success(request, "Training Job Deleted successfully.")
         return util.redirect('training_job_list')
     else:
         return HttpResponse("Method Not Allowed", status=405)
-    
+    '''
 
 @login_required
 def start_training(request, dataset_id):

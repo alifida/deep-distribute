@@ -24,7 +24,7 @@ urlpatterns = [
     path('deep/jobs/stop/<int:job_id>/', TrainingController.stop_training, name='stop_training'),
     
     #path('deep/jobs/delete_confirm/<int:dataset_id>/', TrainingController.delete_confirm, name="training_job_delete_confirm"),
-    #path('deep/jobs/delete/<int:job_id>/', TrainingController.delete, name='training_job_delete'),
+    path('deep/jobs/delete/<int:job_id>/', TrainingController.delete, name='training_job_delete'),
 
 
     
