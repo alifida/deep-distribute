@@ -1,85 +1,105 @@
-import os
 import tensorflow as tf
-from tensorflow.keras.callbacks import TensorBoard
-from datetime import datetime
-from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
-from tensorflow.keras.callbacks import Callback
-import threading
-
-from train.dao.TrainingJobDAO import TrainingJobDAO
 from train.utils.JobStatus import JobStatus
-
+from train.dao.TrainingJobDAO import TrainingJobDAO
+import logging
+import os
 class TrainingService:
-
-    @staticmethod
-    def start_training_thread(job):
-        thread = threading.Thread(target=TrainingService.start_training, args=(job,))
-        thread.start()
-
     @staticmethod
     def start_training(job):
-        print("Configuring distributed strategy")
-        cluster_spec = tf.train.ClusterSpec({
-            "worker": ["192.168.10.106:2222", "192.168.10.71:2222"],
-            "ps": ["192.168.10.106:2223"]
-        })
+        logging.basicConfig(level=logging.DEBUG)
+
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # Enable TF logging
+        tf.debugging.set_log_device_placement(True)  # Log device placement (operations on which devices)
+
+        print('Start training called...')
+
+        # Define the cluster specification
+        cluster_spec = {
+            "worker": ["192.168.10.92:2222"],
+            "ps": ["192.168.10.92:2223"]
+        }
+
+        # Set up the cluster resolver and strategy
         cluster_resolver = tf.distribute.cluster_resolver.SimpleClusterResolver(
-            cluster_spec=cluster_spec, rpc_layer="grpc"
-        )
+            tf.train.ClusterSpec(cluster_spec), rpc_layer="grpc")
         strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
+
+        # Setup the coordinator
         coordinator = tf.distribute.experimental.coordinator.ClusterCoordinator(strategy)
 
+        # Loss function with Reduction.NONE
+        loss_object = BinaryCrossentropy(from_logits=True, reduction=tf.keras.losses.Reduction.NONE)
+
+        # Define `global_batch_size` appropriately
+        global_batch_size = 2  # Adjust based on your setup
+
+        # Training step function scoped correctly
+        def train_step_fn(images, labels):
+            with tf.GradientTape() as tape:
+                predictions = model(images, training=True)
+                per_example_loss = loss_object(labels, predictions)
+                loss = tf.reduce_sum(per_example_loss) * (1. / global_batch_size)
+            grads = tape.gradient(loss, model.trainable_variables)
+            optimizer.apply_gradients(zip(grads, model.trainable_variables))
+            return loss
+
+        # Define the per-worker training step
+        @tf.function
+        def per_worker_train_step(iterator):
+            images, labels = next(iterator)
+            return strategy.run(train_step_fn, args=(images, labels))
+
+        # Define the dataset loading function
+        def dataset_fn():
+            datagen = ImageDataGenerator(rescale=1./255)
+            train_dataset = datagen.flow_from_directory(
+                'E:/dataset/tb_dataset_tiny',  # Path to the data
+                target_size=(150, 150),        # All images will be resized to 150x150
+                batch_size=global_batch_size,
+                class_mode='binary'            # For binary classification
+            )
+            # Convert to tf.data.Dataset
+            return tf.data.Dataset.from_generator(
+                lambda: ((img, label) for img, label in train_dataset),
+                output_types=(tf.float32, tf.float32),
+                output_shapes=([None, 150, 150, 3], [None])
+            ).prefetch(tf.data.experimental.AUTOTUNE)
+
+        # Create the model under the strategy scope
         with strategy.scope():
-            dataset_path = job.dataset_img.extracted_path
-            if not os.path.exists(dataset_path):
-                print(f"Dataset path {dataset_path} does not exist.")
-                return
+            model = Sequential([
+                Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
+                MaxPooling2D(2, 2),
+                Conv2D(64, (3, 3), activation='relu'),
+                MaxPooling2D(2, 2),
+                Flatten(),
+                Dense(128, activation='relu'),
+                Dense(1, activation='sigmoid')
+            ])
+            optimizer = Adam()
+            model.compile(optimizer=optimizer, loss=loss_object, metrics=['accuracy'])
 
-            log_dir = f"logs/fit/{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-            tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+        # Create and distribute the dataset
+        distributed_dataset = coordinator.create_per_worker_dataset(dataset_fn)
+        distributed_iterator = iter(distributed_dataset)
 
-            base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
-            for layer in base_model.layers:
-                layer.trainable = False
+        # Training loop
+        for epoch in range(10):  # Number of epochs
+            print(f"Starting epoch {epoch + 1}")
+            while True:
+                try:
+                    coordinator.schedule(per_worker_train_step, args=(distributed_iterator,))
+                except tf.errors.OutOfRangeError:
+                    break  # Break the loop when there are no more batches to process
+            coordinator.join()  # Wait for all tasks to complete
+            distributed_iterator = iter(distributed_dataset)  # Reset iterator for the next epoch
 
-            x = base_model.output
-            x = GlobalAveragePooling2D()(x)
-            x = Dense(1024, activation='relu')(x)
-            predictions = Dense(1, activation='sigmoid')(x)
-            model = Model(inputs=base_model.input, outputs=predictions)
-            model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', 'Precision', 'Recall', 'MeanSquaredError'])
+        # Update job status upon completion
+        TrainingJobDAO.update_job_status(job.id, JobStatus.COMPLETED)
+        print('Training complete.')
 
-            train_datagen = ImageDataGenerator(rescale=1./255)
-            train_generator = coordinator.create_per_worker_dataset(lambda: TrainingService.distribute_datasets(strategy, dataset_path, train_datagen))
-
-            terminate_on_flag_callback = TerminateOnFlagCallback(job.id)
-            coordinator.schedule(lambda: model.fit(train_generator, epochs=10, callbacks=[tensorboard_callback, terminate_on_flag_callback]))
-
-            coordinator.join()
-            training_job = TrainingJobDAO.get(job.id)
-            if training_job.status == JobStatus.RUNNING.value:
-                TrainingJobDAO.update(job.id, status=JobStatus.COMPLETED.value, ended_at=datetime.now())
-
-    @staticmethod
-    def distribute_datasets(strategy, dataset_path, train_datagen):
-        """ Prepare and distribute datasets using a tf.function within TensorFlow's distributed strategy. """
-        batch_size = 20
-        return train_datagen.flow_from_directory(
-            dataset_path,
-            target_size=(150, 150),
-            batch_size=batch_size,
-            class_mode='binary')
-
-class TerminateOnFlagCallback(Callback):
-    def __init__(self, job_id):
-        super().__init__()
-        self.job_id = job_id
-
-    def on_epoch_end(self, epoch, logs=None):
-        training_job = TrainingJobDAO.get(self.job_id)
-        if training_job.status != JobStatus.RUNNING.value:
-            self.model.stop_training = True
-            print(f"Stopping training at the end of epoch {epoch}")

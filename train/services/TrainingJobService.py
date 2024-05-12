@@ -4,6 +4,7 @@
 
 from train.dao.TrainingJobDAO import TrainingJobDAO
 from train.services.TrainingService import TrainingService
+#from train.services.TrainingService_without_parameter_server import TrainingService
 from train.services.DatasetImgService import DatasetImgService
 from common.utils.util import get_unique_string, get_current_time
 from train.utils.JobStatus import JobStatus
@@ -53,7 +54,8 @@ class TrainingJobService:
        
        # get job_id and start training
        #trainingJob = TrainingJobService.get(job_id)
-       TrainingService.start_training_thread(trainingJob)
+       #TrainingService.start_training_thread(trainingJob)
+       TrainingService.start_training(trainingJob);
         
 
     @staticmethod
