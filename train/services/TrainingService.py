@@ -8,20 +8,21 @@ from train.utils.JobStatus import JobStatus
 from train.dao.TrainingJobDAO import TrainingJobDAO
 import logging
 import os
+import time
 class TrainingService:
     @staticmethod
     def start_training(job):
-        logging.basicConfig(level=logging.DEBUG)
+        #logging.basicConfig(level=logging.DEBUG)
 
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # Enable TF logging
-        tf.debugging.set_log_device_placement(True)  # Log device placement (operations on which devices)
+        #os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # Enable TF logging
+        #tf.debugging.set_log_device_placement(True)  # Log device placement (operations on which devices)
 
         print('Start training called...')
 
         # Define the cluster specification
         cluster_spec = {
-            "worker": ["192.168.10.92:2222"],
-            "ps": ["192.168.10.92:2223"]
+            "worker": ["192.168.100.109:2222"],
+            "ps": ["192.168.100.109:2223"]
         }
 
         # Set up the cluster resolver and strategy
@@ -90,16 +91,25 @@ class TrainingService:
 
         # Training loop
         for epoch in range(10):  # Number of epochs
-            print(f"Starting epoch {epoch + 1}")
-            while True:
-                try:
-                    coordinator.schedule(per_worker_train_step, args=(distributed_iterator,))
-                except tf.errors.OutOfRangeError:
-                    break  # Break the loop when there are no more batches to process
+            start_epoch = time.time()
+            print(f"Starting epoch********** {epoch + 1}")
+            batch_index = 0
+            #while True:
+            start_batch = time.time()
+            try:
+                coordinator.schedule(per_worker_train_step, args=(distributed_iterator,))
+                print(f"Batch {batch_index} processed in {time.time() - start_batch} seconds.")
+                batch_index += 1
+            except tf.errors.OutOfRangeError:
+                print("there are no more batches to process")
+                #break  # Break the loop when there are no more batches to process
             coordinator.join()  # Wait for all tasks to complete
+            print(f"Epoch {epoch + 1} completed in {time.time() - start_epoch} seconds.")
+
             distributed_iterator = iter(distributed_dataset)  # Reset iterator for the next epoch
 
         # Update job status upon completion
-        TrainingJobDAO.update_job_status(job.id, JobStatus.COMPLETED)
+        TrainingJobDAO.update(job.id, status = JobStatus.COMPLETED.value)
+        
         print('Training complete.')
 

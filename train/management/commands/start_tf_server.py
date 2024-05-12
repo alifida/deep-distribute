@@ -24,8 +24,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'Node type: {node_type}, Index: {index}'))
 
         cluster_spec = {
-            "worker": ["192.168.10.92:2222"],
-            "ps": ["192.168.10.92:2223"]
+            "worker": ["192.168.100.109:2222"],
+            "ps": ["192.168.100.109:2223"]
         }
         cluster_resolver = tf.distribute.cluster_resolver.SimpleClusterResolver(
             cluster_spec=tf.train.ClusterSpec(cluster_spec),
