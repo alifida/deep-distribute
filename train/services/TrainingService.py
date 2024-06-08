@@ -112,7 +112,7 @@ class TrainingService:
         # Define the dataset loading function
         def dataset_fn():
             data_dir = job.dataset_img.extracted_path
-             
+            print("**************8888888***************" + data_dir);
             #data_dir = 'E:/dataset/tb_dataset_tiny'
             batch_size = global_batch_size
             img_height = 150
