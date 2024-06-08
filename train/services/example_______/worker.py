@@ -6,8 +6,8 @@ from tensorflow.keras import Model
 
 os.environ["TF_CONFIG"] = json.dumps({
     "cluster": {
-        "worker": ["192.168.100.109:2222"],
-        "ps": ["192.168.100.109:2223"]
+        "worker": ["192.168.100.109111:2222"],
+        "ps": ["192.168.100.109111:2223"]
     },
     "task": {"type": "worker", "index": 0}
 })
@@ -25,8 +25,8 @@ def start_worker_training():
     # Set TF_CONFIG environment for the worker
     os.environ["TF_CONFIG"] = json.dumps({
         "cluster": {
-            "worker": ["192.168.100.109:2222"],
-            "ps": ["192.168.100.109:2223"]
+            "worker": ["192.168.100.109111:2222"],
+            "ps": ["192.168.100.109111:2223"]
         },
         "task": {"type": "worker", "index": 0}
     })

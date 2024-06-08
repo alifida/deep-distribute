@@ -1,0 +1,38 @@
+{% extends "wrapper/base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+    <section class="content">
+        <div class="container-fluid">
+            <br/>
+            <br/>
+            <div class="row">
+                <div class="col-sm-12 col-md-6 col-lg-4 center">
+                    <!-- Confirmation Card -->
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h3 class="card-title">Confirm Deletion</h3>
+                        </div>
+                        <div class="card-body text-center">
+                            <h5>Are you sure you want to delete this node?</h5>
+                            <p class="text-muted">
+                                This action cannot be undone. This will permanently delete the cluster node with the following details:
+                            </p>
+                            <ul class="list-group list-group-flush my-3">
+                                <li class="list-group-item"><strong>Node Type:</strong> {{ node.node_type }}</li>
+                                <li class="list-group-item"><strong>IP Address:</strong> {{ node.ip_address }}</li>
+                                <li class="list-group-item"><strong>Port:</strong> {{ node.port }}</li>
+                            </ul>
+                            <form method="post" action="{% url 'delete_cluster_node' node.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                                <a href="{% url 'list_cluster_nodes' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

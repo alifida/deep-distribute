@@ -1,1 +1,1 @@
-set NODE_TYPE=worker&& set NODE_INDEX=0 && python manage.py start_tf_server
+set NODE_TYPE=worker&& python manage.py start_tf_server

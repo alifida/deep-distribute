@@ -1,9 +1,10 @@
 from django.urls import path
 from .controllers import  HomeController
 #from .controllers.DatasetController import create, save, list, delete
-from .controllers import DatasetController, TrainingController
+from .controllers import DatasetController, TrainingController,ClusterNodeController, ApiController
 from django.views.generic.base import RedirectView
 from .views import welcome
+ 
 
 urlpatterns = [
     path('deep/dataset/list', DatasetController.list, name="list_dataset"),
@@ -33,5 +34,18 @@ urlpatterns = [
     path('dashboard', HomeController.home, name='home'),
     path('dashboard/', HomeController.home, name='home'),
     path('welcome/', welcome, name='welcome'),
+    
+]
+
+
+
+urlpatterns += [
+    path('deep/cluster/list', ClusterNodeController.list, name="list_cluster_nodes"),
+    path('deep/cluster/create/', ClusterNodeController.create, name='create_cluster_node'),
+    path('deep/cluster/view/<int:node_id>/', ClusterNodeController.view, name='view_cluster_node'),
+    path('deep/cluster/edit/<int:node_id>/', ClusterNodeController.edit, name='edit_cluster_node'),
+    path('deep/cluster/delete_confirm/<int:node_id>/', ClusterNodeController.delete_confirm, name='delete_cluster_node_confirm'),
+    path('deep/cluster/delete/<int:node_id>/', ClusterNodeController.delete, name="delete_cluster_node"),
+    path('api/cluster/detail', ApiController.cluster_nodes_json, name='cluster_nodes_json'),
     
 ]

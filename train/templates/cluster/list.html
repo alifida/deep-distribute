@@ -1,0 +1,65 @@
+{% extends "wrapper/base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Cluster Nodes</h1>
+                </div>
+                <div class="col-sm-6">
+                    <a href="{% url 'create_cluster_node' %}" class="btn btn-primary float-right">
+                        <i class="fas fa-plus"></i> Add Node
+                    </a>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+
+                {% for node in nodes %}
+                <div class="col-sm-12 col-md-3 col-lg-2 center">
+                    <!-- Confirmation Card -->
+                    <div class="card  ">
+                        <div class="card-header {% if node.node_type == 'ps' %}bg-success{% else %}bg-info{% endif %} text-white">
+                            <h3 class="card-title">{{ node.node_type }}</h3>
+                        </div>
+                        <div class="card-body text-center">
+                            
+
+                            <div class="row">
+                                <div class="col-6"><span class="right"> IP Address:</span></div>
+                                <div class="col-6"><strong><span class="left">{{ node.ip_address }}</span></strong></div>
+                                <div class="col-6"><span class="right"> Port:</span></div>
+                                <div class="col-6"><strong><span class="left">{{ node.port }}</span></strong></div>
+                                 
+                            </div>
+
+                            
+                        </div>
+                        <div class="card-footer">
+                            <div class="center  text-center  ">
+                                <a href="{% url 'edit_cluster_node' node.id %}" class="btn btn-outline-success   btn-vs "  data-toggle="tooltip" data-placement="top" title="Edit"><i class="nav-icon fa fa-edit"></i></a>
+                                {% comment %} <a href="{% url 'view_cluster_node' node.id %}" class="btn btn-outline-primary btn-vs " data-toggle="tooltip" data-placement="top" title="View"><i class="nav-icon fa fa-eye"></i></a> {% endcomment %}
+                                <a href="{% url 'delete_cluster_node_confirm' node.id %}" class="btn btn-outline-danger btn-vs " data-toggle="tooltip" data-placement="top" title="Delete"><i class="nav-icon fa fa-trash"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+
+
+
+
+                 
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

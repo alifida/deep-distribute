@@ -1,0 +1,43 @@
+{% extends "wrapper/base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+     
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <br/>
+                <br/>
+                <div class="col-sm-12 col-md-6 col-lg-4 center">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h3 class="card-title">View Cluster Node</h3>
+                            <a href="{% url 'edit_cluster_node' node.id %}" class="btn btn-xs btn-info float-right">
+                                <i class="fas fa-edit"></i>  
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-4">Node Type:</dt>
+                                <dd class="col-sm-8">{{ node.node_type }}</dd>
+
+                                <dt class="col-sm-4">IP Address:</dt>
+                                <dd class="col-sm-8">{{ node.ip_address }}</dd>
+
+                                <dt class="col-sm-4">Port:</dt>
+                                <dd class="col-sm-8">{{ node.port }}</dd>
+                            </dl>
+                        </div>
+                        <div class="card-footer">
+                            
+                            <a href="{% url 'list_cluster_nodes' %}" class="btn btn-outline-info btn-sm">Back to List</a>
+                            <a href="{% url 'delete_cluster_node_confirm' node.id %}" class="btn btn-outline-danger btn-sm right">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

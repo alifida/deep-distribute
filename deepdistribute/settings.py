@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-*7o+es^8we7)hedbkteh0a5bw&0-0#w=z-alv^7$3(8mntm*!=
 DEBUG = True
 
 #ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['192.168.10.106', '192.168.10.71','192.168.100.109', '192.168.100.109' ]
+ALLOWED_HOSTS = ['localhost','192.168.10.106', '192.168.10.71','192.168.100.109', '192.168.100.109', '192.168.10.92' ]
+CLUSTER_DETAIL_URL = 'http://192.168.10.92:8000/api/cluster/detail'
 
 
 

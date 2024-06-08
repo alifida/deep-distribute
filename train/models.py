@@ -34,3 +34,17 @@ class Training_job (models.Model):
     
     def __str__(self):
         return self.job_name 
+
+
+
+class ClusterNode(models.Model):
+    NODE_CHOICES = (
+        ('worker', 'Worker'),
+        ('ps', 'Parameter Server')
+    )
+    node_type = models.CharField(max_length=10, choices=NODE_CHOICES)
+    ip_address = models.CharField(max_length=15)
+    port = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.node_type} - {self.ip_address}:{self.port}"

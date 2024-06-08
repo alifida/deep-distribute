@@ -8,7 +8,8 @@ from train.services.TrainingService import TrainingService
 from train.services.DatasetImgService import DatasetImgService
 from common.utils.util import get_unique_string, get_current_time
 from train.utils.JobStatus import JobStatus
-from datetime import datetime
+ 
+from django.utils import timezone
 
 
 class TrainingJobService:
@@ -24,7 +25,7 @@ class TrainingJobService:
             job_name=dataset.data_name +"  "+ get_unique_string(),
             dataset_img = dataset, 
             status=JobStatus.RUNNING.value,
-            started_at = datetime.now(),
+            started_at = timezone.now(),
             ended_at=None,
             algo="ResNet",
             user=user)
@@ -54,7 +55,7 @@ class TrainingJobService:
        
        # get job_id and start training
        #trainingJob = TrainingJobService.get(job_id)
-       #TrainingService.start_training_thread(trainingJob)
+       #TrainingService.start_training_process(trainingJob.id)
        TrainingService.start_training(trainingJob);
         
 
