@@ -28,6 +28,7 @@ DEBUG = True
 #ALLOWED_HOSTS = []
 ALLOWED_HOSTS = ['localhost','192.168.10.106', '192.168.10.71','192.168.100.109', '192.168.100.109', '192.168.10.92' ]
 CLUSTER_DETAIL_URL = 'http://192.168.10.92:8000/api/cluster/detail'
+SHARED_DIRECTORY = '\\\\192.168.10.71/dataset'
 
 
 

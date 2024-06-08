@@ -12,11 +12,13 @@ from django import shortcuts
 import secrets
 import string
 from datetime import datetime
-
+import logging
 
 import zipfile
 import tempfile
 
+ 
+from django.conf import settings
 
 from django.shortcuts import  get_object_or_404
 
@@ -126,6 +128,30 @@ def extract_zip_to_temp(zip_file_path):
         zip_ref.extractall(temp_dir)
 
     return temp_dir
+
+
+def extract_zip_to_shared_loc(zip_file, dataset_id):
+    logging.debug(f"Checking existence of zip file: {zip_file}")
+    if not os.path.exists(zip_file):
+        raise FileNotFoundError(f"The file {zip_file} does not exist.")
+
+    shared_directory = settings.SHARED_DIRECTORY
+    dataset_directory = os.path.join(shared_directory, str(dataset_id))
+
+    logging.debug(f"Creating dataset directory: {dataset_directory}")
+    if not os.path.exists(dataset_directory):
+        os.makedirs(dataset_directory, exist_ok=True)
+
+    try:
+        logging.debug(f"Extracting zip file: {zip_file} to {dataset_directory}")
+        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+            zip_ref.extractall(dataset_directory)
+    except zipfile.BadZipFile:
+        raise Exception("Failed to extract the ZIP file: it may be corrupted.")
+    except Exception as e:
+        raise Exception(f"An error occurred during extraction: {str(e)}")
+     
+    return dataset_directory
 
 def path_exist(path):
     return os.path.exists(path)
