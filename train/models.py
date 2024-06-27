@@ -2,7 +2,7 @@
 from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
-
+import json
 
 # Create your models here.
 
@@ -30,12 +30,16 @@ class Training_job (models.Model):
     ended_at = models.DateTimeField(null=True)
     algo = models.CharField(max_length=300);
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
-    
+    result = models.TextField(null=True)  # TextField to store metrics
     
     def __str__(self):
         return self.job_name 
 
+    def set_result(self, result_dict):
+        self.result = json.dumps(result_dict)
 
+    def get_result(self):
+        return json.loads(self.result) if self.result else None
 
 class ClusterNode(models.Model):
     NODE_CHOICES = (

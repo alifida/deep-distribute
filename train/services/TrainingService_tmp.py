@@ -14,7 +14,7 @@ import requests
 import threading
 from tensorflow.keras.backend import clear_session
 from multiprocessing import Process
-from django.utils import timezone
+import django
 
 def worker_process(job_id):
     import django
@@ -39,15 +39,21 @@ class TrainingService:
         print(response.json())
         print("*****************************************")
         if response.status_code == 200:
+            #return '{"worker": ["192.168.10.92:2222"], "ps": ["192.168.10.92:2223"]}'
             return response.json()
         else:
             raise Exception(f"Failed to retrieve cluster configuration, status code {response.status_code}")
 
+    '''
+    '''
     @staticmethod
     def start_training_thread(job):
         clear_session() 
+
+
         thread = threading.Thread(target=TrainingService.start_training, args=(job,))
         thread.start()
+
 
     @staticmethod
     def start_training_process(job_id):
@@ -58,11 +64,20 @@ class TrainingService:
 
     @staticmethod
     def start_training(job):
+        #logging.basicConfig(level=logging.DEBUG)
+
+        #os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'  # Enable TF logging
+        #tf.debugging.set_log_device_placement(True)  # Log device placement (operations on which devices)
+
         print('Start training called...')
 
         # Define the cluster specification
+        # cluster_spec = {
+        #     "worker": ["192.168.10.92:2222"],
+        #     "ps": ["192.168.10.92:2223"]
+        # }
+
         cluster_spec = TrainingService.get_cluster_config()
-        
         # Set up the cluster resolver and strategy
         cluster_resolver = tf.distribute.cluster_resolver.SimpleClusterResolver(
             tf.train.ClusterSpec(cluster_spec), rpc_layer="grpc")
@@ -77,6 +92,8 @@ class TrainingService:
         # Define `global_batch_size` appropriately
         global_batch_size = 2  # Adjust based on your setup
 
+        # Training step function scoped correctly
+         # Training step function scoped correctly
         def train_step_fn(images, labels):
             with tf.GradientTape() as tape:
                 predictions = model(images, training=True)
@@ -86,13 +103,17 @@ class TrainingService:
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
             return loss
 
+        # Define the per-worker training step
         @tf.function
         def per_worker_train_step(iterator):
             images, labels = next(iterator)
             return strategy.run(train_step_fn, args=(images, labels))
 
+        # Define the dataset loading function
         def dataset_fn():
             data_dir = job.dataset_img.extracted_path
+            print("**************8888888***************" + data_dir);
+            #data_dir = 'E:/dataset/tb_dataset_tiny'
             batch_size = global_batch_size
             img_height = 150
             img_width = 150
@@ -105,83 +126,57 @@ class TrainingService:
             ).prefetch(tf.data.experimental.AUTOTUNE)
 
             print("Dataset loaded successfully.", flush=True)
+            #print(f"Number of batches: {dataset.cardinality().numpy()}", flush=True)
             return dataset
 
         # Create the model under the strategy scope
-        with strategy.scope():
-            model = Sequential([
-                Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
-                MaxPooling2D(2, 2),
-                Conv2D(64, (3, 3), activation='relu'),
-                MaxPooling2D(2, 2),
-                Flatten(),
-                Dense(128, activation='relu'),
-                Dense(1, activation='sigmoid')
-            ])
-            optimizer = Adam()
-            model.compile(optimizer=optimizer, loss=loss_object, metrics=['accuracy'])
+            with strategy.scope():
+                model = Sequential([
+                    Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
+                    MaxPooling2D(2, 2),
+                    Conv2D(64, (3, 3), activation='relu'),
+                    MaxPooling2D(2, 2),
+                    Flatten(),
+                    Dense(128, activation='relu'),
+                    Dense(1, activation='sigmoid')
+                ])
+                optimizer = Adam()
+                model.compile(optimizer=optimizer, loss=loss_object, metrics=['accuracy'])
 
-        # Create and distribute the dataset
-        distributed_dataset = coordinator.create_per_worker_dataset(dataset_fn)
-        distributed_iterator = iter(distributed_dataset)
+            # Start tracking time
+            start_time = time.time()
 
-        # Training loop
-        for epoch in range(10):  # Number of epochs
-            start_epoch = time.time()
-            print(f"Starting epoch {epoch + 1}")
-            batch_index = 0
-            start_batch = time.time()
-            try:
-                coordinator.schedule(per_worker_train_step, args=(distributed_iterator,))
-                print(f"Batch {batch_index} processed in {time.time() - start_batch} seconds.")
-                batch_index += 1
-            except tf.errors.OutOfRangeError:
-                print("there are no more batches to process")
-            coordinator.join()  # Wait for all tasks to complete
-            print(f"Epoch {epoch + 1} completed in {time.time() - start_epoch} seconds.")
+            # Training loop
+            for epoch in range(10):  # Number of epochs
+                start_epoch = time.time()
+                print(f"Starting epoch {epoch + 1}")
+                batch_index = 0
 
-            distributed_iterator = iter(distributed_dataset)  # Reset iterator for the next epoch
+                try:
+                    coordinator.schedule(per_worker_train_step, args=(distributed_iterator,))
+                    batch_index += 1
+                except tf.errors.OutOfRangeError:
+                    print("No more batches to process")
 
-        def eval_dataset_fn():
-            data_dir = job.dataset_img.extracted_path
-            batch_size = global_batch_size
-            img_height = 150
-            img_width = 150
+                coordinator.join()
 
-            dataset = tf.keras.preprocessing.image_dataset_from_directory(
-                data_dir,
-                image_size=(img_height, img_width),
-                batch_size=batch_size,
-                label_mode='binary'
-            ).prefetch(tf.data.experimental.AUTOTUNE)
+                epoch_time = time.time() - start_epoch
+                print(f"Epoch {epoch + 1} completed in {epoch_time} seconds.")
 
-            return dataset
+                distributed_iterator = iter(distributed_dataset)  # Reset iterator for the next epoch
 
-        # Create and distribute the evaluation dataset
-        eval_distributed_dataset = coordinator.create_per_worker_dataset(eval_dataset_fn)
-        eval_distributed_iterator = iter(eval_distributed_dataset)
+            # Calculate total training time
+            total_time = time.time() - start_time
+            print(f"Total training time: {total_time} seconds")
 
-        @tf.function
-        def per_worker_eval_step(iterator):
-            def step_fn(inputs):
-                images, labels = inputs
-                predictions = model(images, training=False)
-                accuracy_metric.update_state(labels, predictions)
-            return strategy.run(step_fn, args=(next(iterator),))
+            # Get final accuracy
+            metrics = model.evaluate(distributed_dataset)
+            accuracy = metrics[1]  # Assuming accuracy is the second metric returned by evaluate()
 
-        # Evaluation loop
-        accuracy_metric = tf.keras.metrics.BinaryAccuracy()
-        ended_at = timezone.now()
-        while True:
-            try:
-                coordinator.schedule(per_worker_eval_step, args=(eval_distributed_iterator,))
-            except tf.errors.OutOfRangeError:
-                break
-        coordinator.join()
+            print(f"Final accuracy: {accuracy}")
 
-        final_accuracy = accuracy_metric.result().numpy()
+            # Update job status upon completion (you may want to handle this part in a separate function or class)
+            TrainingJobDAO.update(job.id, status=JobStatus.COMPLETED.value)
 
-        # Update job status and accuracy upon completion
-        TrainingJobDAO.update(job.id, status=JobStatus.COMPLETED.value, result=final_accuracy, ended_at=ended_at)
-        
-        print(f'Training complete. Final accuracy: {final_accuracy}')
+            print('Training complete.')
+

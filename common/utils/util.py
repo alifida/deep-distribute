@@ -137,9 +137,11 @@ def extract_zip_to_shared_loc(zip_file, dataset_id):
 
     shared_directory = settings.SHARED_DIRECTORY
     dataset_directory = os.path.join(shared_directory, str(dataset_id))
-
+    
     logging.debug(f"Creating dataset directory: {dataset_directory}")
-    if not os.path.exists(dataset_directory):
+    if os.path.exists(shared_directory):
+        return dataset_directory
+    else:
         os.makedirs(dataset_directory, exist_ok=True)
 
     try:
