@@ -1,7 +1,7 @@
 {% extends "wrapper/base.html" %}
 {% block content %}
 {% load static %}
-
+{% load custom_filters %}
 <div class="content-wrapper">
     <section class="content">
         <div class="container-fluid">
@@ -25,6 +25,8 @@
                                         <th scope="col">Status</th>
                                         <th scope="col">Started At</th>
                                         <th scope="col">Ended At</th>
+                                        <th scope="col">Duration</th>
+                                        <th scope="col">Result</th>
                                         <th scope="col">Algorithm</th>
                                         <th scope="col">Dataset</th>
                                         <th scope="col">Actions</th>
@@ -36,8 +38,10 @@
                                         <th scope="row">{{ forloop.counter }}</th>
                                         <td>{{ job.job_name }}</td>
                                         <td>{{ job.status }}</td>
-                                        <td>{{ job.started_at|date:"Y-m-d H:i" }}</td>
-                                        <td>{{ job.ended_at|date:"Y-m-d H:i" }}</td>
+                                        <td>{{ job.started_at|date:"Y-m-d H:i:s" }}</td>
+                                        <td>{{ job.ended_at|date:"Y-m-d H:i:s" }}</td>
+                                        <td>{{ job.started_at|date_diff:job.ended_at }}</td>
+                                        <td>{{ job.result }}</td>
                                         <td>{{ job.algo }}</td>
                                         <td>{{ job.dataset_img.data_name }}</td>
                                         <td>

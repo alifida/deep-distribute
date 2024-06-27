@@ -80,7 +80,7 @@ class TrainingService:
         results = {
             
             'accuracy': float(accuracy),
-            'predictions': predictions.flatten().tolist(),
+            #'predictions': predictions.flatten().tolist(),
             # Include other metrics or details as needed
         }
         results_json = json.dumps(results)

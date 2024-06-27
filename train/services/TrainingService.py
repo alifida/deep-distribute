@@ -15,6 +15,8 @@ import threading
 from tensorflow.keras.backend import clear_session
 from multiprocessing import Process
 from django.utils import timezone
+import json
+
 
 def worker_process(job_id):
     import django
@@ -75,7 +77,7 @@ class TrainingService:
         loss_object = BinaryCrossentropy(from_logits=True, reduction=tf.keras.losses.Reduction.NONE)
 
         # Define `global_batch_size` appropriately
-        global_batch_size = 2  # Adjust based on your setup
+        global_batch_size = 20  # Adjust based on your setup
 
         def train_step_fn(images, labels):
             with tf.GradientTape() as tape:
@@ -171,7 +173,7 @@ class TrainingService:
 
         # Evaluation loop
         accuracy_metric = tf.keras.metrics.BinaryAccuracy()
-        ended_at = timezone.now()
+        
         while True:
             try:
                 coordinator.schedule(per_worker_eval_step, args=(eval_distributed_iterator,))
@@ -180,8 +182,15 @@ class TrainingService:
         coordinator.join()
 
         final_accuracy = accuracy_metric.result().numpy()
-
+        ended_at = timezone.now()
         # Update job status and accuracy upon completion
-        TrainingJobDAO.update(job.id, status=JobStatus.COMPLETED.value, result=final_accuracy, ended_at=ended_at)
+        results = {
+            
+            'accuracy': float(final_accuracy),
+            #'predictions': predictions.flatten().tolist(),
+            # Include other metrics or details as needed
+        }
+        results_json = json.dumps(results)
+        TrainingJobDAO.update(job.id, status=JobStatus.COMPLETED.value, result=results_json, ended_at=ended_at)
         
         print(f'Training complete. Final accuracy: {final_accuracy}')
