@@ -12,7 +12,7 @@ class DatasetImgService:
         dataset = DatasetImgDAO.get(dataset_img_id)
         if(ensureExtractedPath):
             if(not dataset.extracted_path or not util.path_exist(dataset.extracted_path)):
-                extracted_path = util.extract_zip_to_shared_loc(dataset.data_path.path, dataset.id);
+                extracted_path = util.extract_zip_to_media_dir(dataset.data_path.path, dataset.id);
                 dataset.extracted_path = extracted_path
                 DatasetImgService.update(dataset.id,  extracted_path=dataset.extracted_path)
         
@@ -21,8 +21,8 @@ class DatasetImgService:
         return dataset;
 
     @staticmethod
-    def list():
-        return DatasetImgDAO.list()
+    def list(user_id):
+        return DatasetImgDAO.list(user_id)
 
     @staticmethod
     def update(dataset_img_id, **kwargs):

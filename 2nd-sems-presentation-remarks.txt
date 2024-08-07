@@ -1,0 +1,22 @@
+
+
+Dr Qamar:
+1- Add Weights in Proposal Diagram
+2- Proposed framework: complete Diagram
+3- Add diaram in the Research Methodology
+
+
+
+Add Following for comparison
+Precision, Recall, AUC, F1 Score
+Paramenter Server strategy Data set mentioned in the litrature review.
+
+synthatic dataset
+Larger dataset
+Dataset of different Disease.
+
+
+
+
+
+

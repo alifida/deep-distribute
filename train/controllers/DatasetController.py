@@ -3,14 +3,54 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from train.forms.forms import DatasetImgForm
 from train.services.DatasetImgService import DatasetImgService
+from train.services.KerasCatalogService import KerasCatalogService
 from common.utils import util
 from django.contrib import messages
 
 @login_required
-def list(request):
-    datasets = DatasetImgService.list()  # Adjusted to use the service layer
+def list(request, dataset_id=None):
+    datasets = DatasetImgService.list(request.user.id)  # Adjusted to use the service layer
+    
+    models = KerasCatalogService.list_all_models()
+    strategies = KerasCatalogService.list_all_strategies()
 
-    return util.render(request, 'dataset/list.html', {'datasets': datasets})
+     
+
+     
+    print("\nAvailable Keras layers:")
+    print(KerasCatalogService.list_all_layers())
+
+    print("\nAvailable Keras optimizers:")
+    print(KerasCatalogService.list_all_optimizers())
+
+
+
+
+    context = {
+            'datasets': datasets,
+            'dataset': {},
+            'stats': {},
+            
+    }
+    if len(datasets) > 0:
+        if dataset_id ==None:
+            dataset_id= datasets[0].id
+        
+         
+        dataset = DatasetImgService.get(dataset_id, True)
+        stats = dataset.gather_dataset_stats()
+        context = {
+            'datasets': datasets,
+            'dataset': dataset,
+            'stats': stats,
+            
+        }
+    context['models']= models.items()
+    context['strategies']= strategies
+
+
+
+    return util.render(request, 'dataset/list.html', context)
 
 @login_required
 def create(request):
@@ -46,12 +86,21 @@ def edit(request, dataset_id):
         form = DatasetImgForm(instance=dataset)
     return util.render(request, 'dataset/create.html', {'form': form, 'dataset': dataset})
 
+
+
+
 @login_required
 def view(request, dataset_id):
-    dataset = DatasetImgService.get(dataset_id)  # Use service to fetch the dataset
+    dataset = DatasetImgService.get(dataset_id, True)
+    stats = dataset.gather_dataset_stats()
     form = DatasetImgForm(instance=dataset)  # Form for display purposes only
-    return util.render(request, 'dataset/view.html', {'form': form, 'dataset': dataset})
-
+    context = {
+        'form': form,
+        'dataset': dataset,
+        'stats': stats,
+    }
+    return util.render(request, 'dataset/view.html', context)
+ 
 @login_required 
 def delete_confirm(request, dataset_id):
     dataset = DatasetImgService.get(dataset_id)  # Use service to fetch the dataset

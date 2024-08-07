@@ -2,29 +2,25 @@ import tensorflow as tf
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
-from common.utils import util
-
-from train.dao.TrainingJobDAO import TrainingJobDAO
-from train.utils.JobStatus import JobStatus
-from django.utils import timezone
-
+from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
+from tensorflow.keras.metrics import Precision, Recall, AUC
 from tensorflow.keras.callbacks import Callback
 import threading
 import json
-import numpy as np
-from sklearn.metrics import accuracy_score
+from django.utils import timezone
+from train.dao.TrainingJobDAO import TrainingJobDAO
+from train.utils.JobStatus import JobStatus
+from sklearn.metrics import f1_score
 
-
-class TrainingService:
+class TrainingServiceSingle:
 
     @staticmethod
     def start_training_thread(job):
-        thread = threading.Thread(target=TrainingService.start_training, args=(job,))
+        thread = threading.Thread(target=TrainingServiceSingle.start_training, args=(job,))
         thread.start()
 
     @staticmethod
-    def start_training(job):
+    def start_training(job, model):
 
         dataset_path = job.dataset_img.extracted_path
         print('Dataset Path:', dataset_path)
@@ -39,22 +35,29 @@ class TrainingService:
         # Add custom layers on top of ResNet50
         x = base_model.output
         x = GlobalAveragePooling2D()(x)
-        x = Dense(1024, activation='relu')(x)
-        predictions = Dense(1, activation='sigmoid')(x)  # Assuming binary classification
+        x = Dense(1, activation='sigmoid')(x)  # Assuming binary classification
 
         # Create the final model
-        model = Model(inputs=base_model.input, outputs=predictions)
+        model = Model(inputs=base_model.input, outputs=x)
 
         # Compile the model
-        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', 'Precision','Recall','MeanSquaredError'])
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', Precision(), Recall(), AUC()])
 
         # Set up your dataset
-        train_datagen = ImageDataGenerator(rescale=1./255)
+        train_datagen = ImageDataGenerator(rescale=1./255, validation_split=0.2)
         train_generator = train_datagen.flow_from_directory(
                 dataset_path,
                 target_size=(150, 150),
                 batch_size=20,
-                class_mode='binary')
+                class_mode='binary',
+                subset='training')
+
+        validation_generator = train_datagen.flow_from_directory(
+                dataset_path,
+                target_size=(150, 150),
+                batch_size=20,
+                class_mode='binary',
+                subset='validation')
 
         test_datagen = ImageDataGenerator(rescale=1./255)
         test_generator = test_datagen.flow_from_directory(
@@ -66,22 +69,28 @@ class TrainingService:
 
         # Train the model with the callback
         terminate_on_flag_callback = TerminateOnFlagCallback(job.id)
-        model.fit(train_generator, epochs=10, callbacks=[terminate_on_flag_callback])
+        model.fit(train_generator, epochs=10, validation_data=validation_generator, callbacks=[terminate_on_flag_callback])
 
         # Predictions on test set
         predictions = model.predict(test_generator)
 
-        # Calculate accuracy (example for binary classification)
+        # Calculate metrics
         actual_labels = test_generator.classes
-        binary_predictions = (predictions > 0.5).astype(int).flatten()  # Convert probabilities to binary predictions
-        accuracy = accuracy_score(actual_labels, binary_predictions)
+        binary_predictions = (predictions > 0.5).astype(int).flatten()
+
+        accuracy = tf.keras.metrics.BinaryAccuracy()(actual_labels, binary_predictions).numpy()
+        precision = tf.keras.metrics.Precision()(actual_labels, binary_predictions).numpy()
+        recall = tf.keras.metrics.Recall()(actual_labels, binary_predictions).numpy()
+        auc = tf.keras.metrics.AUC()(actual_labels, binary_predictions).numpy()
+        f1 = f1_score(actual_labels, binary_predictions)
 
         # Prepare results in JSON format
         results = {
-            
             'accuracy': float(accuracy),
-            #'predictions': predictions.flatten().tolist(),
-            # Include other metrics or details as needed
+            'precision': float(precision),
+            'recall': float(recall),
+            'auc': float(auc),
+            'f1_score': float(f1)
         }
         results_json = json.dumps(results)
 
@@ -103,5 +112,4 @@ class TerminateOnFlagCallback(Callback):
         if training_job.status != JobStatus.RUNNING.value:  
             self.model.stop_training = True
             print(f"Stopping training at the end of epoch {epoch}")
-
 

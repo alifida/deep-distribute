@@ -3,7 +3,8 @@
 
 
 from train.dao.TrainingJobDAO import TrainingJobDAO
-from train.services.TrainingService import TrainingService
+from train.services.TrainingServicePS import TrainingServicePS
+from train.services.TrainingServiceSingle import TrainingServiceSingle
 #from train.services.TrainingService_without_parameter_server import TrainingService
 from train.services.DatasetImgService import DatasetImgService
 from common.utils.util import get_unique_string, get_current_time
@@ -38,7 +39,7 @@ class TrainingJobService:
 
     @staticmethod
     def get(job_id):
-        return TrainingJobDAO.get(job_id)
+        return TrainingJobDAO.get(job_id, True)
 
     @staticmethod
     def update(job_id, **kwargs):
@@ -46,7 +47,7 @@ class TrainingJobService:
 
 
     @staticmethod
-    def startTraining(dataset_id, user):
+    def startTraining(dataset_id, user, strategy, model='ResNet50'):
        
        # save job 
        trainingJob = TrainingJobService.create(dataset_id=dataset_id, user=user)
@@ -56,7 +57,16 @@ class TrainingJobService:
        # get job_id and start training
        #trainingJob = TrainingJobService.get(job_id)
        #TrainingService.start_training_process(trainingJob.id)
-       TrainingService.start_training(trainingJob);
+       if strategy == 1 or strategy=='Single GPU':
+            TrainingServiceSingle.start_training(trainingJob, model)
+       elif strategy == 2 or  strategy=='GPU Cluster Parameter Server':
+            TrainingServicePS.start_training(trainingJob, model)
+       elif strategy == 3 or  strategy=='GPU Cluster Custom':
+            #TrainingServiceCustom.start_training(trainingJob, model)
+            pass
+       else:
+            # Handle any other cases if needed
+            pass  # or do something else
         
 
     @staticmethod

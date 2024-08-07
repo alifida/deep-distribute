@@ -22,11 +22,11 @@ def worker_process(job_id):
     django.setup()
 
     # Now import any Django-dependent modules
-    from train.services import TrainingService
+    from train.services import TrainingServicePS
     from train.models import Training_job
 
     job = Training_job.objects.get(id=job_id)
-    TrainingService.start_training(job)
+    TrainingServicePS.start_training(job)
 
 class TrainingService:
 

@@ -1,68 +1,106 @@
-{% extends "wrapper/base.html" %} {% block content %} {% load static %}
+{% extends "wrapper/base.html" %}
+{% block content %}
+<div class="content-wrapper">
+    <div class="full-width v-padding-2"></div>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="container mt-5">
+                <div class="row">
+                    <div class="col-8 padding-10">
+                        <h2>Dataset Details</h2>
+                    </div>
+                    <div class="col-4 padding-10">
+                        <a href="{% url 'training_job_list' %}" class="btn btn-primary btn-sm right" data-toggle="tooltip" data-placement="top" title="Training"><i class="nav-icon fas fa-plus"></i> &nbsp; Training</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="card">
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-3">Name</dt>
+                                <dd class="col-sm-9">{{ dataset.data_name }}</dd>
 
- 
-        <div class="content-wrapper">
-	
-	        <div class="full-width v-padding-2"></div>
-	
+                                <dt class="col-sm-3">Meta Information</dt>
+                                <dd class="col-sm-9">{{ dataset.metainfo }}</dd>
 
-	            <section class="content">
-		            <div class="container-fluid ">
+                                <dt class="col-sm-3">Processed At</dt>
+                                <dd class="col-sm-9">{{ dataset.processed_at }}</dd>
 
+                                <dt class="col-sm-3">Delete At</dt>
+                                <dd class="col-sm-9">{{ dataset.delete_at }}</dd>
 
-            
-            
-                        <div class="container mt-5">
-                             
+                                <dt class="col-sm-3">Status</dt>
+                                <dd class="col-sm-9">{{ dataset.status }}</dd>
+
+                                <!-- Include dataset statistics fetched by gather_dataset_stats() -->
+                                {% with stats=dataset.gather_dataset_stats %}
+                                <dt class="col-sm-3">Total Images</dt>
+                                <dd class="col-sm-9">{{ stats.overall_total_examples }}</dd>
+                                <dt class="col-sm-3">Image Size</dt>
+                                <dd class="col-sm-9">{{ stats.image_size }}</dd>
+                                <dt class="col-sm-3">Total Classes</dt>
+                                <dd class="col-sm-9">{{ stats.total_classes }}</dd>
+
+                                <dt class="col-sm-3">Class-wise Counts</dt>
+                                <dd class="col-sm-9">
+                                    <ul>
+                                        {% for files in stats.classwise_details.items %}
+                                        <li>{{ class_name }}: {{ num_examples }}</li>
+                                        <ul>
+                                            {% for class_name, num_examples in stats.classwise_total_examples.items %}
+
+                                            {% endfor %}    
+                                        </ul>
+                                        {% endfor %}
+                                    </ul>
+                                    
+                                </dd>
+                                {% endwith %}
+                            </dl>
+                        </div>
+                        <div class="card-footer">
                             <div class="row">
-                                <div class="col-8 padding-10">
-                                    <h2>Dataset Details</h2> 
-                                </div>
-                                <div class="col-4  padding-10">
-                                    <a href="{% url 'training_job_list' %}" class="btn btn-primary btn-sm right"  data-toggle="tooltip" data-placement="top" title="Training"><i class="nav-icon fas fa-plus"></i> &nbsp; Training</a>  
-                                </div>
-                            </div>
-
-
-                            <div class="card">
-                                <div class="card-body">
-                                    <dl class="row">
-                                        <dt class="col-sm-3">Name</dt>
-                                        <dd class="col-sm-9">{{ dataset.data_name }}</dd>
-
-                                        <dt class="col-sm-3">Meta Information</dt>
-                                        <dd class="col-sm-9">{{ dataset.metainfo }}</dd>
-
-                                        <dt class="col-sm-3">Processed At</dt>
-                                        <dd class="col-sm-9">{{ dataset.processed_at }}</dd>
-
-                                        <dt class="col-sm-3">Delete At</dt>
-                                        <dd class="col-sm-9">{{ dataset.delete_at }}</dd>
-
-                                        <dt class="col-sm-3">Status</dt>
-                                        <dd class="col-sm-9">{{ dataset.status }}</dd>
-
-                                        <!-- Additional fields as necessary -->
-                                    </dl>
-                                </div>
-                                <div class="card-footer">
-                                    <div class="row">
-                                        <div class="col-12 center-inner ">
-                                            <a href="{% url 'edit_dataset' dataset.id %}" class="btn btn-primary"   data-toggle="tooltip" data-placement="top" title="Edit Dataset"><i class="nav-icon fa fa-edit"></i> &nbsp; Edit</a>
-                                            <a href="{% url 'delete_dataset_confirm' dataset.id %}" class="btn btn-danger"   data-toggle="tooltip" data-placement="top" title="Delete Dataset"><i class="nav-icon fa fa-trash"></i> &nbsp; Delete</a>
-                                        </div>
-                                    </div>        
+                                <div class="col-12 center-inner ">
+                                    <a href="{% url 'edit_dataset' dataset.id %}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Edit Dataset"><i class="nav-icon fa fa-edit"></i> &nbsp; Edit</a>
+                                    <a href="{% url 'delete_dataset_confirm' dataset.id %}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Delete Dataset"><i class="nav-icon fa fa-trash"></i> &nbsp; Delete</a>
                                 </div>
                             </div>
                         </div>
-            
-            
-
-
                     </div>
-                </section>
+                </div>
+
+
+                <div class="row">
+                    {% for class_details in stats.classwise_details %}
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ class_details.class_name }}</h5>
+                                <p class="card-text">Total Examples: {{ class_details.total_examples }}</p>
+                                
+                                <!-- Display preview images -->
+                                <div class="row">
+                                    {% for image_url in class_details.preview_images %}
+                                    <div class="col-4 mb-3">
+                                        <img src="{{ image_url }}" class="img-thumbnail" alt="Preview Image">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+
             </div>
-        </div>           
-                    
-    {% endblock%}
+
+
+
+
             
+        </div>
+    </section>
+</div>
+{% endblock %}

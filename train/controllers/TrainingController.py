@@ -56,11 +56,25 @@ def delete(request, job_id):
     '''
 
 @login_required
-def start_training(request, dataset_id):
+def start_training(request, dataset_id, strategy):
      
-    TrainingJobService.startTraining(dataset_id,  request.user)   
+    TrainingJobService.startTraining(dataset_id,  request.user, strategy)   
     messages.success(request, "Training Job Started successfully.")
     return util.redirect('training_job_list')
+
+@login_required
+def start_training_post(request):
+    if request.method == 'POST':
+        # Extract data from the POST request
+        dataset_id = request.POST.get('dataset_id')
+        model = request.POST.get('model')
+        strategy = request.POST.get('strategy')
+        TrainingJobService.startTraining(dataset_id,  request.user, strategy, model)   
+        messages.success(request, "Training Job Started successfully.")
+    else:
+        messages.error(request, "Cannot strat training.")
+
+    return util.redirect('training_job_list')    
 
 @login_required
 def stop_training(request, job_id):

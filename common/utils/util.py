@@ -130,30 +130,34 @@ def extract_zip_to_temp(zip_file_path):
     return temp_dir
 
 
-def extract_zip_to_shared_loc(zip_file, dataset_id):
-    logging.debug(f"Checking existence of zip file: {zip_file}")
+
+
+def extract_zip_to_media_dir(zip_file, dataset_id):
+    # Ensure the zip file exists
     if not os.path.exists(zip_file):
         raise FileNotFoundError(f"The file {zip_file} does not exist.")
 
-    shared_directory = settings.SHARED_DIRECTORY
-    dataset_directory = os.path.join(shared_directory, str(dataset_id))
-    
-    logging.debug(f"Creating dataset directory: {dataset_directory}")
-    if os.path.exists(shared_directory):
-        return dataset_directory
+    # Determine the target directory within MEDIA_ROOT
+    media_directory = os.path.join(settings.MEDIA_ROOT, str(dataset_id))
+
+
+    if os.path.exists(media_directory):
+        return media_directory
     else:
-        os.makedirs(dataset_directory, exist_ok=True)
+        os.makedirs(media_directory, exist_ok=True)
 
     try:
-        logging.debug(f"Extracting zip file: {zip_file} to {dataset_directory}")
+        # Extract the contents of the zip file to the dataset directory
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall(dataset_directory)
+            zip_ref.extractall(media_directory)
     except zipfile.BadZipFile:
         raise Exception("Failed to extract the ZIP file: it may be corrupted.")
     except Exception as e:
         raise Exception(f"An error occurred during extraction: {str(e)}")
-     
-    return dataset_directory
+
+    return media_directory
+
+ 
 
 def path_exist(path):
     return os.path.exists(path)

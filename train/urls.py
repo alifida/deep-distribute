@@ -8,6 +8,8 @@ from .views import welcome
 
 urlpatterns = [
     path('deep/dataset/list', DatasetController.list, name="list_dataset"),
+    path('deep/dataset/list/<int:dataset_id>/', DatasetController.list, name="list_dataset_with_id"),
+
     path('deep/dataset/new/', DatasetController.create, name='create_dataset'),
    # path('train/dataset/save/', DatasetController.save, name="save_dataset"),
     path('deep/dataset/delete/<int:dataset_id>/', DatasetController.delete, name="delete_dataset"),
@@ -21,7 +23,8 @@ urlpatterns = [
     path('deep/jobs/', TrainingController.list, name='training_job_list'),
     path('deep/jobs/create/', TrainingController.edit, name='training_job_create'),
     path('deep/jobs/edit/<int:job_id>/', TrainingController.edit, name='training_job_update'),
-    path('deep/jobs/start/<int:dataset_id>/', TrainingController.start_training, name='start_training'),
+    path('deep/jobs/start/<int:dataset_id>/<int:strategy>', TrainingController.start_training, name='start_training'),
+    path('deep/jobs/start/', TrainingController.start_training_post, name='start_training_post'),
     path('deep/jobs/stop/<int:job_id>/', TrainingController.stop_training, name='stop_training'),
     
     #path('deep/jobs/delete_confirm/<int:dataset_id>/', TrainingController.delete_confirm, name="training_job_delete_confirm"),

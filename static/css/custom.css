@@ -7,6 +7,14 @@ html {
   scroll-behavior: smooth;
 }
 
+
+
+.table-hover tbody tr.selected {
+    color: #212529;
+    background-color: rgb(174 201 213);
+	font-weight: bold;
+}
+
 .list-style-none{
 	list-style: none;
 }

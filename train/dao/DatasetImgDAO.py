@@ -24,6 +24,7 @@ class DatasetImgDAO:
     def delete(dataset_img_id):
         dataset_img = Dataset_IMG.objects.get(id=dataset_img_id)
         dataset_img.delete()
+    
     @staticmethod
-    def list():
-        return Dataset_IMG.objects.all()
+    def list(user_id):
+        return Dataset_IMG.objects.filter(user_id = user_id);
