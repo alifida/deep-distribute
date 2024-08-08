@@ -3,17 +3,19 @@ from train.models import Dataset_IMG
 
 class DatasetImgDAO:
     @staticmethod
-    def create(data_name, data_path, metainfo, status, user):
+    def create(data_name, data_path, data_path_test, user):
         return Dataset_IMG.objects.create(
             data_name=data_name,
             data_path=data_path,
-            metainfo=metainfo,
-            status=status,
+            data_path_test = data_path_test,
+            
             user=user
         )
 
     @staticmethod
     def get(dataset_img_id):
+        print(dataset_img_id)
+        
         return Dataset_IMG.objects.get(id=dataset_img_id)
 
     @staticmethod

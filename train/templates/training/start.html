@@ -1,94 +1,182 @@
-{% extends "wrapper/base.html" %} {% block content %} {% load static %}
+{% extends "wrapper/base.html" %}
+{% block content %}
+{% load static %}
 
- 
 <div class="content-wrapper">
-    <div class="full-width v-padding-2"></div>
-	
-	<section class="content">
-		<div class="container-fluid ">
-            <div class="container mt-5">
-                <div class="col-8 padding-10">
-                    <h2>Create/Update Training Job</h2> 
+    <section class="content">
+        <div class="container-fluid" >
+            <div class="row">
+                 
+                <div class="col-lg-4 col-md-4 col-sm-4 padding-10"> 
+                    <h2 class="left">Datasets</h2> 
                 </div>
-
-                <div class="card">
-                            
-                    <div class="card-body">
-                        <form method="post">
-                            {% csrf_token %}
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.job_name.label_tag }}
-                                        {{ form.job_name }}
-                                        {{ form.job_name.errors }}
-                                    </div>
-                                </div>
-                                <div class="col-sm-12 col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.status.label_tag }}
-                                        {{ form.status }}
-                                        {{ form.status.errors }}
-                                    </div>
-                                </div>
-                            </div>
-                        
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.started_at.label_tag }}
-                                        {{ form.started_at }}
-                                        {{ form.started_at.errors }}
-                                    </div>
-                                </div>
-                                <div class="col-sm-12 col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.ended_at.label_tag }}
-                                        {{ form.ended_at }}
-                                        {{ form.ended_at.errors }}
-                                    </div>
-                                </div>
-                            </div>
-                        
-                            <div class="row">
-                                <div class="col-sm-12 col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.algo.label_tag }}
-                                        {{ form.algo }}
-                                        {{ form.algo.errors }}
-                                    </div>
-                                </div>
-                                <div class="col-sm-12 col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.dataset_img.label_tag }}
-                                        {{ form.dataset_img }}
-                                        {{ form.dataset_img.errors }}
-                                    </div>
-                                </div>
-                            </div>
-                        
-                            <div class="row">
-                                <div class="col-12 text-center">
-                                    <button type="submit" class="btn btn-success btn-sm"><i class="nav-icon fa fa-save"></i> &nbsp; Save</button>
-                                    <a href="{% url 'training_job_list' %}" class="btn btn-danger btn-sm"><i class="nav-icon fa fa-times"></i> &nbsp; Cancel</a>
-                                </div>
-                            </div>
-                        </form>
-                        
-                        
-                    </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 padding-10">
+                    {% if dataset %}
+                        <select  name="dataset_id" class="form-control">
+                            {% for ds in datasets %}
+                            <tr class="{% if ds.id == dataset.id %}selected{% endif %}">
+                                <option {% if ds.id == dataset.id %} selected {% endif %} value="{{ ds.id }}">{{ ds.data_name }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
                 </div>
+                
+                <div class="col-lg-4 col-md-4 col-sm-4 padding-10">
+                    {% if dataset %}
+                        <a href="{% url 'create_dataset' %}" class="btn btn-primary btn-sm right "  data-toggle="tooltip" data-placement="top" title="Upload New Dataset"><i class="nav-icon fas fa-plus"></i> &nbsp; New Dataset</a>  
+                    {% endif %}
+                </div>
+                    
+                 
+                 
             </div>
-    
-    
-
-
+            <div class="row hide">
+                <div class="col-12" > <!-- start of col dataset grid  -->
+                     
+                </div> <!-- end of col dataset grid -->
+            </div>
+            {% if dataset %}
+            <div class="row v-margin-10"> 
+                <div class="col-8" > <!-- start of col datset detail -->  
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-12  ">
+                                    <h5 class="left">Traning</h5>
+                                    <div class="right hide">
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'start_training_post' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="dataset_id" value="{{dataset.id}}"/>
+                                <div class="row">
+                                     
+                                    <div class="col-lg-4 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="model">Choose a model:</label>
+                                            <select id="model" name="model" class="form-control">
+                                                {% for mkey, mval in models %}
+                                                    <option value="{{ mkey }}">{{ mkey }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="model">Strategy:</label>
+                                            <select id="strategy" name="strategy" class="form-control">
+                                                {% for strategy in strategies %}
+                                                    <option value="{{ strategy }}">{{ strategy }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <button type="submit" class="btn btn-info right">
+                                            <i class="fas fa-microscope"></i> <span>Start Training</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>                       
+                <div class="col-4" > <!-- start of col datset detail -->  
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-12  ">
+                                    <h5 class="left">{{ dataset.data_name }}</h5>
+                                    <div class="right hide">
+                                        <a href="{% url 'edit_dataset' dataset.id %}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Edit Dataset"><i class="nav-icon fa fa-edit"></i> &nbsp; Edit</a>
+                                        <a href="{% url 'delete_dataset_confirm' dataset.id %}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Delete Dataset"><i class="nav-icon fa fa-trash"></i> &nbsp; Delete</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-5">Name</dt>
+                                <dd class="col-sm-7">{{ dataset.data_name }}</dd>
+     
+     
+                                <!-- Include dataset statistics fetched by gather_dataset_stats() -->
+                                {% with stats=dataset.gather_dataset_stats %}
+                                <dt class="col-sm-5">Total Images</dt>
+                                <dd class="col-sm-7">{{ stats.overall_total_examples }}</dd>
+                                <dt class="col-sm-5">Image Size</dt>
+                                <dd class="col-sm-7">{{ stats.image_size }}</dd>
+                                <dt class="col-sm-5">Total Classes</dt>
+                                <dd class="col-sm-7">
+                                    {{ stats.total_classes }}
+                                </dd>
+                                <dt class="col-sm-5">Class-wise Counts</dt>
+                                <dd class="col-sm-7">
+                                         
+                                        
+                                <ol class="h-padding-10">
+                                    {% for class_details in stats.classwise_details %}
+                                        <li>
+                                        {{ class_details.class_name }} : {{ class_details.total_examples }}
+                                        </li>
+                                    {% endfor %}    
+                                </ol>
+                                         
+                                    
+                                </dd>
+                                {% endwith %}
+                            </dl>
+                        </div>
+                         
+                    </div>
+                </div><!-- end of col datset detail -->  
+            </div>
+            {% endif %}
+            {% if dataset %}
+            <div class="row v-margin-10">                
+                
+                    {% for class_details in stats.classwise_details %}
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="card-header">
+                                        <div class="row">
+                                            <div class="col-12  ">
+                                                <h6 class="left">{{ class_details.class_name }}</h6>
+                                                <p class="card-text">Total Examples: {{ class_details.total_examples }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                     
+                                    <!-- Display preview images -->
+                                    <div class="row v-margin-10">
+                                        {% for image_url in class_details.preview_images %}
+                                        <div class="col-4 mb-3">
+                                            <img src="{{ image_url }}" class="img-thumbnail" alt="Preview Image">
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                
+            </div>
+            {% endif %}
+            
         </div>
     </section>
 </div>
 
 
-{% endblock%}
-
-
  
+
+
+{% endblock %}

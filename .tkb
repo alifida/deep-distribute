@@ -1,0 +1,86 @@
+{
+  "scope": "Workspace",
+  "tasks": {
+    "task-vS98WCQhHtR3PWSlsLWmb": {
+      "id": "task-vS98WCQhHtR3PWSlsLWmb",
+      "description": "Design Training interface where user can:\n1- select and prview the dataset\n2- Select the Model and its configuration before training starts",
+      "columnId": "column-todo"
+    },
+    "yk4pnwKSC46GT3t3AkGRh": {
+      "id": "yk4pnwKSC46GT3t3AkGRh",
+      "description": "Clean the dataset files from storage upon deleting dataset entity",
+      "columnId": "column-todo"
+    },
+    "WXXfSQ1YiJ1Hd0sTZcD1m": {
+      "id": "WXXfSQ1YiJ1Hd0sTZcD1m",
+      "description": "Allow the user to upload test dataset separately",
+      "columnId": "column-todo"
+    },
+    "tf_pe-4NjLFPgW0Uz4UQv": {
+      "id": "tf_pe-4NjLFPgW0Uz4UQv",
+      "description": "Draw results on graphs",
+      "columnId": "column-todo"
+    },
+    "KbEhF0NidRSR_GCTc6qkZ": {
+      "id": "KbEhF0NidRSR_GCTc6qkZ",
+      "description": "Allow the user to compare multiple results",
+      "columnId": "column-todo"
+    },
+    "VUmnCdx83ifJzLjdYk40z": {
+      "id": "VUmnCdx83ifJzLjdYk40z",
+      "description": "Save the training results in the Database",
+      "columnId": "column-todo"
+    },
+    "GUY6W18h4lwqpqJWMUSq0": {
+      "id": "GUY6W18h4lwqpqJWMUSq0",
+      "description": "Configure the cluster via interface\nDisplay the status (online, offline, busy) of every node in cluster",
+      "columnId": "column-todo"
+    },
+    "0fpELvZ6rQrHfCYeJPi2Y": {
+      "id": "0fpELvZ6rQrHfCYeJPi2Y",
+      "description": "Ping every node in the cluster and utilize the nodes upon avialability",
+      "columnId": "column-todo"
+    },
+    "226oyYrk3CNdGHxHN5TH6": {
+      "id": "226oyYrk3CNdGHxHN5TH6",
+      "description": "Implement the proposed strategy for Cluster GPUs",
+      "columnId": "column-todo"
+    },
+    "KKRrbO0wJuRKG8MsemJe7": {
+      "id": "KKRrbO0wJuRKG8MsemJe7",
+      "description": "Design Training interface along with the dataset details",
+      "columnId": "column-done"
+    }
+  },
+  "columns": [
+    {
+      "id": "column-todo",
+      "title": "To do",
+      "tasksIds": [
+        "task-vS98WCQhHtR3PWSlsLWmb",
+        "WXXfSQ1YiJ1Hd0sTZcD1m",
+        "yk4pnwKSC46GT3t3AkGRh",
+        "tf_pe-4NjLFPgW0Uz4UQv",
+        "KbEhF0NidRSR_GCTc6qkZ",
+        "VUmnCdx83ifJzLjdYk40z",
+        "GUY6W18h4lwqpqJWMUSq0",
+        "0fpELvZ6rQrHfCYeJPi2Y",
+        "226oyYrk3CNdGHxHN5TH6"
+      ]
+    },
+    {
+      "id": "column-done",
+      "title": "Doing",
+      "tasksIds": [
+        "KKRrbO0wJuRKG8MsemJe7"
+      ],
+      "color": "#c8e9ff"
+    },
+    {
+      "id": "column-6qiju_rfa0KQ3WlGWq3tT",
+      "title": "Done",
+      "tasksIds": [],
+      "color": "#cdffe1"
+    }
+  ]
+}

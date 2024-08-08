@@ -11,6 +11,8 @@ class Dataset_IMG(models.Model):
     data_name = models.CharField(max_length=300)
     data_path = models.FileField(max_length=300)
     extracted_path = models.TextField(blank=True)
+    data_path_test = models.FileField(max_length=300, blank=True)
+    extracted_path_test = models.TextField(blank=True)
     metainfo = models.TextField(blank=True)
     processed_at = models.DateTimeField(auto_now_add=True)
     delete_at = models.DateTimeField(null=True)
@@ -69,10 +71,14 @@ class Dataset_IMG(models.Model):
     
     def get_preview_images(self, zip_id, class_name, num_images=5):
             # Construct the base URL for media files
-            base_url = settings.MEDIA_URL
-            
+            base_url = settings.MEDIA_URL + settings.TMP_DIR
+            print("*************************************")
+            print("*************************************")
+            print(base_url)
+            print("*************************************")
+            print("*************************************")
             # Construct the directory path where images are extracted
-            extracted_path = os.path.join(settings.MEDIA_ROOT, str(zip_id), class_name)
+            extracted_path = os.path.join(settings.MEDIA_ROOT , settings.TMP_DIR, str(zip_id), class_name)
             
             # Check if the directory exists
             if not os.path.isdir(extracted_path):

@@ -5,29 +5,39 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
 from tensorflow.keras.metrics import Precision, Recall, AUC
 from tensorflow.keras.callbacks import Callback
-import threading
+
 import json
 from django.utils import timezone
 from train.dao.TrainingJobDAO import TrainingJobDAO
 from train.utils.JobStatus import JobStatus
 from sklearn.metrics import f1_score
+from train.services.KerasCatalogService import KerasCatalogService
+import asyncio
+from django.http import JsonResponse
+
 
 class TrainingServiceSingle:
 
     @staticmethod
-    def start_training_thread(job):
-        thread = threading.Thread(target=TrainingServiceSingle.start_training, args=(job,))
-        thread.start()
+    async def start_training_process(job, model_name):
+        #thread = threading.Thread(target=TrainingServiceSingle.start_training, args=(job,))
+        #thread.start()
+        #from multiprocessing import Process
+        #process = Process(target=TrainingServiceSingle.start_training, args=(job, model_name,))
+        #process.start()
+        #process.join()
+        asyncio.create_task(TrainingServiceSingle.start_training(job, model_name))
+        return JsonResponse({'status': 'Training started', 'job_id': job.id})
 
     @staticmethod
-    def start_training(job, model):
+    async def start_training(job, model_name):
 
         dataset_path = job.dataset_img.extracted_path
         print('Dataset Path:', dataset_path)
 
         # Load the ResNet50 model pre-trained on ImageNet
-        base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
-
+        #base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
+        base_model = KerasCatalogService.get_model_object(model_name);
         # Freeze the layers of the base model
         for layer in base_model.layers:
             layer.trainable = False
@@ -39,7 +49,7 @@ class TrainingServiceSingle:
 
         # Create the final model
         model = Model(inputs=base_model.input, outputs=x)
-
+        
         # Compile the model
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', Precision(), Recall(), AUC()])
 

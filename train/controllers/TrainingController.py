@@ -7,6 +7,11 @@ from train.services.TrainingJobService import TrainingJobService
 from common.utils import util
 from train.utils.JobStatus import JobStatus
 
+
+from train.forms.forms import DatasetImgForm
+from train.services.DatasetImgService import DatasetImgService
+from train.services.KerasCatalogService import KerasCatalogService
+
 @login_required
 def list(request):
     jobs = TrainingJobService.list()
@@ -56,13 +61,6 @@ def delete(request, job_id):
     '''
 
 @login_required
-def start_training(request, dataset_id, strategy):
-     
-    TrainingJobService.startTraining(dataset_id,  request.user, strategy)   
-    messages.success(request, "Training Job Started successfully.")
-    return util.redirect('training_job_list')
-
-@login_required
 def start_training_post(request):
     if request.method == 'POST':
         # Extract data from the POST request
@@ -74,7 +72,58 @@ def start_training_post(request):
     else:
         messages.error(request, "Cannot strat training.")
 
-    return util.redirect('training_job_list')    
+
+@login_required
+def training(request, dataset_id=None):
+    datasets = DatasetImgService.list(request.user.id)  # Adjusted to use the service layer
+    
+    models = KerasCatalogService.list_all_models()
+    strategies = KerasCatalogService.list_all_strategies()
+
+     
+
+     
+    print("\nAvailable Keras layers:")
+    print(KerasCatalogService.list_all_layers())
+
+    print("\nAvailable Keras optimizers:")
+    print(KerasCatalogService.list_all_optimizers())
+
+
+    
+
+    context = {
+            'datasets': datasets,
+            'dataset': {},
+            'stats': {},
+            
+    }
+    if len(datasets) > 0:
+        if dataset_id ==None:
+            dataset_id= datasets[0].id
+        
+         
+        dataset = DatasetImgService.get(dataset_id, True)
+        stats = dataset.gather_dataset_stats()
+        context = {
+            'datasets': datasets,
+            'dataset': dataset,
+            'stats': stats,
+            
+        }
+        
+
+    context['models']= models.items()
+    context['strategies']= strategies
+
+
+
+    return util.render(request, 'training/start.html', context)
+
+
+
+
+
 
 @login_required
 def stop_training(request, job_id):
@@ -85,3 +134,12 @@ def stop_training(request, job_id):
      
 
 
+'''
+@login_required
+def start_training(request, dataset_id, strategy):
+     
+    TrainingJobService.startTraining(dataset_id,  request.user, strategy)   
+    messages.success(request, "Training Job Started successfully.")
+    return util.redirect('training_job_list')
+
+'''

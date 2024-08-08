@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles' 
+    'django.contrib.staticfiles' ,
+    
      
 ]
 
@@ -138,6 +139,7 @@ STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 SITE_ID = 1
 
 MEDIA_URL = '/media/'
+TMP_DIR =   'tmp/'
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 
 # Default primary key field type

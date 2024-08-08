@@ -12,12 +12,13 @@ class ImageUploadForm(forms.Form):
 class DatasetImgForm(forms.ModelForm):
     class Meta:
         model = Dataset_IMG
-        fields = ['data_name', 'data_path', 'metainfo', 'status']
+        fields = ['data_name', 'data_path', 'data_path_test']
         widgets = {
             'data_name': forms.TextInput(attrs={'class': 'form-control'}),
             'data_path': forms.FileInput(attrs={'class': 'form-control'}),
-            'metainfo': forms.Textarea(attrs={'class': 'form-control'}),
-            'status': forms.TextInput(attrs={'class': 'form-control'}),
+            'data_path_test': forms.FileInput(attrs={'class': 'form-control'}),
+            #'metainfo': forms.Textarea(attrs={'class': 'form-control'}),
+            #'status': forms.TextInput(attrs={'class': 'form-control'}),
         }
 '''
 class TrainingJobForm(forms.ModelForm):

@@ -23,8 +23,9 @@ urlpatterns = [
     path('deep/jobs/', TrainingController.list, name='training_job_list'),
     path('deep/jobs/create/', TrainingController.edit, name='training_job_create'),
     path('deep/jobs/edit/<int:job_id>/', TrainingController.edit, name='training_job_update'),
-    path('deep/jobs/start/<int:dataset_id>/<int:strategy>', TrainingController.start_training, name='start_training'),
+    #path('deep/jobs/start/<int:dataset_id>/<int:strategy>', TrainingController.start_training, name='start_training'),
     path('deep/jobs/start/', TrainingController.start_training_post, name='start_training_post'),
+    path('deep/job/training/<int:dataset_id>/', TrainingController.training, name="start_training"),
     path('deep/jobs/stop/<int:job_id>/', TrainingController.stop_training, name='stop_training'),
     
     #path('deep/jobs/delete_confirm/<int:dataset_id>/', TrainingController.delete_confirm, name="training_job_delete_confirm"),

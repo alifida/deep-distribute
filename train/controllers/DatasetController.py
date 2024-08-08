@@ -24,7 +24,7 @@ def list(request, dataset_id=None):
     print(KerasCatalogService.list_all_optimizers())
 
 
-
+    
 
     context = {
             'datasets': datasets,
@@ -45,8 +45,10 @@ def list(request, dataset_id=None):
             'stats': stats,
             
         }
-    context['models']= models.items()
-    context['strategies']= strategies
+        
+
+    #context['models']= models.items()
+    #context['strategies']= strategies
 
 
 
@@ -60,11 +62,12 @@ def create(request):
             # Extract form data
             data_name = form.cleaned_data['data_name']
             data_path = form.cleaned_data['data_path']
-            metainfo = form.cleaned_data['metainfo']
-            status = form.cleaned_data['status']
+            data_path_test = form.cleaned_data['data_path_test']
+            #metainfo = form.cleaned_data['metainfo']
+            #status = form.cleaned_data['status']
             user = request.user
             # Use service layer to create a new dataset
-            DatasetImgService.create(data_name=data_name, data_path=data_path, metainfo=metainfo, status=status, user=user)
+            DatasetImgService.create(data_name=data_name, data_path=data_path, data_path_test=data_path_test, user=user)
             messages.success(request, "Dataset Saved successfully.")
             
             return util.redirect('list_dataset')

@@ -22,7 +22,7 @@ dist/
 # Maven
 target/
 dist/
-/media/tmp/
+*/media/tmp
 
 # JetBrains IDE
 .idea/
@@ -49,4 +49,5 @@ Thumbs.db
 *.mov
 *.wmv
 *.zip
+
 
