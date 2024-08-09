@@ -47,7 +47,7 @@ class TrainingJobService:
 
 
     @staticmethod
-    async def startTraining(dataset_id, user, strategy, algo_name='ResNet50'):
+    def startTraining(dataset_id, user, strategy, algo_name='ResNet50'):
        
        # save job 
        trainingJob = TrainingJobService.create(dataset_id=dataset_id, user=user, algo_name=algo_name)
@@ -58,7 +58,7 @@ class TrainingJobService:
        #trainingJob = TrainingJobService.get(job_id)
        #TrainingService.start_training_process(trainingJob.id)
        if strategy == 1 or strategy=='Single GPU':
-            TrainingServiceSingle.start_training_process(trainingJob, algo_name)
+            TrainingServiceSingle.start_training(trainingJob, algo_name)
        elif strategy == 2 or  strategy=='GPU Cluster Parameter Server':
             TrainingServicePS.start_training(trainingJob, algo_name)
        elif strategy == 3 or  strategy=='GPU Cluster Custom':
