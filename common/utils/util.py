@@ -132,13 +132,13 @@ def extract_zip_to_temp(zip_file_path):
 
 
 
-def extract_zip_to_media_dir(zip_file, dataset_id):
+def extract_zip_to_media_dir(zip_file, dataset_dir):
     # Ensure the zip file exists
     if not os.path.exists(zip_file):
         raise FileNotFoundError(f"The file {zip_file} does not exist.")
 
     # Determine the target directory within MEDIA_ROOT
-    media_directory = os.path.join(settings.MEDIA_ROOT,settings.TMP_DIR, str(dataset_id))
+    media_directory = os.path.join(settings.MEDIA_ROOT,settings.TMP_DIR, str(dataset_dir))
 
 
     if os.path.exists(media_directory):

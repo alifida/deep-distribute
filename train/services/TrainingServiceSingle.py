@@ -16,7 +16,7 @@ from train.services.KerasCatalogService import KerasCatalogService
 from django.http import JsonResponse
 from multiprocessing import Process
 
- 
+
  
     
 class TrainingServiceSingle:
@@ -24,14 +24,19 @@ class TrainingServiceSingle:
 
 
     @staticmethod
-    def start_training_process(job, model_name):
+    def start_training_process__old(job, model_name):
         
         
         process = Process(target=TrainingServiceSingle.start_training,args=(job, model_name,))
         process.start()
         #process.join()  # Optionally wait for the process to complete
 
-    
+    @staticmethod
+    def start_training_process(job, model_name):
+        print("before starting........")
+        TrainingServiceSingle.start_training.delay(job.id, model_name)
+        print("after starting........")
+
     @staticmethod
     def start_training(job, model_name):
         from train.models import Training_job

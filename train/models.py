@@ -25,14 +25,43 @@ class Dataset_IMG(models.Model):
     def gather_dataset_stats(self):
         if not self.extracted_path or not os.path.exists(self.extracted_path):
             return {
-                'total_classes': 0,
-                'class_names': [],
-                'classwise_details': [],
-                'overall_total_examples': 0,
-                'image_size': ''
-            }
+                    'train':
+                            {
+                                'total_classes': 0,
+                                'class_names': [],
+                                'classwise_details': [],
+                                'overall_total_examples': 0,
+                                'image_size': ''
+                            },
+                    'test':
+                            {
+                                'total_classes': 0,
+                                'class_names': [],
+                                'classwise_details': [],
+                                'overall_total_examples': 0,
+                                'image_size': ''
+                            }
+                    }
         
-        class_directories = next(os.walk(self.extracted_path))[1]
+        train = self.get_dataset_details(self.extracted_path, 'train')
+        test = {
+                    'total_classes': 0,
+                    'class_names': [],
+                    'classwise_details': [],
+                    'overall_total_examples': 0,
+                    'image_size': ''
+                }
+        if self.extracted_path_test or not os.path.exists(self.extracted_path_test):
+            test = self.get_dataset_details(self.extracted_path_test, 'test')
+
+        return {
+            'train': train,
+            'test': test
+        }            
+    
+
+    def get_dataset_details(self, extracted_path, ds_type):
+        class_directories = next(os.walk(extracted_path))[1]
         total_classes = len(class_directories)
         class_names = class_directories
         classwise_details = []
@@ -41,7 +70,7 @@ class Dataset_IMG(models.Model):
         image_size = None
 
         for class_dir in class_directories:
-            class_path = os.path.join(self.extracted_path, class_dir)
+            class_path = os.path.join(extracted_path, class_dir)
             if os.path.isdir(class_path):
                 image_files = os.listdir(class_path)
                 if image_size is None:
@@ -50,7 +79,8 @@ class Dataset_IMG(models.Model):
                 num_examples = len([f for f in image_files if os.path.isfile(os.path.join(class_path, f))])
                 
                 # Get preview images URLs
-                preview_images = self.get_preview_images(self.id, class_dir)
+                dataseturl = os.path.join(str(self.id), ds_type)
+                preview_images = self.get_preview_images(dataseturl, class_dir)
                 
                 # Append class-wise details
                 classwise_details.append({
@@ -68,8 +98,11 @@ class Dataset_IMG(models.Model):
             'overall_total_examples': overall_total_examples,
             'image_size': image_size
         }
+
+
     
-    def get_preview_images(self, zip_id, class_name, num_images=5):
+
+    def get_preview_images(self, dir_path, class_name, num_images=5):
             # Construct the base URL for media files
             base_url = settings.MEDIA_URL + settings.TMP_DIR
             print("*************************************")
@@ -78,7 +111,7 @@ class Dataset_IMG(models.Model):
             print("*************************************")
             print("*************************************")
             # Construct the directory path where images are extracted
-            extracted_path = os.path.join(settings.MEDIA_ROOT , settings.TMP_DIR, str(zip_id), class_name)
+            extracted_path = os.path.join(settings.MEDIA_ROOT , settings.TMP_DIR, str(dir_path), class_name)
             
             # Check if the directory exists
             if not os.path.isdir(extracted_path):
@@ -94,7 +127,7 @@ class Dataset_IMG(models.Model):
             for i in range(min(num_images, len(image_files))):
                 image_file = image_files[i]
                 # Construct the full URL for each image file
-                image_url = base_url + str(zip_id) + '/' + class_name + '/' + image_file
+                image_url = base_url + str(dir_path) + '/' + class_name + '/' + image_file
                 preview_images.append(image_url)
             
             return preview_images

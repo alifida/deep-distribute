@@ -75,34 +75,61 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6>Training Dataset</h6>
+                                </div>
+                            </div>
                             <dl class="row">
-                                <dt class="col-sm-5">Name</dt>
-                                <dd class="col-sm-7">{{ dataset.data_name }}</dd>
-     
-     
                                 <!-- Include dataset statistics fetched by gather_dataset_stats() -->
                                 {% with stats=dataset.gather_dataset_stats %}
                                 <dt class="col-sm-5">Total Images</dt>
-                                <dd class="col-sm-7">{{ stats.overall_total_examples }}</dd>
+                                <dd class="col-sm-7">{{ stats.train.overall_total_examples }}</dd>
                                 <dt class="col-sm-5">Image Size</dt>
-                                <dd class="col-sm-7">{{ stats.image_size }}</dd>
+                                <dd class="col-sm-7">{{ stats.train.image_size }}</dd>
                                 <dt class="col-sm-5">Total Classes</dt>
                                 <dd class="col-sm-7">
-                                    {{ stats.total_classes }}
+                                    {{ stats.train.total_classes }}
                                 </dd>
                                 <dt class="col-sm-5">Class-wise Counts</dt>
                                 <dd class="col-sm-7">
-                                         
-                                        
-                                <ol class="h-padding-10">
-                                    {% for class_details in stats.classwise_details %}
+                                <ul class="h-padding-10">
+                                    {% for class_details in stats.train.classwise_details %}
                                         <li>
                                         {{ class_details.class_name }} : {{ class_details.total_examples }}
                                         </li>
                                     {% endfor %}    
-                                </ol>
-                                         
-                                    
+                                </ul>
+                                </dd>
+                                {% endwith %}
+                            </dl>
+
+                            <hr/>
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6>Test Dataset</h6>
+                                </div>
+                            </div>
+                            <dl class="row">
+                                <!-- Include dataset statistics fetched by gather_dataset_stats() -->
+                                {% with stats=dataset.gather_dataset_stats %}
+                                <dt class="col-sm-5">Total Images</dt>
+                                <dd class="col-sm-7">{{ stats.test.overall_total_examples }}</dd>
+                                <dt class="col-sm-5">Image Size</dt>
+                                <dd class="col-sm-7">{{ stats.test.image_size }}</dd>
+                                <dt class="col-sm-5">Total Classes</dt>
+                                <dd class="col-sm-7">
+                                    {{ stats.test.total_classes }}
+                                </dd>
+                                <dt class="col-sm-5">Class-wise Counts</dt>
+                                <dd class="col-sm-7">
+                                <ul class="h-padding-10">
+                                    {% for class_details in stats.test.classwise_details %}
+                                        <li>
+                                        {{ class_details.class_name }} : {{ class_details.total_examples }}
+                                        </li>
+                                    {% endfor %}    
+                                </ul>
                                 </dd>
                                 {% endwith %}
                             </dl>
@@ -115,7 +142,7 @@
             {% if dataset %}
             <div class="row v-margin-10">                
                 
-                    {% for class_details in stats.classwise_details %}
+                    {% for class_details in stats.train.classwise_details %}
                         <div class="col-md-6">
                             <div class="card mb-3">
                                 <div class="card-body">
