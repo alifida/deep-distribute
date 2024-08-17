@@ -15,6 +15,7 @@ from train.services.KerasCatalogService import KerasCatalogService
 #import asyncio
 from django.http import JsonResponse
 from multiprocessing import Process
+from tensorflow.keras.callbacks import EarlyStopping
 
 
  
@@ -38,58 +39,104 @@ class TrainingServiceSingle:
         print("after starting........")
 
     @staticmethod
-    def start_training(job, model_name):
+    def start_training(training_params):
         from train.models import Training_job
         from train.dao.TrainingJobDAO import TrainingJobDAO
+        from tensorflow.keras.optimizers import Adam, SGD, RMSprop, Adadelta , Adagrad, Adamax, Nadam, Ftrl # Import other optimizers as needed
 
-        dataset_path = job.dataset_img.extracted_path
-        print('Dataset Path:', dataset_path)
+        # Extracting paths from training job
+        dataset_path_train = training_params['training_job'].dataset_img.extracted_path
+        dataset_path_test = training_params['training_job'].dataset_img.extracted_path_test
 
-        # Load the ResNet50 model pre-trained on ImageNet
-        #base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
-        base_model = KerasCatalogService.get_model_object(model_name);
+        # Dynamically load the model based on model_name
+        base_model = KerasCatalogService.get_model_object(training_params['algo_name'])
+
         # Freeze the layers of the base model
         for layer in base_model.layers:
             layer.trainable = False
 
-        # Add custom layers on top of ResNet50
+        # Add custom layers on top of the base model
         x = base_model.output
         x = GlobalAveragePooling2D()(x)
         x = Dense(1, activation='sigmoid')(x)  # Assuming binary classification
 
         # Create the final model
         model = Model(inputs=base_model.input, outputs=x)
-        
-        # Compile the model
-        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', Precision(), Recall(), AUC()])
 
-        # Set up your dataset
-        train_datagen = ImageDataGenerator(rescale=1./255, validation_split=0.2)
+        # Select optimizer dynamically
+        optimizer = None
+        learning_rate = float(training_params['learning_rate'])
+
+        if training_params['optimizer'] == 'adam':
+            optimizer = Adam(learning_rate=learning_rate)
+        elif training_params['optimizer'] == 'sgd':
+            optimizer = SGD(learning_rate=learning_rate)
+        elif training_params['optimizer'] == 'rmsprop':
+            optimizer = RMSprop(learning_rate=learning_rate)
+        elif training_params['optimizer'] == 'adadelta':
+            optimizer = Adadelta(learning_rate=learning_rate)
+        elif training_params['optimizer'] == 'adagrad':
+            optimizer = Adagrad(learning_rate=learning_rate)
+        elif training_params['optimizer'] == 'adamax':
+            optimizer = Adamax(learning_rate=learning_rate)
+        elif training_params['optimizer'] == 'nadam':
+            optimizer = Nadam(learning_rate=learning_rate)
+        elif training_params['optimizer'] == 'ftrl':
+            optimizer = Ftrl(learning_rate=learning_rate)
+
+        # Compile the model with dynamic parameters
+        model.compile(optimizer=optimizer, 
+                    loss=training_params['loss_function'], 
+                    metrics=['accuracy', Precision(), Recall(), AUC()])
+
+        # Set up the dataset
+        if training_params['augmentation'] and training_params['augmentation'].lower() != 'none':
+            augmentation_params = eval(training_params['augmentation'])
+        else:
+            augmentation_params = {}
+
+        # Set up the dataset
+        train_datagen = ImageDataGenerator(
+            rescale=1./255,
+            validation_split=float(training_params['validation_split']),
+            **augmentation_params  # Using augmentation if any
+        )
         train_generator = train_datagen.flow_from_directory(
-                dataset_path,
-                target_size=(150, 150),
-                batch_size=20,
-                class_mode='binary',
-                subset='training')
+            dataset_path_train,
+            target_size=(150, 150),
+            batch_size=int(training_params['batch_size']),
+            class_mode='binary',
+            subset='training'
+        )
 
         validation_generator = train_datagen.flow_from_directory(
-                dataset_path,
-                target_size=(150, 150),
-                batch_size=20,
-                class_mode='binary',
-                subset='validation')
+            dataset_path_train,
+            target_size=(150, 150),
+            batch_size=int(training_params['batch_size']),
+            class_mode='binary',
+            subset='validation'
+        )
 
         test_datagen = ImageDataGenerator(rescale=1./255)
         test_generator = test_datagen.flow_from_directory(
-                dataset_path,
-                target_size=(150, 150),
-                batch_size=20,
-                class_mode='binary',
-                shuffle=False)
+            dataset_path_test,
+            target_size=(150, 150),
+            batch_size=int(training_params['batch_size']),
+            class_mode='binary',
+            shuffle=False
+        )
+
+        # Set up early stopping callback
+        early_stopping = EarlyStopping(monitor='val_loss', 
+                                    patience=int(training_params['early_stopping_patience']),
+                                    restore_best_weights=True)
 
         # Train the model with the callback
-        terminate_on_flag_callback = TerminateOnFlagCallback(job.id)
-        model.fit(train_generator, epochs=10, validation_data=validation_generator, callbacks=[terminate_on_flag_callback])
+        terminate_on_flag_callback = TerminateOnFlagCallback(training_params['training_job'].id)
+        model.fit(train_generator, 
+                epochs=int(training_params['epochs']), 
+                validation_data=validation_generator, 
+                callbacks=[early_stopping, terminate_on_flag_callback])
 
         # Predictions on test set
         predictions = model.predict(test_generator)
@@ -116,12 +163,11 @@ class TrainingServiceSingle:
 
         # Update job status in TrainingJobDAO
         TrainingJobDAO.update(
-            job.id,
+            training_params['training_job'].id,
             status=JobStatus.COMPLETED.value,
             ended_at=timezone.now(),
             result=results_json
         )
-
 class TerminateOnFlagCallback(Callback):
     def __init__(self, job_id):
         super().__init__()

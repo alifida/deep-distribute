@@ -67,7 +67,39 @@ def start_training_post(request):
         dataset_id = request.POST.get('dataset_id')
         model = request.POST.get('model')
         strategy = request.POST.get('strategy')
-        TrainingJobService.startTraining(dataset_id,  request.user, strategy, model)   
+
+        epochs = request.POST.get('epochs', 10)  # Default to 10 if not provided
+        batch_size = request.POST.get('batch_size', 32)  # Default to 32 if not provided
+        learning_rate = request.POST.get('learning_rate', 0.001)  # Default to 0.001 if not provided
+        optimizer = request.POST.get('optimizer', 'adam')  # Default to 'adam' if not provided
+        loss_function = request.POST.get('loss_function', 'binary_crossentropy')  # Default to binary_crossentropy
+        validation_split = request.POST.get('validation_split', 0.2)  # Default to 0.2 if not provided
+        early_stopping_patience = request.POST.get('early_stopping_patience', 10)  # Default to 10 if not provided
+        dropout_rate = request.POST.get('dropout_rate', 0.5)
+        augmentation = request.POST.get('augmentation', 'None')  # Default to 'None' if not provided
+        class_weights = request.POST.get('class_weights', '{0:1.0, 1:1.0}')  # Default to '{0:1.0, 1:1.0}' if not provided
+        random_seed = request.POST.get('random_seed', '42')  # Default to '42' if not provided
+
+        training_params = {
+            'dataset_id': dataset_id,
+            'user': request.user, 
+            'strategy': strategy, 
+            'algo_name': model, 
+            'epochs': epochs, 
+            'batch_size' : batch_size, 
+            'learning_rate' : learning_rate, 
+            'optimizer' : optimizer, 
+            'loss_function': loss_function, 
+            'validation_split': validation_split, 
+            'early_stopping_patience': early_stopping_patience, 
+            'dropout_rate': dropout_rate, 
+            'augmentation': augmentation, 
+            'class_weights': class_weights, 
+            'random_seed': random_seed
+        }
+
+
+        TrainingJobService.startTraining(training_params)   
         messages.success(request, "Training Job Started successfully.")
     else:
         messages.error(request, "Cannot strat training.")

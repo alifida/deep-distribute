@@ -154,6 +154,7 @@ class Training_job (models.Model):
     ended_at = models.DateTimeField(null=True)
     algo = models.CharField(max_length=300);
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
+    parameter_settings = models.TextField(null=True)
     result = models.TextField(null=True)  # TextField to store metrics
     
     def __str__(self):

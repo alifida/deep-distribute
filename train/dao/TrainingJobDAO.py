@@ -4,7 +4,7 @@ class TrainingJobDAO:
 
 
     @staticmethod
-    def create(job_name, dataset_img, status,started_at,ended_at,algo, user):
+    def create(job_name, dataset_img, status,started_at,ended_at,algo, user, parameter_settings):
         return Training_job.objects.create(
             job_name = job_name,
             dataset_img = dataset_img,
@@ -12,7 +12,8 @@ class TrainingJobDAO:
             started_at = started_at,
             ended_at = ended_at,
             algo = algo,
-            user = user
+            user = user,
+            parameter_settings= parameter_settings
         )
 
     @staticmethod

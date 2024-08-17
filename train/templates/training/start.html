@@ -53,12 +53,14 @@
                         <div class="card-body">
                             <form method="post" action="{% url 'start_training_post' %}">
                                 {% csrf_token %}
-                                <input type="hidden" name="dataset_id" value="{{dataset.id}}"/>
+                                <input type="hidden" name="dataset_id" value="{{ dataset.id }}"/>
+                            
                                 <div class="row">
-                                     
-                                    <div class="col-lg-4 col-md-3 col-sm-12 center">
+                                    <div class="col-lg-6 col-md-6 col-sm-12 center">
                                         <div class="form-group">
-                                            <label for="model">Choose a model:</label>
+                                            <label for="model">Choose a model:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Select the model architecture you want to use for training."></i>
+                                            </label>
                                             <select id="model" name="model" class="form-control">
                                                 {% for mkey, mval in models %}
                                                     <option value="{{ mkey }}">{{ mkey }}</option>
@@ -66,9 +68,12 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4 col-md-3 col-sm-12 center">
+                            
+                                    <div class="col-lg-6 col-md-6 col-sm-12 center">
                                         <div class="form-group">
-                                            <label for="model">Strategy:</label>
+                                            <label for="strategy">Strategy:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Choose a strategy for training, such as transfer learning or fine-tuning."></i>
+                                            </label>
                                             <select id="strategy" name="strategy" class="form-control">
                                                 {% for strategy in strategies %}
                                                     <option value="{{ strategy }}">{{ strategy }}</option>
@@ -76,20 +81,141 @@
                                             </select>
                                         </div>
                                     </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="epochs">Number of Epochs:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Specify the number of complete passes through the training dataset."></i>
+                                            </label>
+                                            <input type="number" id="epochs" name="epochs" class="form-control" min="1" value="10"/>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="batch_size">Batch Size:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Number of samples processed before the model is updated."></i>
+                                            </label>
+                                            <input type="number" id="batch_size" name="batch_size" class="form-control" min="1" value="32"/>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="learning_rate">Learning Rate:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Controls how much to change the model in response to the estimated error each time the model weights are updated."></i>
+                                            </label>
+                                            <input type="number" id="learning_rate" name="learning_rate" class="form-control" step="0.0001" value="0.001"/>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="optimizer">Optimizer:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Algorithm to use for minimizing the loss function during training."></i>
+                                            </label>
+                                            <select id="optimizer" name="optimizer" class="form-control">
+                                                <option value="adam">Adam</option>
+                                                <option value="sgd">SGD</option>
+                                                <option value="rmsprop">RMSprop</option>
 
-                                    
-
-
-
+                                                <option value="adadelta">Adadelta</option>
+                                                <option value="adagrad">Adagrad</option>
+                                                <option value="adamax">Adamax</option>
+                                                <option value="nadam">Nadam</option>
+                                                <option value="ftrl">Ftrl</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="loss_function">Loss Function:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Function that the model aims to minimize during training."></i>
+                                            </label>
+                                            <select id="loss_function" name="loss_function" class="form-control">
+                                                <option value="binary_crossentropy">Binary Crossentropy</option>
+                                                <option value="categorical_crossentropy">Categorical Crossentropy</option>
+                                                <option value="mean_squared_error">Mean Squared Error</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="validation_split">Validation Split:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Percentage of the training data to be used for validation."></i>
+                                            </label>
+                                            <input type="number" id="validation_split" name="validation_split" class="form-control" step="0.01" min="0.01" max="0.5" value="0.2"/>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="early_stopping_patience">Early Stopping Patience:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Number of epochs with no improvement after which training will be stopped."></i>
+                                            </label>
+                                            <input type="number" id="early_stopping_patience" name="early_stopping_patience" class="form-control" min="0" value="10"/>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="dropout_rate">Dropout Rate:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Rate at which neurons are randomly dropped to prevent overfitting."></i>
+                                            </label>
+                                            <input type="number" id="dropout_rate" name="dropout_rate" class="form-control" step="0.01" min="0" max="0.9" value="0.5"/>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="data_augmentation">Data Augmentation:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Techniques to increase the diversity of the training data by applying random transformations."></i>
+                                            </label>
+                                            <select id="data_augmentation" name="data_augmentation" class="form-control">
+                                                <option value="none">None</option>
+                                                <option value="rotation">Rotation</option>
+                                                <option value="flipping">Flipping</option>
+                                                <option value="scaling">Scaling</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="class_weights">Class Weights:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Weights assigned to each class to handle imbalanced datasets. Format: {0:1.0, 1:1.0}."></i>
+                                            </label>
+                                            <input type="text" id="class_weights" name="class_weights" class="form-control" placeholder="{0:1.0, 1:1.0}"/>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="form-group">
+                                            <label for="random_seed">Random Seed:
+                                                <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Seed value for random number generators to ensure reproducibility of results."></i>
+                                            </label>
+                                            <input type="number" id="random_seed" name="random_seed" class="form-control" min="0" value="42"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-12 center">
+                                        <div class="v-padding-30">
+                                             
+                                            <button type="submit" class="btn btn-info right">
+                                                <i class="fas fa-microscope"></i> <span>Start Training</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
+                            
                                 <div class="row">
                                     <div class="col-lg-12 col-md-12 col-sm-12">
-                                        <button type="submit" class="btn btn-info right">
-                                            <i class="fas fa-microscope"></i> <span>Start Training</span>
-                                        </button>
+                                        
                                     </div>
                                 </div>
                             </form>
+                            
                         </div>
                     </div>
                 </div>                       
@@ -204,8 +330,10 @@
                                                     <th scope="col">Started At</th>
                                                     <th scope="col">Ended At</th>
                                                     <th scope="col">Duration</th>
-                                                    <th scope="col">Result</th>
                                                     <th scope="col">Algorithm</th>
+                                                    <th scope="col">Parameter Settings</th>
+                                                    
+                                                    <th scope="col">Result</th>
                                                     <th scope="col">Dataset</th>
                                                     <th scope="col">Actions</th>
                                                 </tr>
@@ -219,8 +347,9 @@
                                                     <td>{{ job.started_at|date:"Y-m-d H:i:s" }}</td>
                                                     <td>{{ job.ended_at|date:"Y-m-d H:i:s" }}</td>
                                                     <td>{{ job.started_at|date_diff:job.ended_at }}</td>
-                                                    <td>{{ job.result }}</td>
                                                     <td>{{ job.algo }}</td>
+                                                    <td>{{ job.parameter_settings }}</td>
+                                                    <td>{{ job.result }}</td>
                                                     <td>{{ job.dataset_img.data_name }}</td>
                                                     <td>
                                                         <a href="{% url 'training_job_update' job.id %}" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="top" title="Edit"><i class="nav-icon fa fa-edit"></i></a>

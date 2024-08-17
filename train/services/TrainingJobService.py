@@ -16,7 +16,7 @@ from django.utils import timezone
 class TrainingJobService:
 
     @staticmethod
-    def create(dataset_id, user, algo_name):
+    def create(dataset_id, user, algo_name, parameter_settings):
 
 
         
@@ -29,7 +29,8 @@ class TrainingJobService:
             started_at = timezone.now(),
             ended_at=None,
             algo=algo_name,
-            user=user)
+            user=user,
+            parameter_settings= parameter_settings)
         
         
          
@@ -47,20 +48,26 @@ class TrainingJobService:
 
 
     @staticmethod
-    def startTraining(dataset_id, user, strategy, algo_name='ResNet50'):
+    def startTraining(training_params):
        
+
+       algo_name=training_params['algo_name']
+       user=training_params['user']
+       dataset_id=training_params['dataset_id']
+       strategy=training_params['strategy']
        # save job 
-       trainingJob = TrainingJobService.create(dataset_id=dataset_id, user=user, algo_name=algo_name)
-       
-       print (trainingJob.id)
+       training_job = TrainingJobService.create(dataset_id=dataset_id, user=user, algo_name=algo_name, parameter_settings=training_params)
+       training_params['training_job'] = training_job
+       print (training_job.id)
        
        # get job_id and start training
        #trainingJob = TrainingJobService.get(job_id)
        #TrainingService.start_training_process(trainingJob.id)
+        
        if strategy == 1 or strategy=='Single GPU':
-            TrainingServiceSingle.start_training_process(trainingJob, algo_name)
+            TrainingServiceSingle.start_training(training_params)
        elif strategy == 2 or  strategy=='GPU Cluster Parameter Server':
-            TrainingServicePS.start_training(trainingJob, algo_name)
+            TrainingServicePS.start_training(training_params)
        elif strategy == 3 or  strategy=='GPU Cluster Custom':
             #TrainingServiceCustom.start_training(trainingJob, model)
             pass
