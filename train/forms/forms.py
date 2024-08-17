@@ -20,6 +20,11 @@ class DatasetImgForm(forms.ModelForm):
             #'metainfo': forms.Textarea(attrs={'class': 'form-control'}),
             #'status': forms.TextInput(attrs={'class': 'form-control'}),
         }
+        labels = {
+            'data_name': 'Dataset Name',
+            'data_path': 'Train Dataset',
+            'data_path_test': 'Test Dataset',
+        }
 '''
 class TrainingJobForm(forms.ModelForm):
     # Optional: Add custom validation, widgets, or fields if needed

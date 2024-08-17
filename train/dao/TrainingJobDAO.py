@@ -31,3 +31,7 @@ class TrainingJobDAO:
     @staticmethod
     def list():
         return Training_job.objects.all()
+
+    @staticmethod
+    def list_by_dataset(dataset_id):
+        return Training_job.objects.filter(dataset_img_id=dataset_id)

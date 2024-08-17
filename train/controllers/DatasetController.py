@@ -11,8 +11,8 @@ from django.contrib import messages
 def list(request, dataset_id=None):
     datasets = DatasetImgService.list(request.user.id)  # Adjusted to use the service layer
     
-    models = KerasCatalogService.list_all_models()
-    strategies = KerasCatalogService.list_all_strategies()
+    #models = KerasCatalogService.list_all_models()
+    #strategies = KerasCatalogService.list_all_strategies()
 
      
 

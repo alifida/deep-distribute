@@ -72,6 +72,9 @@ def start_training_post(request):
     else:
         messages.error(request, "Cannot strat training.")
 
+    return util.redirect('start_training' , dataset_id)
+
+
 
 @login_required
 def training(request, dataset_id=None):
@@ -96,6 +99,7 @@ def training(request, dataset_id=None):
             'datasets': datasets,
             'dataset': {},
             'stats': {},
+            'trainings': {},
             
     }
     if len(datasets) > 0:
@@ -105,11 +109,12 @@ def training(request, dataset_id=None):
          
         dataset = DatasetImgService.get(dataset_id, True)
         stats = dataset.gather_dataset_stats()
+        trainings = TrainingJobService.list_by_dataset(dataset_id);
         context = {
             'datasets': datasets,
             'dataset': dataset,
             'stats': stats,
-            
+            'trainings': trainings,
         }
         
 

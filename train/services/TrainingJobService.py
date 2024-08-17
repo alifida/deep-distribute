@@ -58,7 +58,7 @@ class TrainingJobService:
        #trainingJob = TrainingJobService.get(job_id)
        #TrainingService.start_training_process(trainingJob.id)
        if strategy == 1 or strategy=='Single GPU':
-            TrainingServiceSingle.start_training(trainingJob, algo_name)
+            TrainingServiceSingle.start_training_process(trainingJob, algo_name)
        elif strategy == 2 or  strategy=='GPU Cluster Parameter Server':
             TrainingServicePS.start_training(trainingJob, algo_name)
        elif strategy == 3 or  strategy=='GPU Cluster Custom':
@@ -80,3 +80,7 @@ class TrainingJobService:
     @staticmethod
     def list():
         return TrainingJobDAO.list()
+    
+    @staticmethod
+    def list_by_dataset(dataset_id):
+        return TrainingJobDAO.list_by_dataset(dataset_id=dataset_id)

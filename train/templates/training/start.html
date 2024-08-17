@@ -1,5 +1,6 @@
 {% extends "wrapper/base.html" %}
 {% block content %}
+{% load custom_filters %}
 {% load static %}
 
 <div class="content-wrapper">
@@ -75,6 +76,11 @@
                                             </select>
                                         </div>
                                     </div>
+
+                                    
+
+
+
                                 </div>
                                 <div class="row">
                                     <div class="col-lg-12 col-md-12 col-sm-12">
@@ -93,7 +99,7 @@
                             <div class="row">
                                 <div class="col-12  ">
                                     <h5 class="left">{{ dataset.data_name }}</h5>
-                                    <div class="right hide">
+                                    <div class="right">
                                         <a href="{% url 'edit_dataset' dataset.id %}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Edit Dataset"><i class="nav-icon fa fa-edit"></i> &nbsp; Edit</a>
                                         <a href="{% url 'delete_dataset_confirm' dataset.id %}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Delete Dataset"><i class="nav-icon fa fa-trash"></i> &nbsp; Delete</a>
                                     </div>
@@ -135,41 +141,122 @@
                         </div>
                          
                     </div>
-                </div><!-- end of col datset detail -->  
+                </div><!-- end of col datset detail --> 
+                
+                
+                 
+
+
             </div>
             {% endif %}
-            {% if dataset %}
-            <div class="row v-margin-10">                
-                
-                    {% for class_details in stats.classwise_details %}
-                        <div class="col-md-6">
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <div class="card-header">
-                                        <div class="row">
-                                            <div class="col-12  ">
-                                                <h6 class="left">{{ class_details.class_name }}</h6>
-                                                <p class="card-text">Total Examples: {{ class_details.total_examples }}</p>
-                                            </div>
-                                        </div>
+             
+ 
+
+                {% if dataset %}
+                <div class="row">
+                    <div class="col-12">
+                        <ul class="nav nav-tabs" id="trainingTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="training-tab" data-toggle="tab" href="#training" role="tab" aria-controls="training" aria-selected="true">Trainings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="dataset-tab" data-toggle="tab" href="#dataset" role="tab" aria-controls="dataset" aria-selected="false">Dataset Details</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="trainingTabsContent">
+                            
+                            <div class="tab-pane fade show active" id="training" role="tabpanel" aria-labelledby="training-tab">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <table class="table table-hover table-responsive-md">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th scope="col">Name</th>
+                                                    <th scope="col">Status</th>
+                                                    <th scope="col">Started At</th>
+                                                    <th scope="col">Ended At</th>
+                                                    <th scope="col">Duration</th>
+                                                    <th scope="col">Result</th>
+                                                    <th scope="col">Algorithm</th>
+                                                    <th scope="col">Dataset</th>
+                                                    <th scope="col">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for job in trainings %}
+                                                <tr>
+                                                    <th scope="row">{{ forloop.counter }}</th>
+                                                    <td>{{ job.job_name }}</td>
+                                                    <td>{{ job.status }}</td>
+                                                    <td>{{ job.started_at|date:"Y-m-d H:i:s" }}</td>
+                                                    <td>{{ job.ended_at|date:"Y-m-d H:i:s" }}</td>
+                                                    <td>{{ job.started_at|date_diff:job.ended_at }}</td>
+                                                    <td>{{ job.result }}</td>
+                                                    <td>{{ job.algo }}</td>
+                                                    <td>{{ job.dataset_img.data_name }}</td>
+                                                    <td>
+                                                        <a href="{% url 'training_job_update' job.id %}" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="top" title="Edit"><i class="nav-icon fa fa-edit"></i></a>
+                                                        <a href="{% url 'training_job_delete' job.id %}" class="btn btn-danger btn-sm " data-toggle="tooltip" data-placement="top" title="Delete"><i class="nav-icon fa fa-trash"></i></a>
+                                                        {% if job.status == status_running %}
+                                                        <a href="{% url 'stop_training' job.id %}" class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Stop"><i class="nav-icon fa fa-times"></i></a>
+                                                        {% endif %}
+                                                        
+                                                        {% comment %} <a href="{% url 'training_job_delete_confirm' job.id %}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Delete"><i class="nav-icon fa fa-trash"></i></a> {% endcomment %}
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="8">No training jobs found.</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
                                     </div>
-                                     
-                                    <!-- Display preview images -->
-                                    <div class="row v-margin-10">
-                                        {% for image_url in class_details.preview_images %}
-                                        <div class="col-4 mb-3">
-                                            <img src="{{ image_url }}" class="img-thumbnail" alt="Preview Image">
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    
                                 </div>
                             </div>
+                            <div class="tab-pane fade" id="dataset" role="tabpanel" aria-labelledby="dataset-tab">
+                                
+                                <div class="row v-margin-10">                
+                            
+                                    {% for class_details in stats.classwise_details %}
+                                        <div class="col-md-6">
+                                            <div class="card mb-3">
+                                                <div class="card-body">
+                                                    <div class="card-header">
+                                                        <div class="row">
+                                                            <div class="col-12  ">
+                                                                <h6 class="left">{{ class_details.class_name }}</h6>
+                                                                <p class="card-text">Total Examples: {{ class_details.total_examples }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Display preview images -->
+                                                    <div class="row v-margin-10">
+                                                        {% for image_url in class_details.preview_images %}
+                                                        <div class="col-4 mb-3">
+                                                            <img src="{{ image_url }}" class="img-thumbnail" alt="Preview Image">
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                
+                                </div>
+                            </div>
+                          
+                            
+
+
                         </div>
-                    {% endfor %}
-                
-            </div>
-            {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
             
         </div>
     </section>

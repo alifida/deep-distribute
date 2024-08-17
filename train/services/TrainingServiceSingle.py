@@ -14,24 +14,28 @@ from sklearn.metrics import f1_score
 from train.services.KerasCatalogService import KerasCatalogService
 #import asyncio
 from django.http import JsonResponse
+from multiprocessing import Process
 
-
+ 
+ 
+    
 class TrainingServiceSingle:
+    
+
 
     @staticmethod
     def start_training_process(job, model_name):
-        #thread = threading.Thread(target=TrainingServiceSingle.start_training, args=(job,))
-        #thread.start()
-        #from multiprocessing import Process
-        #process = Process(target=TrainingServiceSingle.start_training, args=(job, model_name,))
-        #process.start()
-        #process.join()
-        #asyncio.create_task(TrainingServiceSingle.start_training(job, model_name))
-        #return JsonResponse({'status': 'Training started', 'job_id': job.id})
-        pass
+        
+        
+        process = Process(target=TrainingServiceSingle.start_training,args=(job, model_name,))
+        process.start()
+        #process.join()  # Optionally wait for the process to complete
 
+    
     @staticmethod
     def start_training(job, model_name):
+        from train.models import Training_job
+        from train.dao.TrainingJobDAO import TrainingJobDAO
 
         dataset_path = job.dataset_img.extracted_path
         print('Dataset Path:', dataset_path)
