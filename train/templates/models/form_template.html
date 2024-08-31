@@ -1,0 +1,33 @@
+{% if deployed_model.key_attributes %}
+<div id="model_prediction_form_wrapper_{{deployed_model.id}}" class="full-width">
+    <form method="post" id="model_prediction_form_{{deployed_model.id}}" onsubmit="event.preventDefault();submit_model_prediction_form('{{deployed_model.id}}');">
+        {% csrf_token %}
+        <input type="hidden" name="model_id" value="{{deployed_model.id}}" />
+        <div class="form-row">
+            {% for attrib in deployed_model.key_attributes %}
+            <div class="form-group col-lg-3 col-md-4 col-sm-12">
+                <label for="__key_attrib_{{ attrib }}">{{ attrib }}:</label>
+                <input type="text" class="form-control required-form-control" name="__key_attrib_{{ attrib }}" id="__key_attrib_{{ attrib }}" required>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <label for="supply_dataset_{{deployed_model.id}}">supply_dataset:</label>
+                <input type="file" name="supply_dataset" id="supply_dataset_{{deployed_model.id}}" onchange="toggleRequiredFields('{{deployed_model.id}}')"/>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <button type="submit" class="btn btn-outline-info right"><span class="prediction-btn_{{deployed_model.id}}">Predict {{deployed_model.class_label}}</span></button>
+                <button type="reset" class="btn btn-outline-secondary right mr-3"><span class="reset-btn">Reset </span></button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <a href="{% url 'download_csv_template' deployed_model.id %}" target="_blank">Download template to upload multiple records</a>
+            </div> 
+        </div>
+    </form>
+
+    
+</div>
+{% endif %}

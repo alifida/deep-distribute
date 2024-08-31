@@ -10,13 +10,8 @@ from django.contrib import messages
 @login_required
 def list(request, dataset_id=None):
     datasets = DatasetImgService.list(request.user.id)  # Adjusted to use the service layer
-    
-    #models = KerasCatalogService.list_all_models()
-    #strategies = KerasCatalogService.list_all_strategies()
-
      
 
-     
     print("\nAvailable Keras layers:")
     print(KerasCatalogService.list_all_layers())
 
@@ -52,7 +47,7 @@ def list(request, dataset_id=None):
 
 
 
-    return util.render(request, 'dataset/list.html', context)
+    return util.myrender(request, 'dataset_images/list.html', context)
 
 @login_required
 def create(request):
@@ -70,10 +65,10 @@ def create(request):
             DatasetImgService.create(data_name=data_name, data_path=data_path, data_path_test=data_path_test, user=user)
             messages.success(request, "Dataset Saved successfully.")
             
-            return util.redirect('list_dataset')
+            return util.redirect('list_images_dataset')
     else:
         form = DatasetImgForm()
-    return util.render(request, 'dataset/create.html', {'form': form})
+    return util.myrender(request, 'dataset_images/create.html', {'form': form})
 
 @login_required
 def edit(request, dataset_id):
@@ -84,10 +79,10 @@ def edit(request, dataset_id):
             # Use service layer to update, passing cleaned form data as kwargs
             DatasetImgService.update(dataset_id, **form.cleaned_data)
             messages.success(request, "Dataset Saved successfully.")
-            return util.redirect('list_dataset')
+            return util.redirect('list_images_dataset')
     else:
         form = DatasetImgForm(instance=dataset)
-    return util.render(request, 'dataset/create.html', {'form': form, 'dataset': dataset})
+    return util.myrender(request, 'dataset_images/create.html', {'form': form, 'dataset': dataset})
 
 
 
@@ -102,19 +97,19 @@ def view(request, dataset_id):
         'dataset': dataset,
         'stats': stats,
     }
-    return util.render(request, 'dataset/view.html', context)
+    return util.myrender(request, 'dataset_images/view.html', context)
  
 @login_required 
 def delete_confirm(request, dataset_id):
     dataset = DatasetImgService.get(dataset_id)  # Use service to fetch the dataset
     form = DatasetImgForm(instance=dataset)  # Form for display purposes only, if needed
-    return util.render(request, 'dataset/delete.html', {'form': form, 'dataset': dataset})
+    return util.myrender(request, 'dataset_images/delete.html', {'form': form, 'dataset': dataset})
 
 @login_required
 def delete(request, dataset_id):
     if request.method == 'POST':
         DatasetImgService.delete(dataset_id)  # Use service to delete the dataset
         messages.success(request, "Dataset Deleted successfully.")
-        return util.redirect('list_dataset')
+        return util.redirect('list_images_dataset')
     else:
         return HttpResponse("Method Not Allowed", status=405)

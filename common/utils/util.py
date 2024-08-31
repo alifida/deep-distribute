@@ -31,13 +31,25 @@ def redirect(to, *args, permanent=False, **kwargs):
         
     return shortcuts.redirect(to, *args, permanent=permanent, **kwargs)
 
-def render(request, template, data=None, content_type=None, status=None, using=None):
-    print("util.............................render()")
+
+def myrender(request, template, data=None, content_type=None, status=None, using=None):
+   # print("util.............................render()")
      
-    data["parentTemplate"] = "base.html"
+    data["parentTemplate"] = "wrapper/base.html"
     if "rt" in request.GET:
         print(request.GET["rt"])
-        data["parentTemplate"] = "ajax.html"
+        data["parentTemplate"] = "wrapper/ajax.html"
+    
+    return render(request, template, data, content_type, status, using)
+
+
+def render(request, template, data=None, content_type=None, status=None, using=None):
+     
+     
+    data["parentTemplate"] = "wrapper/base.html"
+    if "rt" in request.GET:
+        print(request.GET["rt"])
+        data["parentTemplate"] = "wrapper/ajax.html"
     
     
     return shortcuts.render(request, template, data, content_type=content_type, status=status, using=using)

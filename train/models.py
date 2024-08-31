@@ -177,3 +177,74 @@ class ClusterNode(models.Model):
 
     def __str__(self):
         return f"{self.node_type} - {self.ip_address}:{self.port}"
+    
+
+
+class Dataset (models.Model):
+    description = models.CharField(max_length=300)
+    dataset = models.FileField(upload_to='datasets/', validators=[FileExtensionValidator(allowed_extensions=['csv','xls','xlsx'])])
+    dataset_test = models.FileField(upload_to='datasets/', validators=[FileExtensionValidator(allowed_extensions=['csv','xls','xlsx'])], blank = True, null=True)
+    source_dataset_id = models.ForeignKey( 'self', on_delete=models.CASCADE, related_name="source_id", blank = True, null=True)
+    process_details = models.TextField(blank = True)
+    processed_at = models.DateTimeField(auto_now_add=True)
+    metainfo = models.TextField(blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+    
+    
+    def __str__(self):
+        return self.description 
+    
+    def delete(self, *args, **kwargs):
+        # Delete related trained models
+        self.trained_models.all().delete()
+        if self.dataset:
+            if os.path.isfile(self.dataset.path):
+                os.remove(self.dataset.path)
+        # Call the parent class's delete method
+        super().delete(*args, **kwargs)
+
+
+class TrainedModel(models.Model):
+    # The file field for storing the trained model file
+    model_file = models.FileField(upload_to='trained_models/', blank=True, null=True)
+    
+    # Fields for additional details
+    description = models.CharField(max_length=300, blank=True, null=True)
+    status = models.CharField(max_length=100, choices=[('Temp', 'Temp'), ('Deployed', 'Deployed')], default='Temp')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    dataset = models.ForeignKey('Dataset', on_delete=models.CASCADE, related_name='trained_models')
+    key_attributes = models.CharField(max_length=300, blank=True, null=True)
+    class_label = models.TextField(blank=True)
+    def __str__(self):
+        return f"Model: {self.description or 'No description'} - Status: {self.status}"
+
+    def delete(self, *args, **kwargs):
+        # Delete the model file from the filesystem when the model instance is deleted
+        if self.model_file:
+            if os.path.isfile(self.model_file.path):
+                os.remove(self.model_file.path)
+        super().delete(*args, **kwargs)
+
+class ChartType(models.Model):
+    name = models.CharField(max_length=50, blank=True, null=True)
+    type = models.CharField(max_length=50)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    template = models.TextField()
+    def __str__(self):
+        if self.name==None:
+            self.name=""
+        return self.name +" ("+self.type+")" 
+    
+class Chart(models.Model):
+    name = models.CharField(max_length=1000)
+    type = models.ForeignKey('train.ChartType', on_delete=models.CASCADE, blank=True, null=True)
+#    type = models.CharField(max_length=50)
+    dataset = models.ForeignKey('train.Dataset', on_delete=models.CASCADE, blank=True, null=True)
+    dataset_attribute = models.CharField(max_length=1000 , blank=True, null=True)
+    data = models.TextField()
+    def __str__(self):
+        return self.name 
+      

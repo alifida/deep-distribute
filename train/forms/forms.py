@@ -1,5 +1,5 @@
 from django import forms
-from train.models import Dataset_IMG, Training_job
+from train.models import Dataset, Dataset_IMG, Training_job
 
 
 
@@ -7,6 +7,25 @@ class ImageUploadForm(forms.Form):
     images = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
 
+
+class DatasetForm(forms.ModelForm):
+    class Meta:
+        model = Dataset
+        fields = ['description', 'dataset']
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add Bootstrap class to form fields
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
+
+class TestDatasetForm(forms.ModelForm):
+    class Meta:
+        model = Dataset
+        fields = ['dataset_test']
+        labels = {
+            'dataset_test': 'Records to predict'  # Change this label to your desired text
+        }
 
 
 class DatasetImgForm(forms.ModelForm):
@@ -25,29 +44,7 @@ class DatasetImgForm(forms.ModelForm):
             'data_path': 'Train Dataset',
             'data_path_test': 'Test Dataset',
         }
-'''
-class TrainingJobForm(forms.ModelForm):
-    # Optional: Add custom validation, widgets, or fields if needed
-
-    class Meta:
-        model = Training_job
-        fields = ['job_name', 'status', 'started_at', 'ended_at', 'algo', 'dataset_img', 'user']
-        widgets = {
-            'started_at': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
-            'ended_at': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
-            # If you want the user field to be auto-filled or hidden, you might not include it in the form or handle it differently
-        }
-        exclude = ['user']  # Exclude the user field if you're handling it automatically
-
-    def __init__(self, *args, **kwargs):
-        super(TrainingJobForm, self).__init__(*args, **kwargs)
-        self.fields['started_at'].input_formats = ('%Y-%m-%dT%H:%M',)
-        self.fields['ended_at'].input_formats = ('%Y-%m-%dT%H:%M',)
-
-        # Example to set initial values or querysets for ForeignKey fields
-        # self.fields['dataset_img'].queryset = Dataset_IMG.objects.filter(some_criteria=True)
-'''        
-
+ 
 
 
 class TrainingJobForm(forms.ModelForm):

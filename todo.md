@@ -10,3 +10,5 @@
 - [ ] Implement cluster configuration
 - [ ] Ping every node in the cluster configuration to check if it is online/offline or busy
 - [ ] Implement the proposed strategy for Cluster GPUs
+----------------
+

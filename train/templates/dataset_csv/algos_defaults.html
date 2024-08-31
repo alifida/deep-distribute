@@ -1,0 +1,59 @@
+	
+	
+	{% for algo_detail_key, algo_detail in algos_details.items %}
+		<div class="col-lg-4 col-md-4 col-sm-12 padding-10 ">
+			<div class="card ">
+				<div class="card-header">
+					{{algo_detail_key}}	
+					<a target="_blank" class="right" href="https://scikit-learn.org/stable/user_guide.html">Doc</a>
+				</div>
+				<div class="card-body">
+					{% for param_key, param in  algo_detail.items %}
+						<label>{{param.param_name}}</label>
+						<input type="hidden" name="{{algo_detail_key}}_{{param.param_name}}___type" value="{{param.param_type.d_type}}" />
+						
+						<div class="input-group input-group input-group-sm">
+							{% if param.param_type.d_type == 'float' or param.param_type.d_type == 'int-or-float' %}
+								<input  type="number" step=".01" name="{{algo_detail_key}}_{{param.param_name}}" value="{{param.param_type.default_val}}"  class="form-control form-control-sm border-info" >    
+							{% elif param.param_type.d_type == 'int' %}
+							    <input  type="number" step="1" name="{{algo_detail_key}}_{{param.param_name}}" value="{{param.param_type.default_val}}"   step="1" class="form-control form-control-sm border-info" >
+							{% elif param.param_type.d_type == 'bool' %} 
+							    <select name="{{algo_detail_key}}_{{param.param_name}}" class="form-control form-control-sm border-info" title="Select {{param.param_name}}" > 
+									{% if param.param_type.default_val == 'None' %}
+										<option value="">Select {{param.param_name}}</option>
+									{% endif %} 
+										<option value="True" {% if param.param_type.default_val == 'True' %} selected {% endif %}>True</option> 
+										<option value="False" {% if param.param_type.default_val == 'False' %} selected {% endif %}>False</option> 
+								</select>
+							{% elif param.param_type.d_type == 'string' %} 
+							    <input  type="text" name="{{algo_detail_key}}_{{param.param_name}}" value="{{param.param_type.default_val}}"  class="form-control   form-control-sm border-info" >
+							{% elif param.param_type.d_type == 'dropdown' %}
+								<select name="{{algo_detail_key}}_{{param.param_name}}" class="form-control form-control-sm border-info" title="Select {{param.param_name}}" > 
+										{% if param.param_type.default_val == 'None' %}
+											<option value="">Select {{param.param_name}}</option>
+										{% endif %} 
+									{% for ddval in param.param_type.dd_list %}
+											<option value="{{ddval}}" {% if param.param_type.default_val == ddval %} selected {% endif %}>{{ddval}}</option> 
+									{% endfor %}
+								</select>
+							{% endif %} 
+		                  	
+		                  	<div class="input-group-append">
+		                   		<a type="button" title="" data-content="{{param.param_doc}}" data-original-title="Documentation" class="btn btn-sm btn-outline-info" data-toggle="popover" >
+		                   			<i class="fas fa-question"></i>
+		                   		</a>
+		                  	</div>
+		                </div>
+						 
+						{{algo.param_type}}
+					{% endfor %}				 
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+	<input type="hidden" value="{{selected_algos}}" name="selected_algos" />
+	 
+	
+	<script type="text/javascript">
+		enable_popover();
+	</script>

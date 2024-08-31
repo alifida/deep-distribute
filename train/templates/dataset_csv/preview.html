@@ -1,0 +1,789 @@
+ {% extends parentTemplate %} {% block content %} {{ dataset.metainfo.details }}   {% load static %}
+<script src="{% static "highcharts/code/highcharts.js" %}"></script>
+<script src="{% static "highcharts/code/modules/exporting.js" %}"></script>
+<script src="{% static "highcharts/code/modules/export-data.js" %}"></script>
+<script src="{% static "highcharts/code/modules/accessibility.js" %}"></script>
+
+ 
+
+
+<div class="content-wrapper">
+	<!-- Content Header (Page header) -->
+	<div class="content-header">
+		<div class="container-fluid">
+			 
+			<div class="row ">
+				<div class="col-sm-6">
+					<h1 class="m-0 text-dark left">{% if dataset.description %} {{dataset.description}} {% else %} Dataset {% endif %}</h1>
+				</div>
+				<div class="col-sm-4 hide">
+					<div class="btn-group right">
+                        <a type="button" class="btn btn-sm btn-outline-info"  href="{{dataset.dataset.url}}" title="download"><i class="fas fa-download"></i></a>
+                        <a type="button" class="btn btn-sm btn-outline-success" data-toggle="collapse" href="#process_dataset_wrapper" role="button" aria-expanded="false">Process</a>
+                     </div>
+                       
+				</div>
+				<div class="col-sm-1">
+					<label class="right v-padding-5">Dataset: </label>
+				</div>
+				<div class="col-sm-3 ">
+                      	<select onchange="load_dataset(this)" name="datasets"  class=" form-control form-control-sm border-info" data-style="btn-white  border-info form-control form-control-sm"    >
+						{% for ds in dataset_list %}
+							<option value="{{ds.pk}}" {% if  dataset.pk == ds.pk %} selected="selected" {% endif %} >{{ds.description}}</option>
+						{% endfor %}
+						</select>
+						 
+				</div>
+				<div class="col-sm-2">
+					<a href="{{dataset.dataset.url}}"  class="btn btn-sm btn-outline-success  right mr-1">
+						<i class="fa fa-download"></i> Download
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<section class="content">
+		<div class="container-fluid ">
+		
+		
+		<div class="row   ">
+				<div class="col-12 col-sm-6 col-md-3 padding-5">
+					<div class="info-box">
+						<span class="info-box-icon bg-info elevation-1"><i class="fas fa-database"></i></span>
+
+						<div class="info-box-content">
+							<span class="info-box-text">Total Instances</span> <span class="info-box-number"> {{metainfo.details.total_instances}} <small></small>
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3 padding-5">
+					<div class="info-box">
+						<span class="info-box-icon bg-danger elevation-1"><i class="fas fa-balance-scale"></i></span>
+
+						<div class="info-box-content">
+							<span class="info-box-text">Total Weight</span> <span class="info-box-number">{{metainfo.details.total_weight}}</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="clearfix hidden-md-up "></div>
+
+				<div class="col-12 col-sm-6 col-md-3 padding-5">
+					<div class="info-box">
+						<span class="info-box-icon bg-success elevation-1"><i class="fas fa-tasks"></i></span>
+
+						<div class="info-box-content">
+							<span class="info-box-text">Total Attributes</span> <span class="info-box-number">{{metainfo.details.total_attributes}}</span>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3 padding-5">
+					<div class="info-box">
+						<span class="info-box-icon bg-warning elevation-1"><i class="fas fa-exclamation"></i></span>
+
+						<div class="info-box-content">
+							<span class="info-box-text">total_missing</span> <span class="info-box-number">{{metainfo.details.total_missing}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+
+			<div class="row   ">
+				<div class="col-lg-12 col-md-12 col-sm-12 padding-5">
+					<div class="card card-info   card-outline" id="sample_data_collapse">
+						<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Review Your Data">
+							<h3 class="card-title">Review Your Data</h3>
+							<div class="card-tools">
+								<button type="button" class="btn btn-default btn-xs" data-card-widget="collapse" data-toggle="tooltip" title="Review Your Data">
+									<i class="fas fa-minus"></i>
+								</button>
+							</div>
+						</div>
+						<!-- /.card-header -->
+						<div class="card-body v-padding-15 h-padding-5 scrollable no-wrap">{{metainfo.details.sample |safe }}</div>
+						<!-- /.card-body -->
+					</div>
+
+				</div>
+			</div>
+			<div class="row   ">
+				<div class="col-lg-3 col-md-3 col-sm-6  hide-imp ">
+					<div class="card ">
+						<h5 class="padding-10  text-light-gray">Columns ({{metainfo.details.total_attributes}})</h5>
+						<ul class="list-group">
+							{% for colkey, colval in metainfo.details.columns.items %}
+							<li class="list-group-item pointer" onclick="populate_charts_by_column('{{dataset.pk}}','{{colkey}}', plot_charts_list);"><span class="full-width ">{{colkey}}</span> <br /> <small class="left h-padding-5">Type: {{colval.datatype}}</small> <small class="right">Range: ({{colval.min}} to {{colval.max}})</small></li> {% endfor %}
+						</ul>
+						
+						
+						
+						
+						
+					</div>
+				</div>
+				<div class="col-lg-12 col-md-12 col-sm-12   padding-0">
+					<div class="row padding-0" id="colwise_charts_wrapper"></div>
+
+				</div>
+				
+				
+				
+				
+				
+			</div>
+
+		
+		
+		
+			<div class="row  " id="process_dataset_wrapper">
+				 
+				
+				
+				<div class="col-lg-12 col-md-12 col-sm-12  padding-5">
+					<div class="card card-success collapsed-card card-outline">
+						<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Prediction">
+							<h3 class="card-title">Prediction</h3>
+							<div class="card-tools">
+								<button type="button" class="btn btn-default btn-xs" data-card-widget="collapse" data-toggle="tooltip" title="Prediction">
+									<i class="fas fa-plus"></i>
+								</button>
+							</div>
+						</div>
+						<div class="card-body">
+							<form action=""   id="dataset_prediction_form" onsubmit="event.preventDefault();submit_dataset_prediction_form();">
+								<div class="row ">
+									<div class="col-lg-4 col-md-4 col-sm-12 ">
+										<label data-toggle="tooltip" title="Choose your training method (e.g., Decision Tree, Naive Bayes)." >Choose Training Method</label>
+										<div class="input-group input-group input-group-sm">
+						                  <select name="algo" id="algos_box" class="selectpicker show-tick form-control form-control-sm border-info" data-style="btn-white  border-info form-control form-control-sm"  title="Select Algo" multiple  data-done-button="true"   data-live-search="true"  required="required">
+							                  	<optgroup label="Classifiers" class="bg-info">
+													{% for clas in classifiers %}
+														 <option class=" " value="{{clas}}">{{clas|title}}</option>
+													{% endfor %}
+							                  	</optgroup>
+							                  	<optgroup label="Regressors" class="bg-success">
+													{% for reg in regressors %}
+														 <option class="" value="{{reg}}">{{reg|title}}</option>
+													{% endfor %}
+							                  	</optgroup>
+							                  	<optgroup label="Clusters" class="bg-danger">
+													{% for clu in clusters %}
+														 <option class="text-danger22" value="{{clu}}">{{clu|title}}</option>
+													{% endfor %}
+							                  	</optgroup>
+							                  	 
+											</select>
+											 
+						                  <div class="input-group-append">
+						                    <a type="button" class="btn btn-sm btn-outline-info" onclick="csv_dataset_algos_defaults('algos_defaults_form', 'algos_box', 'algos_defaults');" ><i class="fa fa-edit"></i></a>
+						                  </div>
+						                </div>
+									</div>
+									<div class="col-lg-4 col-md-4 col-sm-12 ">
+										<label  data-toggle="tooltip" title="Select the key attributes that are important for training." >Important Features
+											 
+
+										</label>
+										<div class="input-group input-group input-group-sm">
+						                  <select name="key_attributes" class="selectpicker form-control form-control-sm border-info " data-style="btn-white  border-info form-control form-control-sm"  title="Select Key attributes"  multiple  data-done-button="true" data-live-search="true" required="required">
+												{% for colkey, colval in metainfo.details.columns.items %}
+													<option value="{{colkey}}">{{colkey}}</option> 
+												{% endfor %}
+											</select>
+						                  <div class="input-group-append">
+						                    <a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Key attributes" data-content="Key attributes help text."><i class="fas fa-question"></i></a>
+						                  </div>
+						                </div>
+									</div>
+									<div class="col-lg-4 col-md-4 col-sm-12 ">
+										<label data-toggle="tooltip" title="Specify the outcome you want to predict" >Outcome to Predict</label>
+										<div class="input-group input-group input-group-sm">
+						                  <select name="class_label" class="selectpicker form-control form-control-sm border-info" title="Select Class label" 
+						                  	data-style="btn-white  border-info "
+						                  	required="required" data-live-search="true">
+												{% for colkey, colval in metainfo.details.columns.items %}
+													<option value="{{colkey}}">{{colkey}}</option> 
+												{% endfor %}
+											</select>
+						                  <div class="input-group-append">
+						                    <a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Class Lable" data-content="Class labels help text"><i class="fas fa-question"></i></a>
+						                  </div>
+						                </div>
+									</div>
+								</div>
+				                <div class="row v-padding-20">
+									<div class="col-lg-2 col-md-3 col-sm-12 ">
+										<label data-toggle="tooltip" title="Set up your testing options (e.g., Provide Records to predict, Percentage Split, or Cross Validation" >Test Setup</label>
+										<div class="input-group input-group input-group-sm">
+						                  <select  onchange="toggle_test_options(this);" name="test_option" class=" form-control form-control-sm border-info " data-style="btn-white  border-info form-control form-control-sm"  title="Select Key attributes"  required="required">
+											  <option value="3" selected >Provide Records to predict</option> 
+												<option value="1">Percentage Split</option> 
+												<option value="2">Cross Validation </option> 
+											</select>
+						                  <div class="input-group-append">
+						                    <a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Key attributes" data-content="Key attributes help text."><i class="fas fa-question"></i></a>
+						                  </div>
+						                </div>
+									</div>
+									<script>
+										function toggle_test_options(item){
+											$('.p-split-attribs').removeClass('hide');
+											$('.cv-attribs').removeClass('hide');
+											if(item.value =='1'){
+												$('.p-split-attribs').show();
+												$('.cv-attribs').hide();
+												$('.supply-test-dataset').hide();
+											}else if(item.value =='2'){
+												$('.cv-attribs').show();
+												$('.p-split-attribs').hide();
+												$('.supply-test-dataset').hide();
+											}else if(item.value =='3'){
+												$('.supply-test-dataset').show();
+												$('.p-split-attribs').hide();
+												$('.cv-attribs').hide();
+											}
+											 
+										}
+
+										 
+									</script>
+									
+									<div class="col-lg-2 col-md-3 col-sm-6 p-split-attribs hide">
+										<label >Test Data (%)</label>
+										<div class="input-group input-group input-group-sm">
+											<input min="0" max="1" step=".05" type="number" class="form-control form-control-sm border-info" name="test_percent" value="{{default_test_percent}}" required="required">
+						                  	<div class="input-group-append">
+						                   		<a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Test Data " data-content="Test data percentate...."><i class="fas fa-question"></i></a>
+						                  	</div>
+						                </div>
+									</div>
+									<div class="col-lg-2 col-md-3 col-sm-6 cv-attribs hide">
+										<label >CV (K Folds)</label>
+										<div class="input-group input-group input-group-sm">
+											<input min="0"  step="1" type="number" class="form-control form-control-sm border-info" name="splits" >
+						                  	<div class="input-group-append">
+						                   		<a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Cross validation" data-content="Cross validation...."><i class="fas fa-question"></i></a>
+						                  	</div>
+						                </div>
+									</div>
+									<div class="col-lg-3 col-md-3 col-sm-12 supply-test-dataset  full-label-inner">
+										{% csrf_token %}  
+
+
+										<div class="form-group">
+											<label for="{{ testDatasetForm.dataset_test.id_for_label }}" data-toggle="tooltip" title="Select the dataset records you want to predict outcomes for.">
+												{{ testDatasetForm.dataset_test.label }}
+											</label>
+											{{ testDatasetForm.dataset_test }}
+										</div>
+									</div>
+									<div class="col-lg-1 col-md-2 col-sm-12">
+										<label >Normalize</label>
+										<div class="custom-control v-padding-5 custom-switch">
+											<input onchange = "toggle_normalize_range(this);" name="normalize" type="checkbox" class="custom-control-input left " id="normalize_switch" /> 
+											<label class=" custom-control-label" for="normalize_switch"></label>
+										</div>
+									</div>
+									<script>
+										function toggle_normalize_range(item){
+											$('.norm-range').removeClass('hide');
+											if(item.checked == true){
+												$('.norm-range').show();
+											}else{
+												$('.norm-range').hide();
+											}
+										}
+									</script>
+									<div class="col-lg-2 col-md-2 col-sm-6 norm-range hide">
+										<label >Normalize Range</label>
+										<div class="input-group input-group input-group-sm">
+											<input  step="0.1" value="0" type="number" class="form-control form-control-sm border-info" name="normalize_min" >
+						                   	<input  step="0.1" value="1" type="number" class="form-control form-control-sm border-info" name="normalize_max" >
+						                </div>
+									</div>
+									
+									<div class="col-lg-2 col-md-2 col-sm-6 right">
+										<label class="text-transparent block full-width"> .</label>
+										<button type="submit" class=" form-control form-control-sm  btn  btn-outline-info btn-block btn-sm right "><span class="prediction-btn">Predict</span></button>
+									</div>
+								</div>
+								
+								<div class="row" id="algos_defaults"></div>
+								
+								<input type="hidden" name ="dataset_id"  value="{{dataset.pk}}" />
+								<input type="hidden" name ="algo_type" id="algo_type"  />
+								
+								
+							</form>
+							
+						</div>
+					</div>
+				</div>
+				
+				
+				
+			</div>
+
+ 
+          <div class="col-12 padding-5 hide" id="prediction_output">
+            <!-- Custom Tabs -->
+            <div class="card card-success card-outline">
+				<div class="card-header d-flex p-0">
+					<div class="row">
+						<div class="col-lg-4">
+							<h3 class="card-title p-3">Prediction Results</h3>
+						</div>
+						<div class="col-lg-4">
+							<div class="row padding-10" id="deployment_wrapper">
+								<div class="col-lg-6 col-md-6 col-sm-6">
+									<div class="select-box"></div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-6">
+									<button onclick="deploy_model();"  class=" form-control form-control-sm  btn  btn-success btn-block btn-sm right "><span class="deploy-btn">Deploy For furture Use</span></button>
+								</div>
+								 
+							</div>
+						</div>
+						<div class="col-lg-4 ">
+							<ul class="nav nav-pills ml-auto p-2 right">
+								<li class="nav-item"><a class="nav-link active" href="#tab_1" data-toggle="tab">Charts</a></li>
+								<li class="nav-item"><a class="nav-link" href="#tab_2" data-toggle="tab">Results</a></li>
+								<li class="nav-item"><a class="nav-link" href="#tab_3" data-toggle="tab">Predicted Data</a></li>
+							</ul>
+						</div>
+					</div>
+					
+						
+
+
+						 
+
+
+				</div>
+              <div class="card-body" >
+                <div class="tab-content" >
+                  <div class="tab-pane active charts-wrapper " id="tab_1" >
+                   	<div class="results"></div>
+                  </div>
+                  <div class="tab-pane primary-info" id="tab_2" >
+                   	<div class="results">
+                   		<div class="cards row"></div>
+                   		<div class="tabular row mt-2"></div>
+                   	</div>
+                  </div>
+                  <div class="tab-pane  secondary-info" id="tab_3" >
+                   	<div class="results"></div>
+                   	
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- ./card -->
+          </div>
+         
+
+
+
+							 
+							<script type="text/javascript">
+								var disable_prediction = false;
+								function submit_dataset_prediction_form(){
+										
+									if(disable_prediction == false){
+									
+										var selected = $(':selected', $("#algos_box"));
+										selected_group = selected.parent().attr('label');
+										console.log(selected_group);
+										$("#algo_type").val(selected_group);
+										
+										var url = "{% url 'predict_csv_dataset' %}" ;
+										ajax_submit(url, '', 'dataset_prediction_form', 'POST',  '', afterDsPrediction);
+	
+										disable_prediction = true;
+										
+										$("#prediction_output .charts-wrapper .results").html("");
+										$("#prediction_output .primary-info .results cards").html("");
+										$("#prediction_output .primary-info .results tabular").html("");
+										$("#prediction_output .secondary-info .results").html("");
+										$("#prediction_output").addClass("hide");
+										display_loader(".prediction-btn");
+										
+									}
+								}
+								
+								function afterDsPrediction(raw){
+								 	res = $.parseJSON(raw);
+								  	show_alert(res.status, res.message);
+								  	//if(res.status=='success'){
+								 		display_prediction_results(res);
+									//}
+								 		
+									disable_prediction = false;
+									hide_loader(".prediction-btn");
+								}
+								
+								
+   		
+							function plot_charts(target_id, item){
+							
+							 	chartmodel = $.parseJSON(item);
+						    	$('#'+target_id).highcharts(chartmodel);
+
+						  	}
+								
+							 	
+							function display_prediction_results(res){
+								 
+								for (var chart_key in res.charts) {
+									var chart_div ='<div id="chart_' + chart_key + '"></div>';
+									$("#prediction_output .charts-wrapper .results").append(chart_div);
+									plot_charts("chart_"+ chart_key , res.charts[chart_key]);
+								}
+							
+							
+								
+								tab_content ='<div class="tab-content" >'; 
+								tab_head = '<ul class="nav nav-tabs" role="tablist">';	 
+								var activeclass="";
+								
+								var key_set = new Set();
+								for (var key_out in res.classifiers) {
+									classifier = res.classifiers[key_out];
+									// populate keys_set
+									for (var key in classifier['primary_info']) {
+									    if (classifier.primary_info.hasOwnProperty(key)) {
+									    	 key_set.add(key);
+									    }
+									}
+								}
+								key_set = Array.from(key_set);
+								console.log(key_set);
+
+								
+								
+								deploy_model_options ="";
+
+								cards ='';
+								cards += "<div class='card card-success card-outline full-width' >";
+								cards +='	<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Results Details"> ';
+								cards +='		<h3 class="card-title">Results Details</h3>';
+								cards +='		<div class="card-tools">';
+								cards +='			<button type="button" class="btn btn-default btn-xs" data-card-widget="collapse" data-toggle="tooltip" title="Results Details">';
+								cards +='				<i class="fas fa-minus"></i>';
+								cards +='			</button>';
+								cards +='		</div>';
+								cards +='	</div>';
+								cards +='<div class="card-body">';
+								cards +='	<div class="row">';
+								
+								
+								table ='';
+								table += "<div class='card card-info card-outline full-width' >";
+								table +='	<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Results Comparison"> ';
+								table +='		<h3 class="card-title">Results Comparison</h3>';
+								table +='		<div class="card-tools">';
+								table +='			<button type="button" class="btn btn-default btn-xs" data-card-widget="collapse" data-toggle="tooltip" title="Results Comparison">';
+								table +='				<i class="fas fa-minus"></i>';
+								table +='			</button>';
+								table +='		</div>';
+								table +='	</div>';
+								table +='<div class="card-body">';
+								table +='	<div class="row">';
+								
+								table += '	<table class="dataTable dataframe">';
+								table += '	<thead>	<tr>';
+						    	table += '		<th>';
+						        table += 			'Training Method';
+						        table += '		</th>';
+									for (var index in key_set) {
+											
+									    	table += '		<th>';
+									        table += 			key_set[index];
+									        table += '		</th>';
+									   
+									}
+											
+											
+									table += '	</tr> </thead>';
+									table += ' <tbody>	';		
+								
+								for (var key_out in res.classifiers) {
+									if(key_out == 0){
+										activeclass="active";
+									}else {
+										activeclass="";
+									}
+									classifier = res.classifiers[key_out];
+									
+									deploy_model_options += '<option value="'+classifier['trained_model_id']+'">'+classifier['classifier']+'</option>';
+									
+
+							    	cards +='<div class="col-lg-4 col-md-4 col-sm-12 padding-5 ">';
+							    	cards +='<div class="card card-outline card-success">';
+							    	cards += '<div class="card-header">';
+									cards += '	<h3 class="card-title">'+classifier['classifier']+'</h3>';
+									cards += '</div>';	
+								    cards += '	<div class="card-body padding-0">';
+								    cards += '	<ul class="nav nav-pills flex-column">';
+							    	
+							    	table += ' <tr>';
+							    	table += '		<td>';
+							        table += 			classifier['classifier'];
+							        table += '		</td>';
+									
+									for (var index in key_set) {
+									
+									    	key2 = key_set[index];
+									        table += '		<td>';
+									       try {
+											  	var $tmp_str = classifier['primary_info'][key2];
+									        	$tmp_str = $tmp_str.toString();
+									        	tmp_str = $tmp_str.replace(/,/g, ", ");
+									        	table += tmp_str;
+									        	
+									        	
+									        cards += '		<li class="nav-item row ">';
+									    	cards += '		<span class="col-sm-10 h-padding-5">';
+									        cards += 			key2;
+									        cards += '		</span>';
+									        cards += '		<span class="col-sm-2 h-padding-0">';
+									        cards += tmp_str
+									        cards += '		</span>';
+											cards += '	</li>';
+									        	
+									        	
+											}
+											catch(err) {
+											 console.log('Ignored missing value in result set.');
+											 console.log(err);
+											}
+									        
+									        table += '		</td>';
+									        
+									     
+									    
+									}
+									table += '	</tr>';
+										
+									cards += '	</ul>';
+									cards += '	</div>';
+									cards += '	</div>';
+									cards += '	</div>';
+									
+									
+									
+									
+								 
+									
+									
+									
+									tab_head += '<li class="nav-item">';
+                					tab_head += '	<a class="nav-link '+activeclass+'" data-toggle="pill" href="#sec_tab_'+key_out+'" role="tab" aria-controls="custom-content-below-home" aria-selected="true">'+classifier['classifier']+'</a>';
+              						tab_head += '</li>';
+              						 
+									tab_content += '<div class=" tab-pane fade '+activeclass+' show" id="sec_tab_'+key_out+'" role="tabpanel" aria-labelledby="custom-content-below-home-tab">';
+									
+									for (var key_s in classifier['secondary_info']) {
+									    if (classifier['secondary_info'].hasOwnProperty(key_s)) {
+									    	if(key_s=='test_features_html'){
+									    		
+									    		tab_content += '<div class="v-padding-10">';
+									    		tab_content += classifier['secondary_info'][key_s];
+									    		tab_content += '</div>';
+									    		continue;
+									    	}
+										}    
+									}
+								
+									tab_content += '		</div>';
+									
+								}
+								cards += '	</div>';
+								cards += '	</div>';
+								cards += '	</div>';
+								table += '	 </tbody>';
+								
+								table += '	</table>';
+								
+								
+								
+								table += '	</div>';
+								table += '	</div>';
+								table += '	</div>';
+								 
+
+
+
+								selectbox ='';
+								selectbox ="<select id='model_to_deploy' name='model_to_deploy' class=' form-control form-control-sm border-success '>";
+								selectbox += deploy_model_options;
+								selectbox += "</select>"
+
+
+								/*
+								
+								html ='<div class="row">';
+								html +='<div class="col-lg-12 col-md-12 col-sm-12 padding-5 ">';
+								html += '<div class="card card-outline card-success">';
+								html += '<div class="card-header">';
+								html += '	<h3 class="card-title">Results Comparison</h3>';
+								html += '</div>';	
+							    html += '	<div class="card-body">';
+								
+								 html += table;
+								
+								html += '	</div>';
+								html += '</div>';
+								html += '</div>';
+								html += '</div>';	
+								*/
+								
+								tab_head += '</div>';	
+								tab_content += '</div>';
+								
+								$("#prediction_output .primary-info .results .tabular").html(table);
+								$("#prediction_output .primary-info .results .cards").html(cards);
+								
+								
+								$("#prediction_output .secondary-info .results").append( tab_head );
+								$("#prediction_output .secondary-info .results").append( tab_content );
+								
+
+
+								$("#deployment_wrapper .select-box").html(selectbox);
+
+								$("#prediction_output").removeClass("hide");
+								convert_to_datatable();
+									
+							}
+								
+								function convert_to_datatable(){
+									$('.dataframe').DataTable({
+									  "dom": 'Bfrtip',
+									  "destroy": true,
+								      "paging": true,
+								      "lengthChange": true,
+								      "searching": true,
+								      "ordering": true,
+								      "info": true,
+								      "autoWidth": false,
+								      "responsive": {
+									        "details": true,
+									    },
+								      "fixedColumns":{
+								            "leftColumns": 1,
+								            "rightColumns": 3,
+								        },
+								      "buttons": [ 'pageLength', 'copy', 'excel', 'pdf','colvis'],
+								      "lengthMenu": [
+								            [ 20, 50,100,500,1000, -1 ],
+								            [ '20 rows', '50 rows','100 rows','500 rows','1000 rows', 'Show all' ]
+								        ],
+								    });
+								}
+								 
+							</script>
+							<script type="text/javascript">
+								function get_algos_defaults(defaults_form_id, select_box_id, target_id){
+									
+									var defaults_url= "{% url 'csv_dataset_algos_defaults' %}";
+									//var defaults_form_id = "algos_defaults_form";
+									$("#"+defaults_form_id).remove();
+
+									var selected_algos = $('#'+select_box_id).val();
+									 
+									if(selected_algos != ""){
+										$f_html = '<form id="'+defaults_form_id+'">';
+										$f_html += '<input class="hide" required="required" name="selected_algos" type="text" value="' + selected_algos +'"/>';
+										$f_html += '</form>';
+	
+										$($f_html).appendTo('body');
+										ajax_submit(defaults_url, target_id, defaults_form_id, 'POST',  '', '', '');
+									}
+								}
+								
+							</script>
+
+			
+
+		</div>
+	</section>
+</div>
+</div>
+<script type="text/javascript">
+var url= "";
+
+ function plot_charts_list(data, datasetid,col) { 
+	   $("#colwise_charts_wrapper").html("");
+	   //console.log(data.chartsdata);
+	   $.each(data.chartsdata, function(i, item) {
+		    //console.log(item);
+		    $("#colwise_charts_wrapper").append( '<div class=" col-lg-4 col-md-6 col-sm-12 padding-5"><div class="card" id="chart_'+item.id+'"></div></div>');
+		    //console.log($.parseJSON(item.data));
+		    $('#chart_'+item.id).highcharts( $.parseJSON(item.data)  );
+	   });
+  }
+  function populate_charts_by_column(datasetid,col, callback){
+  	
+  	$('#sample_data_collapse').addClass('collapsed-card');
+  	setTimeout($('#sample_data_collapse .card-body').hide(), 1000);
+  	
+  	beforeAjaxFormSubmit("colwise_charts_wrapper");
+			
+	  $.ajax({
+			url : url+"?datasetid="+datasetid+"&col="+col,
+			type : "get",
+			success : function(result) {
+				callback(result, datasetid,col);
+				afterAjaxResponse("colwise_charts_wrapper");
+			},error: function (request, status, error) {
+		        afterAjaxResponse("colwise_charts_wrapper");
+		    }
+		});
+  
+  }  
+
+  function deploy_model(){
+	
+	display_loader(".deploy-btn");
+    var modelId = $("#model_to_deploy").val(); // Correct way to get value using jQuery
+    var deploy_model_url = "{% url 'deploy_model_url' 0 %}".replace(/0$/, modelId); // Replace placeholder with actual modelId
+    disable_deploy = true;
+	ajax_submit(deploy_model_url,'','', 'POST',  '', after_deploy_model, after_deploy_model) ;
+  }
+  function after_deploy_model(raw){
+	res = $.parseJSON(raw);
+	show_alert(res.status, res.message);
+	if(res.status=='success'){
+	   if(res.hasOwnProperty('redirectURL')){
+		  window.location.href = res.redirectURL;
+	  }
+  }
+	   
+	disable_deploy= false;
+	hide_loader(".deploy-btn");
+  }
+    
+$(document).ready(function() {
+  	convert_to_datatable();
+ });
+ 
+	$(document).ready(function(){
+		// Initialize Bootstrap tooltips
+		$('[data-toggle="tooltip"]').tooltip();
+	});
+ 
+       
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+

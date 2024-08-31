@@ -50,6 +50,41 @@
       "id": "KKRrbO0wJuRKG8MsemJe7",
       "description": "Design Training interface along with the dataset details",
       "columnId": "column-done"
+    },
+    "z5cX3S44XncSVHpp6bIU6": {
+      "id": "z5cX3S44XncSVHpp6bIU6",
+      "description": "Update the interface as per old dmlab",
+      "columnId": "column-todo"
+    },
+    "rQa-HLApluo0co-poJmql": {
+      "id": "rQa-HLApluo0co-poJmql",
+      "description": "Merge the code of ML and Deep-distribute",
+      "columnId": "column-todo"
+    },
+    "LHpqmJ7wTt1rjcqJvbEEB": {
+      "id": "LHpqmJ7wTt1rjcqJvbEEB",
+      "description": "Override the Validation Dataset at the time of training",
+      "columnId": "column-todo"
+    },
+    "tWkD4ummU9FCRuxWbTrdE": {
+      "id": "tWkD4ummU9FCRuxWbTrdE",
+      "description": "Save the Tranined model and allow the user to deploy the best one as per his choice",
+      "columnId": "column-todo"
+    },
+    "pQctPvbfYbfmHYiEl7JbU": {
+      "id": "pQctPvbfYbfmHYiEl7JbU",
+      "description": "Plot the results on chart and provide multiple results comparison",
+      "columnId": "column-todo"
+    },
+    "nSU0puoiV3SUxdFs0pLBr": {
+      "id": "nSU0puoiV3SUxdFs0pLBr",
+      "description": "ML and deep distribute contents features and guide",
+      "columnId": "column-todo"
+    },
+    "331EgfcSLhBFq901v7gqW": {
+      "id": "331EgfcSLhBFq901v7gqW",
+      "description": "",
+      "columnId": "column-todo"
     }
   },
   "columns": [
@@ -65,7 +100,14 @@
         "VUmnCdx83ifJzLjdYk40z",
         "GUY6W18h4lwqpqJWMUSq0",
         "0fpELvZ6rQrHfCYeJPi2Y",
-        "226oyYrk3CNdGHxHN5TH6"
+        "226oyYrk3CNdGHxHN5TH6",
+        "z5cX3S44XncSVHpp6bIU6",
+        "rQa-HLApluo0co-poJmql",
+        "LHpqmJ7wTt1rjcqJvbEEB",
+        "tWkD4ummU9FCRuxWbTrdE",
+        "pQctPvbfYbfmHYiEl7JbU",
+        "nSU0puoiV3SUxdFs0pLBr",
+        "331EgfcSLhBFq901v7gqW"
       ]
     },
     {
@@ -73,14 +115,12 @@
       "title": "Doing",
       "tasksIds": [
         "KKRrbO0wJuRKG8MsemJe7"
-      ],
-      "color": "#c8e9ff"
+      ]
     },
     {
       "id": "column-6qiju_rfa0KQ3WlGWq3tT",
       "title": "Done",
-      "tasksIds": [],
-      "color": "#cdffe1"
+      "tasksIds": []
     }
   ]
 }

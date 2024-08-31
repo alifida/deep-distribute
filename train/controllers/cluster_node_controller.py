@@ -11,7 +11,7 @@ from django.contrib import messages
 @login_required
 def list(request):
     nodes = ClusterNodeService.list()
-    return util.render(request, 'cluster/list.html', {'nodes': nodes})
+    return util.myrender(request, 'cluster/list.html', {'nodes': nodes})
 
 @login_required
 def create(request):
@@ -26,7 +26,7 @@ def create(request):
             return redirect('list_cluster_nodes')
     else:
         form = ClusterNodeForm()
-    return util.render(request, 'cluster/create.html', {'form': form})
+    return util.myrender(request, 'cluster/create.html', {'form': form})
 
 @login_required
 def edit(request, node_id):
@@ -39,14 +39,14 @@ def edit(request, node_id):
             return redirect('list_cluster_nodes')
     else:
         form = ClusterNodeForm(instance=node)
-    return util.render(request, 'cluster/create.html', {'form': form, 'node': node})
+    return util.myrender(request, 'cluster/create.html', {'form': form, 'node': node})
 
 
 @login_required
 def view(request, node_id):
     node = ClusterNodeService.get(node_id)  #  
     form = ClusterNodeForm(instance=node)  # 
-    return util.render(request, 'cluster/view.html', {'form': form, 'node': node})
+    return util.myrender(request, 'cluster/view.html', {'form': form, 'node': node})
 
 
 
@@ -58,7 +58,7 @@ def view(request, node_id):
 def delete_confirm(request, node_id):
     node = ClusterNodeService.get(node_id)  # Use service to fetch the node
     form = ClusterNodeForm(instance=node)  # Form for display purposes only, if needed
-    return util.render(request, 'cluster/delete.html', {'form': form, 'node': node})
+    return util.myrender(request, 'cluster/delete.html', {'form': form, 'node': node})
 
 
 @login_required

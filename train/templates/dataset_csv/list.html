@@ -1,0 +1,76 @@
+ 
+
+
+  
+
+ 
+    <div class="row">
+        {% for dataset in dataset_list %}
+        <div class="col-lg-12 col-md-12 col-sm-12 mb-4 h-padding-0">
+            <div class="info-box padding-10">
+				<span class="text-info text-xxl inline-block h-padding-20"><i class="fas fa-database  v-align-sub"></i></span>
+                 
+                <!-- Card Body -->
+
+				<div class="info-box-content padding-10" >
+					<span class="info-box-number">{{ dataset.description }}</span> 
+					<span class="info-box-text">{{ dataset.dataset.name }}</span>
+					<span class="info-box-text right">{{ dataset.processed_at }}</span>
+					
+					<span class="info-box-text right">
+						<a href="{% url 'preview_csv_dataset' dataset.pk %}" class=" right btn btn-sm btn-warning circle1 circle-sm1 left mr-1">
+							<i class="fa fa-microscope"></i>
+						</a>
+						 
+						{% if dataset.dataset.name %} 
+							<a href="{{ dataset.dataset.url }}" class=" right btn btn-sm  circle1 circle-vs1 left mr-1">
+								<i class="fa fa-download"></i>
+							</a>
+						{% endif %}
+						
+						<button type="button" class="right btn btn-sm  circle1 circle-vs1 left mr-1" 
+								onclick="ajax_submit('{% url 'delete_csv_dataset' dataset.pk %}', 'dataset_list_wrapper','','POST')"> 
+								<i class="fa fa-trash"></i>
+						</button>
+					</span>
+				</div>
+
+                 
+                 
+            </div>
+        </div>
+        {% endfor %}
+		 
+		{% if  dataset_count <= 0 %}
+		<script>
+			// Trigger collapse to show if the dataset_list is empty
+			$(document).ready(function() {
+				$('#dataset_form_wrapper').collapse('show');
+			});
+		</script>
+		<div class="row">
+			<div class="col-md-12 col-lg-12 col-sm-12 center padding-0">
+			<span class="d-flex justify-content-center align-items-center" style="height: 40vh;">
+				<div class="card " style="width: 100%; height: 40vh;">
+					<div class="card-body text-center card-vertical-center">
+						<i class="fas fa-database text-info" style="font-size: 10vh;"></i>
+						<br/>
+						<h5 class="card-text mt-3">Upload Dataset to start.</h5>
+					</div>
+				</div>
+			</span>
+		</div>
+
+		</div>
+			
+			
+			
+		{% endif %}
+
+
+    </div>
+</div>
+
+
+ 
+

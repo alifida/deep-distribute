@@ -1,0 +1,58 @@
+{% load crispy_forms_tags %} 
+
+<div class="card__  mb-3">
+	<div class="card card-success">
+		<div class="card-body padding-30">
+			<form method="post" enctype="multipart/form-data" id="dataset_form" action="{% url 'save_csv_dataset' %}" 
+      onsubmit="event.preventDefault();submit_dataset_form();">
+    {% csrf_token %}
+    
+    <div class="container">
+        <!-- Row for Form Fields -->
+        <div class="row mb-3">
+            <div class="col-md-12">	
+                <div class="form-group">
+                    <label for="{{ datasetForm.description.id_for_label }}">Description</label>
+                    {{ datasetForm.description }}
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="{{ datasetForm.dataset.id_for_label }}">Dataset</label>
+                    {{ datasetForm.dataset }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button Row -->
+        <div class="row">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-sm btn-outline-info right">Upload</button>
+            </div>
+        </div>
+    </div>
+</form>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+
+	function submit_dataset_form(){
+		ajax_submit("{% url 'save_csv_dataset'%}",'dataset_form_wrapper','dataset_form','POST', '', on_dataset_success);
+	}
+
+	function on_dataset_success(){
+		afterAjaxResponse('dataset_form_wrapper');	
+		ajax_submit("{% url 'list_csv_dataset'%}", 'dataset_list_wrapper');
+		ajax_submit("{% url 'save_csv_dataset'%}", 'dataset_form_wrapper');
+	}
+
+	function collapse_check_when_error($selector){
+		if($($selector).find( '.invalid-feedback').length > 0 ){
+			$($selector).collapse("show");
+		}else{
+			$($selector).collapse("hide");
+		}
+	}
+			collapse_check_when_error("#dataset_form_wrapper");
+</script>

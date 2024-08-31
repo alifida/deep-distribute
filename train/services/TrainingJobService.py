@@ -64,9 +64,9 @@ class TrainingJobService:
        #trainingJob = TrainingJobService.get(job_id)
        #TrainingService.start_training_process(trainingJob.id)
         
-       if strategy == 1 or strategy=='Single GPU':
+       if strategy == 1 or strategy==' GPU':
             TrainingServiceSingle.start_training(training_params)
-       elif strategy == 2 or  strategy=='GPU Cluster Parameter Server':
+       elif strategy == 2 or  strategy=='GPSingleU Cluster Parameter Server':
             TrainingServicePS.start_training(training_params)
        elif strategy == 3 or  strategy=='GPU Cluster Custom':
             #TrainingServiceCustom.start_training(trainingJob, model)

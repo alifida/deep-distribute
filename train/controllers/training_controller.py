@@ -15,7 +15,7 @@ from train.services.KerasCatalogService import KerasCatalogService
 @login_required
 def list(request):
     jobs = TrainingJobService.list()
-    return util.render(request, 'training/list.html', {'jobs': jobs, 'status_running': JobStatus.RUNNING.value})
+    return util.myrender(request, 'training/list.html', {'jobs': jobs, 'status_running': JobStatus.RUNNING.value})
 
 
 
@@ -45,7 +45,7 @@ def edit(request, job_id=None):
         'form': form,
         'job': job
     }
-    return util.render(request, 'training/start.html', context)
+    return util.myrender(request, 'training/start.html', context)
 
 @login_required
 def delete(request, job_id):
@@ -155,7 +155,7 @@ def training(request, dataset_id=None):
 
 
 
-    return util.render(request, 'training/start.html', context)
+    return util.myrender(request, 'training/start.html', context)
 
 
 
