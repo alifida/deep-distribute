@@ -40,7 +40,7 @@ class TrainingJobService:
 
     @staticmethod
     def get(job_id):
-        return TrainingJobDAO.get(job_id, True)
+        return TrainingJobDAO.get(job_id)
 
     @staticmethod
     def update(job_id, **kwargs):

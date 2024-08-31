@@ -24,7 +24,7 @@
                 
                 <div class="col-lg-4 col-md-4 col-sm-4 padding-10">
                     {% if dataset %}
-                        <a href="{% url 'create_dataset' %}" class="btn btn-primary btn-sm right "  data-toggle="tooltip" data-placement="top" title="Upload New Dataset"><i class="nav-icon fas fa-plus"></i> &nbsp; New Dataset</a>  
+                        <a href="{% url 'create_images_dataset' %}" class="btn btn-primary btn-sm right "  data-toggle="tooltip" data-placement="top" title="Upload New Dataset"><i class="nav-icon fas fa-plus"></i> &nbsp; New Dataset</a>  
                     {% endif %}
                 </div>
                     
@@ -226,8 +226,8 @@
                                 <div class="col-12  ">
                                     <h5 class="left">{{ dataset.data_name }}</h5>
                                     <div class="right">
-                                        <a href="{% url 'edit_dataset' dataset.id %}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Edit Dataset"><i class="nav-icon fa fa-edit"></i> &nbsp; Edit</a>
-                                        <a href="{% url 'delete_dataset_confirm' dataset.id %}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Delete Dataset"><i class="nav-icon fa fa-trash"></i> &nbsp; Delete</a>
+                                        <a href="{% url 'edit_images_dataset' dataset.id %}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Edit Dataset"><i class="nav-icon fa fa-edit"></i> &nbsp; Edit</a>
+                                        <a href="{% url 'delete_images_dataset_confirm' dataset.id %}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Delete Dataset"><i class="nav-icon fa fa-trash"></i> &nbsp; Delete</a>
                                     </div>
                                 </div>
                             </div>
@@ -352,11 +352,12 @@
                                                     <td>{{ job.result }}</td>
                                                     <td>{{ job.dataset_img.data_name }}</td>
                                                     <td>
-                                                        <a href="{% url 'training_job_update' job.id %}" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="top" title="Edit"><i class="nav-icon fa fa-edit"></i></a>
                                                         <a href="{% url 'training_job_delete' job.id %}" class="btn btn-danger btn-sm " data-toggle="tooltip" data-placement="top" title="Delete"><i class="nav-icon fa fa-trash"></i></a>
                                                         {% if job.status == status_running %}
                                                         <a href="{% url 'stop_training' job.id %}" class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Stop"><i class="nav-icon fa fa-times"></i></a>
                                                         {% endif %}
+                                                        {% comment %}
+                                                        <a href="{% url 'training_job_update' job.id %}" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="top" title="Edit"><i class="nav-icon fa fa-edit"></i></a>
                                                         
                                                         {% comment %} <a href="{% url 'training_job_delete_confirm' job.id %}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Delete"><i class="nav-icon fa fa-trash"></i></a> {% endcomment %}
                                                     </td>
