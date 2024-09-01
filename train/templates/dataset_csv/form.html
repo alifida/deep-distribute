@@ -1,16 +1,17 @@
 {% load crispy_forms_tags %} 
 
-<div class="card__  mb-3">
-	<div class="card card-success">
+<div class=" mb-3">
+	<div class="card   card-purple card-outline">
 		<div class="card-body padding-30">
 			<form method="post" enctype="multipart/form-data" id="dataset_form" action="{% url 'save_csv_dataset' %}" 
-      onsubmit="event.preventDefault();submit_dataset_form();">
-    {% csrf_token %}
+                onsubmit="event.preventDefault();submit_dataset_form();">
+                {% csrf_token %}
     
     <div class="container">
         <!-- Row for Form Fields -->
         <div class="row mb-3">
             <div class="col-md-12">	
+                 
                 <div class="form-group">
                     <label for="{{ datasetForm.description.id_for_label }}">Description</label>
                     {{ datasetForm.description }}
@@ -27,7 +28,7 @@
         <!-- Submit Button Row -->
         <div class="row">
             <div class="col-md-12">
-                <button type="submit" class="btn btn-sm btn-outline-info right">Upload</button>
+                <button type="submit" class="btn btn-sm btn-outline-purple full-width right"><icon class="fa fa-upload h-padding-10"></icon> Upload</button>
             </div>
         </div>
     </div>

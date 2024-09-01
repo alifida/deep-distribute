@@ -7,15 +7,21 @@
     <div class="row">
         {% for dataset in dataset_list %}
         <div class="col-lg-12 col-md-12 col-sm-12 mb-4 h-padding-0">
-            <div class="info-box padding-10">
-				<span class="text-info text-xxl inline-block h-padding-20"><i class="fas fa-database  v-align-sub"></i></span>
-                 
-                <!-- Card Body -->
+			   
 
+
+            <div class="info-box padding-10">
+				<span class="text-purple text-xxl inline-block h-padding-20"><i class="fas fa-database  v-align-sub"></i></span>
+                  
 				<div class="info-box-content padding-10" >
 					<span class="info-box-number">{{ dataset.description }}</span> 
 					<span class="info-box-text">{{ dataset.dataset.name }}</span>
-					<span class="info-box-text right">{{ dataset.processed_at }}</span>
+					 
+					
+					<span class="purple-box-text full-width mb-3"><span class="right text-vs">{{ dataset.processed_at }}</span></span>
+					 
+					
+					 
 					
 					<span class="info-box-text right">
 						<a href="{% url 'preview_csv_dataset' dataset.pk %}" class=" right btn btn-sm btn-warning circle1 circle-sm1 left mr-1">
@@ -53,7 +59,7 @@
 			<span class="d-flex justify-content-center align-items-center" style="height: 40vh;">
 				<div class="card " style="width: 100%; height: 40vh;">
 					<div class="card-body text-center card-vertical-center">
-						<i class="fas fa-database text-info" style="font-size: 10vh;"></i>
+						<i class="fas fa-database text-purple" style="font-size: 10vh;"></i>
 						<br/>
 						<h5 class="card-text mt-3">Upload Dataset to start.</h5>
 					</div>

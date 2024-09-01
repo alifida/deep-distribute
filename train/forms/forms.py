@@ -12,12 +12,22 @@ class DatasetForm(forms.ModelForm):
     class Meta:
         model = Dataset
         fields = ['description', 'dataset']
+        widgets = {
+            'description': forms.TextInput(attrs={'class': 'form-control form-control-sm border-purple'}),
+            'dataset': forms.FileInput(attrs={'class': 'form-control  form-control border-purple', 'accept': '.csv, .xlsx'}),
+        }
+        labels = {
+            'description': 'Description',
+            'dataset': 'Dataset'
+        }
+             
+        
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Add Bootstrap class to form fields
-        for field in self.fields.values():
-            field.widget.attrs.update({'class': 'form-control'})
+        #for field in self.fields.values():
+        #    field.widget.attrs.update({'class': 'form-control'})
 
 class TestDatasetForm(forms.ModelForm):
     class Meta:
@@ -25,6 +35,9 @@ class TestDatasetForm(forms.ModelForm):
         fields = ['dataset_test']
         labels = {
             'dataset_test': 'Records to predict'  # Change this label to your desired text
+        }
+        widgets = {
+            'dataset_test': forms.FileInput(attrs={'class': 'form-control  form-control border-purple', 'accept': '.csv, .xlsx'}),
         }
 
 
@@ -36,7 +49,7 @@ class DatasetImgForm(forms.ModelForm):
             'data_name': forms.TextInput(attrs={'class': 'form-control'}),
             'data_path': forms.FileInput(attrs={'class': 'form-control'}),
             'data_path_test': forms.FileInput(attrs={'class': 'form-control'}),
-            #'metainfo': forms.Textarea(attrs={'class': 'form-control'}),
+            #'metapurple': forms.Textarea(attrs={'class': 'form-control'}),
             #'status': forms.TextInput(attrs={'class': 'form-control'}),
         }
         labels = {

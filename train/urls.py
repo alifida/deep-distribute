@@ -6,11 +6,10 @@ from django.views.generic.base import RedirectView
 from .views import welcome
  
 
+     
 urlpatterns = [
-    path('', RedirectView.as_view(url = "home")), 
-    path('home', home_controller.home, name='home'),
-    path('dashboard', home_controller.home, name='home'),
-    path('dashboard/', home_controller.home, name='home'),
+    path('', RedirectView.as_view(url="home", permanent=True)),
+    path('welcome', welcome, name='welcome_'),
     path('welcome/', welcome, name='welcome'),
 ]
 
@@ -55,7 +54,10 @@ urlpatterns += [
 
 #DeploymentController
 urlpatterns += [
-    path('model/welcome/', deployment_controller.index, name='model_welcome'),
+    path('home', deployment_controller.index, name='model_welcome'),
+    path('home', deployment_controller.index, name='home'),
+
+    path('home/', deployment_controller.index, name='home_'),
     path('model/deploy/model/<int:trained_model_id>', deployment_controller.deploy_trained_model, name='deploy_model_url'),
     path('model/deployed/', deployment_controller.list_deployed_models, name='list_deployed_models'),
     path('model/deployed/<int:pk>', deployment_controller.get_model_by_id, name='load_model_by_id'),

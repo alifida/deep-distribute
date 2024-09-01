@@ -5,19 +5,21 @@
         <input type="hidden" name="model_id" value="{{deployed_model.id}}" />
         <div class="form-row">
             {% for attrib in deployed_model.key_attributes %}
-            <div class="form-group col-lg-3 col-md-4 col-sm-12">
+            <div class="form-group  col-lg-3 col-md-4 col-sm-12">
                 <label for="__key_attrib_{{ attrib }}">{{ attrib }}:</label>
-                <input type="text" class="form-control required-form-control" name="__key_attrib_{{ attrib }}" id="__key_attrib_{{ attrib }}" required>
+                <input type="text" class="form-control border-purple required-form-control" name="__key_attrib_{{ attrib }}" id="__key_attrib_{{ attrib }}" required>
             </div>
             {% endfor %}
         </div>
         <div class="row">
-            <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="col-lg-3 col-md-4 col-sm-12 ">
                 <label for="supply_dataset_{{deployed_model.id}}">supply_dataset:</label>
-                <input type="file" name="supply_dataset" id="supply_dataset_{{deployed_model.id}}" onchange="toggleRequiredFields('{{deployed_model.id}}')"/>
+                <input type="file"  class="form-control border-purple " name="supply_dataset" id="supply_dataset_{{deployed_model.id}}" onchange="toggleRequiredFields('{{deployed_model.id}}')"/>
             </div>
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <button type="submit" class="btn btn-outline-info right"><span class="prediction-btn_{{deployed_model.id}}">Predict {{deployed_model.class_label}}</span></button>
+            
+            <div class="col-lg-6 col-md-6 col-sm-12 offset-lg-3 offset-md-4 offset-sm-0">
+                <div class="full-width padding-15" > </div>
+                <button type="submit" class="btn btn-outline-purple right"><span class="prediction-btn_{{deployed_model.id}}">Predict {{deployed_model.class_label}}</span></button>
                 <button type="reset" class="btn btn-outline-secondary right mr-3"><span class="reset-btn">Reset </span></button>
             </div>
         </div>

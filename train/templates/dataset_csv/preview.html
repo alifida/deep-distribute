@@ -13,32 +13,36 @@
 		<div class="container-fluid">
 			 
 			<div class="row ">
-				<div class="col-sm-6">
+				<div class="col-lg-9 col-md-7 col-sm-12">
 					<h1 class="m-0 text-dark left">{% if dataset.description %} {{dataset.description}} {% else %} Dataset {% endif %}</h1>
 				</div>
-				<div class="col-sm-4 hide">
-					<div class="btn-group right">
-                        <a type="button" class="btn btn-sm btn-outline-info"  href="{{dataset.dataset.url}}" title="download"><i class="fas fa-download"></i></a>
-                        <a type="button" class="btn btn-sm btn-outline-success" data-toggle="collapse" href="#process_dataset_wrapper" role="button" aria-expanded="false">Process</a>
-                     </div>
-                       
-				</div>
-				<div class="col-sm-1">
-					<label class="right v-padding-5">Dataset: </label>
-				</div>
-				<div class="col-sm-3 ">
-                      	<select onchange="load_dataset(this)" name="datasets"  class=" form-control form-control-sm border-info" data-style="btn-white  border-info form-control form-control-sm"    >
-						{% for ds in dataset_list %}
-							<option value="{{ds.pk}}" {% if  dataset.pk == ds.pk %} selected="selected" {% endif %} >{{ds.description}}</option>
-						{% endfor %}
+				 
+				 
+
+				<div class="col-lg-3 col-md-5 col-sm-12">
+				<div class="form-group row">
+					<div class="col-sm-2">
+					  <label class="col-form-label v-padding-5 right">Dataset:</label>
+					</div>
+				  
+					<div class="col-sm-10 h-padding-0">
+					  <div class="input-group">
+						<select onchange="load_dataset(this)" name="datasets" class="form-control form-control-sm border-purple">
+						  {% for ds in dataset_list %}
+							<option value="{{ds.pk}}" {% if dataset.pk == ds.pk %} selected="selected" {% endif %}>{{ds.description}}</option>
+						  {% endfor %}
 						</select>
-						 
+						<div class="input-group-append">
+						  <a href="{{dataset.dataset.url}}" class="btn btn-sm btn-outline-purple">
+							<i class="fa fa-download"></i>
+						  </a>
+						</div>
+					  </div>
+					</div>
+				  </div>
 				</div>
-				<div class="col-sm-2">
-					<a href="{{dataset.dataset.url}}"  class="btn btn-sm btn-outline-success  right mr-1">
-						<i class="fa fa-download"></i> Download
-					</a>
-				</div>
+				  
+
 			</div>
 		</div>
 	</div>
@@ -49,7 +53,7 @@
 		<div class="row   ">
 				<div class="col-12 col-sm-6 col-md-3 padding-5">
 					<div class="info-box">
-						<span class="info-box-icon bg-info elevation-1"><i class="fas fa-database"></i></span>
+						<span class="info-box-icon bg-purple elevation-1"><i class="fas fa-database"></i></span>
 
 						<div class="info-box-content">
 							<span class="info-box-text">Total Instances</span> <span class="info-box-number"> {{metainfo.details.total_instances}} <small></small>
@@ -59,7 +63,7 @@
 				</div>
 				<div class="col-12 col-sm-6 col-md-3 padding-5">
 					<div class="info-box">
-						<span class="info-box-icon bg-danger elevation-1"><i class="fas fa-balance-scale"></i></span>
+						<span class="info-box-icon bg-purple elevation-1"><i class="fas fa-balance-scale"></i></span>
 
 						<div class="info-box-content">
 							<span class="info-box-text">Total Weight</span> <span class="info-box-number">{{metainfo.details.total_weight}}</span>
@@ -71,7 +75,7 @@
 
 				<div class="col-12 col-sm-6 col-md-3 padding-5">
 					<div class="info-box">
-						<span class="info-box-icon bg-success elevation-1"><i class="fas fa-tasks"></i></span>
+						<span class="info-box-icon bg-purple elevation-1"><i class="fas fa-tasks"></i></span>
 
 						<div class="info-box-content">
 							<span class="info-box-text">Total Attributes</span> <span class="info-box-number">{{metainfo.details.total_attributes}}</span>
@@ -80,7 +84,7 @@
 				</div>
 				<div class="col-12 col-sm-6 col-md-3 padding-5">
 					<div class="info-box">
-						<span class="info-box-icon bg-warning elevation-1"><i class="fas fa-exclamation"></i></span>
+						<span class="info-box-icon bg-purple elevation-1"><i class="fas fa-exclamation"></i></span>
 
 						<div class="info-box-content">
 							<span class="info-box-text">total_missing</span> <span class="info-box-number">{{metainfo.details.total_missing}}</span>
@@ -93,7 +97,7 @@
 
 			<div class="row   ">
 				<div class="col-lg-12 col-md-12 col-sm-12 padding-5">
-					<div class="card card-info   card-outline" id="sample_data_collapse">
+					<div class="card card-purple   card-outline" id="sample_data_collapse">
 						<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Review Your Data">
 							<h3 class="card-title">Review Your Data</h3>
 							<div class="card-tools">
@@ -143,7 +147,7 @@
 				
 				
 				<div class="col-lg-12 col-md-12 col-sm-12  padding-5">
-					<div class="card card-success collapsed-card card-outline">
+					<div class="card card-purple collapsed-card card-outline">
 						<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Prediction">
 							<h3 class="card-title">Prediction</h3>
 							<div class="card-tools">
@@ -158,13 +162,13 @@
 									<div class="col-lg-4 col-md-4 col-sm-12 ">
 										<label data-toggle="tooltip" title="Choose your training method (e.g., Decision Tree, Naive Bayes)." >Choose Training Method</label>
 										<div class="input-group input-group input-group-sm">
-						                  <select name="algo" id="algos_box" class="selectpicker show-tick form-control form-control-sm border-info" data-style="btn-white  border-info form-control form-control-sm"  title="Select Algo" multiple  data-done-button="true"   data-live-search="true"  required="required">
+						                  <select name="algo" id="algos_box" class="selectpicker show-tick form-control form-control-sm border-purple" data-style="btn-white  border-purple form-control form-control-sm"  title="Select Algo" multiple  data-done-button="true"   data-live-search="true"  required="required">
 							                  	<optgroup label="Classifiers" class="bg-info">
 													{% for clas in classifiers %}
 														 <option class=" " value="{{clas}}">{{clas|title}}</option>
 													{% endfor %}
 							                  	</optgroup>
-							                  	<optgroup label="Regressors" class="bg-success">
+							                  	<optgroup label="Regressors" class="bg-purple">
 													{% for reg in regressors %}
 														 <option class="" value="{{reg}}">{{reg|title}}</option>
 													{% endfor %}
@@ -178,7 +182,7 @@
 											</select>
 											 
 						                  <div class="input-group-append">
-						                    <a type="button" class="btn btn-sm btn-outline-info" onclick="csv_dataset_algos_defaults('algos_defaults_form', 'algos_box', 'algos_defaults');" ><i class="fa fa-edit"></i></a>
+						                    <a type="button" class="btn btn-sm btn-outline-purple" onclick="csv_dataset_algos_defaults('algos_defaults_form', 'algos_box', 'algos_defaults');" ><i class="fa fa-edit"></i></a>
 						                  </div>
 						                </div>
 									</div>
@@ -188,43 +192,43 @@
 
 										</label>
 										<div class="input-group input-group input-group-sm">
-						                  <select name="key_attributes" class="selectpicker form-control form-control-sm border-info " data-style="btn-white  border-info form-control form-control-sm"  title="Select Key attributes"  multiple  data-done-button="true" data-live-search="true" required="required">
+						                  <select name="key_attributes" class="selectpicker form-control form-control-sm border-purple " data-style="btn-white  border-purple form-control form-control-sm"  title="Select Key attributes"  multiple  data-done-button="true" data-live-search="true" required="required">
 												{% for colkey, colval in metainfo.details.columns.items %}
 													<option value="{{colkey}}">{{colkey}}</option> 
 												{% endfor %}
 											</select>
 						                  <div class="input-group-append">
-						                    <a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Key attributes" data-content="Key attributes help text."><i class="fas fa-question"></i></a>
+						                    <a type="button" class="btn btn-sm btn-outline-purple" data-toggle="popover" title="Key attributes" data-content="Key attributes help text."><i class="fas fa-question"></i></a>
 						                  </div>
 						                </div>
 									</div>
 									<div class="col-lg-4 col-md-4 col-sm-12 ">
 										<label data-toggle="tooltip" title="Specify the outcome you want to predict" >Outcome to Predict</label>
 										<div class="input-group input-group input-group-sm">
-						                  <select name="class_label" class="selectpicker form-control form-control-sm border-info" title="Select Class label" 
-						                  	data-style="btn-white  border-info "
+						                  <select name="class_label" class="selectpicker form-control form-control-sm border-purple" title="Select Class label" 
+						                  	data-style="btn-white  border-purple "
 						                  	required="required" data-live-search="true">
 												{% for colkey, colval in metainfo.details.columns.items %}
 													<option value="{{colkey}}">{{colkey}}</option> 
 												{% endfor %}
 											</select>
 						                  <div class="input-group-append">
-						                    <a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Class Lable" data-content="Class labels help text"><i class="fas fa-question"></i></a>
+						                    <a type="button" class="btn btn-sm btn-outline-purple" data-toggle="popover" title="Class Lable" data-content="Class labels help text"><i class="fas fa-question"></i></a>
 						                  </div>
 						                </div>
 									</div>
 								</div>
 				                <div class="row v-padding-20">
-									<div class="col-lg-2 col-md-3 col-sm-12 ">
+									<div class="col-lg-2 col-md-4 col-sm-12 ">
 										<label data-toggle="tooltip" title="Set up your testing options (e.g., Provide Records to predict, Percentage Split, or Cross Validation" >Test Setup</label>
 										<div class="input-group input-group input-group-sm">
-						                  <select  onchange="toggle_test_options(this);" name="test_option" class=" form-control form-control-sm border-info " data-style="btn-white  border-info form-control form-control-sm"  title="Select Key attributes"  required="required">
+						                  <select  onchange="toggle_test_options(this);" name="test_option" class=" form-control form-control-sm border-purple " data-style="btn-white  border-purple form-control form-control-sm"  title="Select Key attributes"  required="required">
 											  <option value="3" selected >Provide Records to predict</option> 
 												<option value="1">Percentage Split</option> 
 												<option value="2">Cross Validation </option> 
 											</select>
 						                  <div class="input-group-append">
-						                    <a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Key attributes" data-content="Key attributes help text."><i class="fas fa-question"></i></a>
+						                    <a type="button" class="btn btn-sm btn-outline-purple" data-toggle="popover" title="Key attributes" data-content="Key attributes help text."><i class="fas fa-question"></i></a>
 						                  </div>
 						                </div>
 									</div>
@@ -251,28 +255,26 @@
 										 
 									</script>
 									
-									<div class="col-lg-2 col-md-3 col-sm-6 p-split-attribs hide">
+									<div class="col-lg-2 col-md-4 col-sm-6 p-split-attribs hide">
 										<label >Test Data (%)</label>
 										<div class="input-group input-group input-group-sm">
-											<input min="0" max="1" step=".05" type="number" class="form-control form-control-sm border-info" name="test_percent" value="{{default_test_percent}}" required="required">
+											<input min="0" max="1" step=".05" type="number" class="form-control form-control-sm border-purple" name="test_percent" value="{{default_test_percent}}" required="required">
 						                  	<div class="input-group-append">
-						                   		<a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Test Data " data-content="Test data percentate...."><i class="fas fa-question"></i></a>
+						                   		<a type="button" class="btn btn-sm btn-outline-purple" data-toggle="popover" title="Test Data " data-content="Test data percentate...."><i class="fas fa-question"></i></a>
 						                  	</div>
 						                </div>
 									</div>
-									<div class="col-lg-2 col-md-3 col-sm-6 cv-attribs hide">
+									<div class="col-lg-2 col-md-4 col-sm-6 cv-attribs hide">
 										<label >CV (K Folds)</label>
 										<div class="input-group input-group input-group-sm">
-											<input min="0"  step="1" type="number" class="form-control form-control-sm border-info" name="splits" >
+											<input min="0"  step="1" type="number" class="form-control form-control-sm border-purple" name="splits" >
 						                  	<div class="input-group-append">
-						                   		<a type="button" class="btn btn-sm btn-outline-info" data-toggle="popover" title="Cross validation" data-content="Cross validation...."><i class="fas fa-question"></i></a>
+						                   		<a type="button" class="btn btn-sm btn-outline-purple" data-toggle="popover" title="Cross validation" data-content="Cross validation...."><i class="fas fa-question"></i></a>
 						                  	</div>
 						                </div>
 									</div>
-									<div class="col-lg-3 col-md-3 col-sm-12 supply-test-dataset  full-label-inner">
+									<div class="col-lg-2 col-md-4 col-sm-6 supply-test-dataset  full-label-inner">
 										{% csrf_token %}  
-
-
 										<div class="form-group">
 											<label for="{{ testDatasetForm.dataset_test.id_for_label }}" data-toggle="tooltip" title="Select the dataset records you want to predict outcomes for.">
 												{{ testDatasetForm.dataset_test.label }}
@@ -280,12 +282,25 @@
 											{{ testDatasetForm.dataset_test }}
 										</div>
 									</div>
-									<div class="col-lg-1 col-md-2 col-sm-12">
-										<label >Normalize</label>
-										<div class="custom-control v-padding-5 custom-switch">
-											<input onchange = "toggle_normalize_range(this);" name="normalize" type="checkbox" class="custom-control-input left " id="normalize_switch" /> 
-											<label class=" custom-control-label" for="normalize_switch"></label>
+									<div class="col-lg-4 col-md-4 col-sm-6">
+										<div class="row padding-0">
+											<div class="col-lg-6 col-md-6 col-sm-6 padding-0">
+												<label >Normalize</label>
+												<div class="custom-control v-padding-5 custom-switch">
+													<input onchange = "toggle_normalize_range(this);" name="normalize" type="checkbox" class="custom-control-input left " id="normalize_switch" /> 
+													<label class=" custom-control-label" for="normalize_switch"></label>
+												</div>
+											</div>
+											<div class="col-lg-6 col-md-6 col-sm-6 padding-0 hide norm-range">
+												<label >Normalize Range</label>
+												<div class="input-group input-group input-group-sm">
+													<input  step="0.1" value="0" type="number" class="form-control form-control-sm border-purple" name="normalize_min" >
+													   <input  step="0.1" value="1" type="number" class="form-control form-control-sm border-purple" name="normalize_max" >
+												</div>
+											</div>
 										</div>
+										
+
 									</div>
 									<script>
 										function toggle_normalize_range(item){
@@ -297,17 +312,11 @@
 											}
 										}
 									</script>
-									<div class="col-lg-2 col-md-2 col-sm-6 norm-range hide">
-										<label >Normalize Range</label>
-										<div class="input-group input-group input-group-sm">
-											<input  step="0.1" value="0" type="number" class="form-control form-control-sm border-info" name="normalize_min" >
-						                   	<input  step="0.1" value="1" type="number" class="form-control form-control-sm border-info" name="normalize_max" >
-						                </div>
-									</div>
+									 
 									
-									<div class="col-lg-2 col-md-2 col-sm-6 right">
+									<div class="col-lg-2 col-md-3 col-sm-12 offset-lg-2 offset-md-9 offset-sm-0 right">
 										<label class="text-transparent block full-width"> .</label>
-										<button type="submit" class=" form-control form-control-sm  btn  btn-outline-info btn-block btn-sm right "><span class="prediction-btn">Predict</span></button>
+										<button type="submit" class=" form-control form-control-sm  btn  btn-outline-purple btn-block btn-sm right "><span class="prediction-btn">Predict</span></button>
 									</div>
 								</div>
 								
@@ -330,7 +339,7 @@
  
           <div class="col-12 padding-5 hide" id="prediction_output">
             <!-- Custom Tabs -->
-            <div class="card card-success card-outline">
+            <div class="card card-purple card-outline">
 				<div class="card-header d-flex p-0">
 					<div class="row">
 						<div class="col-lg-4">
@@ -342,7 +351,7 @@
 									<div class="select-box"></div>
 								</div>
 								<div class="col-lg-6 col-md-6 col-sm-6">
-									<button onclick="deploy_model();"  class=" form-control form-control-sm  btn  btn-success btn-block btn-sm right "><span class="deploy-btn">Deploy For furture Use</span></button>
+									<button onclick="deploy_model();"  class=" form-control form-control-sm  btn  btn-purple btn-block btn-sm right "><span class="deploy-btn">Deploy For furture Use</span></button>
 								</div>
 								 
 							</div>
@@ -467,7 +476,7 @@
 								deploy_model_options ="";
 
 								cards ='';
-								cards += "<div class='card card-success card-outline full-width' >";
+								cards += "<div class='card card-purple card-outline full-width' >";
 								cards +='	<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Results Details"> ';
 								cards +='		<h3 class="card-title">Results Details</h3>';
 								cards +='		<div class="card-tools">';
@@ -522,7 +531,7 @@
 									
 
 							    	cards +='<div class="col-lg-4 col-md-4 col-sm-12 padding-5 ">';
-							    	cards +='<div class="card card-outline card-success">';
+							    	cards +='<div class="card card-outline card-purple">';
 							    	cards += '<div class="card-header">';
 									cards += '	<h3 class="card-title">'+classifier['classifier']+'</h3>';
 									cards += '</div>';	
@@ -618,7 +627,7 @@
 
 
 								selectbox ='';
-								selectbox ="<select id='model_to_deploy' name='model_to_deploy' class=' form-control form-control-sm border-success '>";
+								selectbox ="<select id='model_to_deploy' name='model_to_deploy' class=' form-control form-control-sm border-purple '>";
 								selectbox += deploy_model_options;
 								selectbox += "</select>"
 
@@ -627,7 +636,7 @@
 								
 								html ='<div class="row">';
 								html +='<div class="col-lg-12 col-md-12 col-sm-12 padding-5 ">';
-								html += '<div class="card card-outline card-success">';
+								html += '<div class="card card-outline card-purple">';
 								html += '<div class="card-header">';
 								html += '	<h3 class="card-title">Results Comparison</h3>';
 								html += '</div>';	
