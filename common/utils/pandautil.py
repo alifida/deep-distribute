@@ -26,9 +26,9 @@ from sklearn.model_selection._split import KFold
 import joblib
 
 
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.wrappers.scikit_learn import KerasRegressor
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import cross_val_score
 
 from sklearn.preprocessing import StandardScaler

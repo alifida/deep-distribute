@@ -1,9 +1,9 @@
 from sklearn import datasets, linear_model
 from sklearn.model_selection import cross_val_score, KFold
-from keras.models import Sequential
+from tensorflow.keras.models import Sequential
 from sklearn.metrics import accuracy_score
-from keras.layers import Dense
-from keras.wrappers.scikit_learn import KerasRegressor
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
 seed = 1
 
 diabetes = datasets.load_diabetes()
