@@ -1,0 +1,386 @@
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card card-purple card-outline mb-2">
+
+
+      <div class="card-header d-flex p-0">
+        <div class="row">
+          <div class="col-lg-4">
+            <h3 class="card-title p-3">Prediction Results</h3>
+          </div>
+          <div class="col-lg-4">
+            <div class="row padding-10" id="deployment_wrapper"></div>
+          </div>
+          <div class="col-lg-4">
+            <ul class="nav nav-pills ml-auto p-2 right">
+              <li class="nav-item">
+                <a class="nav-link active" href="#tab_1" data-toggle="tab"
+                  >Results</a>
+              </li>
+              
+              <li class="nav-item">
+                <a class="nav-link" href="#tab_2" data-toggle="tab" >Predicted Data</a >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  	</div>
+	</div>
+
+	<div class="tab-content">
+  	<div class="tab-pane active charts-wrapper" id="tab_1">
+		<div class="row h-padding-0 mb-2">
+			<div class="col-lg-6 col-md-6 col-sm-12">
+				<div class="card padding-10">
+				<div id="chart_1" class="">
+					<div class="chart"></div>
+					<span class="data hide"> {{charts.chart_1}} </span>
+				</div>
+				</div>
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-12">
+				<div class="card padding-10">
+				<div id="chart_2" class="">
+					<div class="chart"></div>
+					<span class="data hide"> {{charts.chart_2}} </span>
+				</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-3 col-sm-12">
+				<div class="card padding-10 mt-3">
+				<div id="chart_accuracy" class="">
+					<div class="chart"></div>
+					<span class="data hide"> {{charts.chart_accuracy}} </span>
+				</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-3 col-sm-12">
+				<div class="card padding-10 mt-3">
+				<div id="chart_precision" class="">
+					<div class="chart"></div>
+					<span class="data hide"> {{charts.chart_precision}} </span>
+				</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-3 col-sm-12">
+				<div class="card padding-10 mt-3">
+				<div id="chart_recall" class="">
+					<div class="chart"></div>
+					<span class="data hide"> {{charts.chart_recall}} </span>
+				</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-3 col-sm-12">
+				<div class="card padding-10 mt-3">
+				<div id="chart_fscore" class="">
+					<div class="chart"></div>
+					<span class="data hide"> {{charts.chart_fscore}} </span>
+				</div>
+				</div>
+			</div>
+		</div>
+		<div class="tabular row mt-3 padding-10">
+			<div class="card card-purple card-outline full-width">
+			   <div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+				  <h3 class="card-title">Results Comparison</h3>
+				  <div class="card-tools">			
+					 <button type="button" class="btn btn-default btn-xs" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">				
+					 <i class="fas fa-minus"></i>			
+					 </button>		
+				  </div>
+			   </div>
+			   <div class="card-body">
+				  <div class="row" id="result_comparison_datatable">
+						
+					<table class="dataframe dataTable full-width" >
+						<thead>
+							{% if classifiers %}
+							<tr role="row">
+								<th>Regressor</th>
+								{% for key in classifiers.0.primary_info.keys %}
+								{% if key != "Confusion matrix" and key != "Multilabel confusion matrix" and key != "Classification report" %}
+								<th>{{ key }}</th>
+								{% endif %}
+								{% endfor %}
+							</tr>
+							{% endif %}
+						</thead>
+						<tbody>
+							{% for classifier in classifiers %}
+							<tr role="row" class="{% cycle 'odd' 'even' %}">
+								<td>{{ classifier.classifier }}</td>
+								{% for key, value in classifier.primary_info.items %}
+								{% if key != "Confusion matrix" and key != "Multilabel confusion matrix" and key != "Classification report" %}
+								<td>
+									{% if value is iterable and value.0 is string %}
+									{{ value|join:", " }}
+									{% else %}
+									{{ value }}
+									{% endif %}
+								</td>
+								{% endif %}
+								{% endfor %}
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				  </div>
+
+
+
+
+				  
+			   </div>
+			</div>
+
+
+
+
+
+
+
+			{% for classifier in classifiers %}
+				<div class="row h-padding-0">
+					<div class="col-lg-12 col-md-12 col-sm-12 h-padding-0">
+						<div class="card mt-3 card-outline card-purple">
+							<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+								<h3 class="card-title">{{ classifier.classifier }}</h3>
+								<div class="card-tools">			
+								<button type="button" class="btn btn-default btn-xs" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">				
+								<i class="fas fa-minus"></i>			
+								</button>		
+								</div>
+							</div>
+							
+							<div class="card-body">
+								<div class="row h-padding-0">
+									<div class="col-lg-12 col-md-12 col-sm-12 h-padding-0">
+										<div class="row">
+											{% for key, value in classifier.primary_info.items %}
+												{% if key == "Confusion matrix" %}
+													<div class="col-lg-2 col-md-3 col-sm-12">
+														<div class="card mb-3 card-outline card-purple">
+															<div class="card-header">Confusion matrix</div>
+															<div class="card-body">
+																{% if value %}
+																	{% for row in value %}
+																		{{ row  }}
+																	{% endfor %}
+																{% else %}
+																	No data available
+																{% endif %}
+															</div>
+														</div>
+													</div>
+												{% endif %}
+												{% if key == "Multilabel confusion matrix" %}
+													<div class="col-lg-2 col-md-3 col-sm-12">
+														<div class="card mb-3 card-outline card-purple">
+															<div class="card-header">Multilabel confusion matrix</div>
+															<div class="card-body" >
+																{% if value %}
+																		<div id="{{ classifier.classifier }}_matrix_2">
+																			{{ value  }}
+																		</div>
+																		<script>
+																			
+																			
+																		</script>
+																{% else %}
+																	No data available
+																{% endif %}
+																
+															</div>
+														</div>
+													</div>
+												{% endif %}
+												{% if key == "Classification report" %}
+													<div class="col-lg-8 col-md-6 col-sm-12">
+														<div class="card mb-3 card-outline card-purple">
+															<div class="card-header">Classification report</div>
+															<div class="card-body">
+																{% if value %}
+																		{{ value  }}
+																{% else %}
+																	No data available
+																{% endif %}
+															</div>
+														</div>
+													</div>
+												{% endif %}
+											{% endfor %}
+										</div> <!-- End of .row inside .card-body -->
+									</div> <!-- End of .col-lg-12 inside .card-body -->
+								</div> <!-- End of .row inside .card-body -->
+							</div> <!-- End of .card-body -->
+						</div> <!-- End of .card -->
+					</div> <!-- End of .col-lg-12 -->
+				</div> <!-- End of .row -->
+				{% endfor %}
+
+ 
+
+
+
+
+
+
+
+			
+						 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		</div>
+		 
+	</div>
+
+		
+	
+
+		<div class="tab-pane primary-info" id="tab_2">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card padding-10">
+						<ul class="nav nav-tabs" id="custom-content-below-tab" role="tablist">
+							{% for classifier in classifiers %}
+								<li class="nav-item">
+									<a class="nav-link {% if forloop.first %}active{% endif %}" 
+									data-toggle="pill" 
+									href="#{{ classifier.classifier }}-datatab" 
+									role="tab" 
+									aria-controls="{{ classifier.classifier }}-datatab" 
+									aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+									{{ classifier.classifier }}
+									</a>
+								</li>
+							{% endfor %}
+						</ul>
+						<div class="tab-content" id="custom-content-below-tabContent">
+							{% for classifier in classifiers %}
+								<div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+									id="{{ classifier.classifier }}-datatab" 
+									role="tabpanel" 
+									aria-labelledby="{{ classifier.classifier }}-datatab">
+									<div class="full-width padding-10 mt-3">
+										{{ classifier.secondary_info.test_features_html|safe }}
+									</div>
+								</div>
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	
+<script>
+	convert_to_datatable();
+</script>
+
+
+
+
+
+
+		</div>
+	
+
+
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="card">
+					<div class="card-body">
+						<div class="row">
+							<div class="col-lg-12 col-md-12 col-sm-12">
+								<div class="info-box bg-light mb-3">
+									<div class="info-box-content">
+									<span class="info-box-text text-center text-muted">Choose a Model to deploy it for future use.</span>
+									<span class="info-box-number text-center text-muted mb-0"></span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-lg-4 col-md-4 col-sm-12 offset-lg-4 offset-md-4 offset-sm-0">
+								<select id='model_to_deploy' name='model_to_deploy' class='mb-3 form-control form-control-sm border-purple '>
+									{% for classifier in classifiers %}
+									<option value="{{classifier.trained_model_id}}">{{classifier.classifier}}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<div class="col-lg-4 col-md-4 col-sm-12 offset-lg-4 offset-md-4 offset-sm-0">
+								 
+								<button type="button"  onclick="deploy_model();"  class=" btn  btn-purple btn-block btn-lg right "><span class="deploy-btn text-lg">Deploy For furture Use</span></button>
+							</div>
+						</div>
+					</div>
+				</div>
+				 
+			</div>
+		</div>
+
+		
+
+
+
+</div>
+
+<script>
+  $(document).ready(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+    disable_prediction = false;
+    plot_chart("chart_1");
+    plot_chart("chart_2");
+    plot_chart("chart_accuracy");
+    plot_chart("chart_fscore");
+    plot_chart("chart_precision");
+    plot_chart("chart_recall");
+
+    $("#chart_2 .highcharts-data-table").html("");
+    $("#chart_accuracy .highcharts-data-table").html("");
+    $("#chart_precision .highcharts-data-table").html("");
+    $("#chart_recall .highcharts-data-table").html("");
+    $("#chart_fscore .highcharts-data-table").html("");
+  });
+
+  function plot_chart(target_id) {
+    console.log("-------------");
+
+    jsonData = $("#" + target_id + " .data")
+      .html()
+      .trim();
+
+    // Remove \r and \n, but be cautious with the backslashes
+    jsonData = jsonData.replace(/\\r/g, "");
+    jsonData = jsonData.replace(/\\n/g, "");
+    jsonData = jsonData.replace(/\\"/g, '"'); // Handle escaped quotes correctly
+
+    // Remove the outer double quotes if they exist
+    if (jsonData.startsWith('"') && jsonData.endsWith('"')) {
+      jsonData = jsonData.slice(1, -1);
+    }
+    chartmodel = {};
+    try {
+      
+      console.log(jsonData);
+      chartmodel = $.parseJSON(jsonData);
+      //console.log(chartmodel.chart);
+    } catch (e) {
+      console.error("Parsing error:", e);
+    }
+    $("#" + target_id + " .chart").highcharts(chartmodel);
+  }
+</script>

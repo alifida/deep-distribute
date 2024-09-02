@@ -12,7 +12,7 @@
 	<div class="content-header">
 		<div class="container-fluid">
 			 
-			<div class="row ">
+			<div class="row h-padding-10">
 				<div class="col-lg-9 col-md-7 col-sm-12">
 					<h1 class="m-0 text-dark left">{% if dataset.description %} {{dataset.description}} {% else %} Dataset {% endif %}</h1>
 				</div>
@@ -50,7 +50,7 @@
 		<div class="container-fluid ">
 		
 		
-		<div class="row   ">
+		<div class="row  h-padding-10 ">
 				<div class="col-12 col-sm-6 col-md-3 padding-5">
 					<div class="info-box">
 						<span class="info-box-icon bg-purple elevation-1"><i class="fas fa-database"></i></span>
@@ -95,7 +95,7 @@
 
 
 
-			<div class="row   ">
+			<div class="row  h-padding-10 ">
 				<div class="col-lg-12 col-md-12 col-sm-12 padding-5">
 					<div class="card card-purple   card-outline" id="sample_data_collapse">
 						<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Review Your Data">
@@ -142,7 +142,7 @@
 		
 		
 		
-			<div class="row  " id="process_dataset_wrapper">
+			<div class="row  h-padding-10" id="process_dataset_wrapper">
 				 
 				
 				
@@ -337,60 +337,9 @@
 			</div>
 
  
-          <div class="col-12 padding-5 hide" id="prediction_output">
-            <!-- Custom Tabs -->
-            <div class="card card-purple card-outline">
-				<div class="card-header d-flex p-0">
-					<div class="row">
-						<div class="col-lg-4">
-							<h3 class="card-title p-3">Prediction Results</h3>
-						</div>
-						<div class="col-lg-4">
-							<div class="row padding-10" id="deployment_wrapper">
-								<div class="col-lg-6 col-md-6 col-sm-6">
-									<div class="select-box"></div>
-								</div>
-								<div class="col-lg-6 col-md-6 col-sm-6">
-									<button onclick="deploy_model();"  class=" form-control form-control-sm  btn  btn-purple btn-block btn-sm right "><span class="deploy-btn">Deploy For furture Use</span></button>
-								</div>
-								 
-							</div>
-						</div>
-						<div class="col-lg-4 ">
-							<ul class="nav nav-pills ml-auto p-2 right">
-								<li class="nav-item"><a class="nav-link active" href="#tab_1" data-toggle="tab">Charts</a></li>
-								<li class="nav-item"><a class="nav-link" href="#tab_2" data-toggle="tab">Results</a></li>
-								<li class="nav-item"><a class="nav-link" href="#tab_3" data-toggle="tab">Predicted Data</a></li>
-							</ul>
-						</div>
-					</div>
-					
-						
-
-
-						 
-
-
-				</div>
-              <div class="card-body" >
-                <div class="tab-content" >
-                  <div class="tab-pane active charts-wrapper " id="tab_1" >
-                   	<div class="results"></div>
-                  </div>
-                  <div class="tab-pane primary-info" id="tab_2" >
-                   	<div class="results">
-                   		<div class="cards row"></div>
-                   		<div class="tabular row mt-2"></div>
-                   	</div>
-                  </div>
-                  <div class="tab-pane  secondary-info" id="tab_3" >
-                   	<div class="results"></div>
-                   	
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- ./card -->
+          <div class="col-12 padding-5 " id="prediction_output">
+            <div class="card">
+			</div>
           </div>
          
 
@@ -398,9 +347,28 @@
 
 							 
 							<script type="text/javascript">
+
+								function test_predict(){
+									if(disable_prediction == false){
+										var url = "{% url 'predict_csv_dataset' %}" ;
+										display_loader("#prediction_output .card");
+										var selected = $(':selected', $("#algos_box"));
+										selected_group = selected.parent().attr('label');
+										console.log(selected_group);
+										$("#algo_type").val(selected_group);
+										
+										var url = "{% url 'predict_csv_dataset' %}" ;
+										ajax_submit(url, 'prediction_output', 'dataset_prediction_form', 'POST');
+									}
+									
+									
+								}
+
+
 								var disable_prediction = false;
 								function submit_dataset_prediction_form(){
-										
+										test_predict();
+										return;
 									if(disable_prediction == false){
 									
 										var selected = $(':selected', $("#algos_box"));
@@ -444,230 +412,7 @@
 						  	}
 								
 							 	
-							function display_prediction_results(res){
-								 
-								for (var chart_key in res.charts) {
-									var chart_div ='<div id="chart_' + chart_key + '"></div>';
-									$("#prediction_output .charts-wrapper .results").append(chart_div);
-									plot_charts("chart_"+ chart_key , res.charts[chart_key]);
-								}
-							
-							
-								
-								tab_content ='<div class="tab-content" >'; 
-								tab_head = '<ul class="nav nav-tabs" role="tablist">';	 
-								var activeclass="";
-								
-								var key_set = new Set();
-								for (var key_out in res.classifiers) {
-									classifier = res.classifiers[key_out];
-									// populate keys_set
-									for (var key in classifier['primary_info']) {
-									    if (classifier.primary_info.hasOwnProperty(key)) {
-									    	 key_set.add(key);
-									    }
-									}
-								}
-								key_set = Array.from(key_set);
-								console.log(key_set);
-
-								
-								
-								deploy_model_options ="";
-
-								cards ='';
-								cards += "<div class='card card-purple card-outline full-width' >";
-								cards +='	<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Results Details"> ';
-								cards +='		<h3 class="card-title">Results Details</h3>';
-								cards +='		<div class="card-tools">';
-								cards +='			<button type="button" class="btn btn-default btn-xs" data-card-widget="collapse" data-toggle="tooltip" title="Results Details">';
-								cards +='				<i class="fas fa-minus"></i>';
-								cards +='			</button>';
-								cards +='		</div>';
-								cards +='	</div>';
-								cards +='<div class="card-body">';
-								cards +='	<div class="row">';
-								
-								
-								table ='';
-								table += "<div class='card card-info card-outline full-width' >";
-								table +='	<div class="card-header pointer" data-card-widget="collapse" data-toggle="tooltip" title="Results Comparison"> ';
-								table +='		<h3 class="card-title">Results Comparison</h3>';
-								table +='		<div class="card-tools">';
-								table +='			<button type="button" class="btn btn-default btn-xs" data-card-widget="collapse" data-toggle="tooltip" title="Results Comparison">';
-								table +='				<i class="fas fa-minus"></i>';
-								table +='			</button>';
-								table +='		</div>';
-								table +='	</div>';
-								table +='<div class="card-body">';
-								table +='	<div class="row">';
-								
-								table += '	<table class="dataTable dataframe">';
-								table += '	<thead>	<tr>';
-						    	table += '		<th>';
-						        table += 			'Training Method';
-						        table += '		</th>';
-									for (var index in key_set) {
-											
-									    	table += '		<th>';
-									        table += 			key_set[index];
-									        table += '		</th>';
-									   
-									}
-											
-											
-									table += '	</tr> </thead>';
-									table += ' <tbody>	';		
-								
-								for (var key_out in res.classifiers) {
-									if(key_out == 0){
-										activeclass="active";
-									}else {
-										activeclass="";
-									}
-									classifier = res.classifiers[key_out];
-									
-									deploy_model_options += '<option value="'+classifier['trained_model_id']+'">'+classifier['classifier']+'</option>';
-									
-
-							    	cards +='<div class="col-lg-4 col-md-4 col-sm-12 padding-5 ">';
-							    	cards +='<div class="card card-outline card-purple">';
-							    	cards += '<div class="card-header">';
-									cards += '	<h3 class="card-title">'+classifier['classifier']+'</h3>';
-									cards += '</div>';	
-								    cards += '	<div class="card-body padding-0">';
-								    cards += '	<ul class="nav nav-pills flex-column">';
-							    	
-							    	table += ' <tr>';
-							    	table += '		<td>';
-							        table += 			classifier['classifier'];
-							        table += '		</td>';
-									
-									for (var index in key_set) {
-									
-									    	key2 = key_set[index];
-									        table += '		<td>';
-									       try {
-											  	var $tmp_str = classifier['primary_info'][key2];
-									        	$tmp_str = $tmp_str.toString();
-									        	tmp_str = $tmp_str.replace(/,/g, ", ");
-									        	table += tmp_str;
-									        	
-									        	
-									        cards += '		<li class="nav-item row ">';
-									    	cards += '		<span class="col-sm-10 h-padding-5">';
-									        cards += 			key2;
-									        cards += '		</span>';
-									        cards += '		<span class="col-sm-2 h-padding-0">';
-									        cards += tmp_str
-									        cards += '		</span>';
-											cards += '	</li>';
-									        	
-									        	
-											}
-											catch(err) {
-											 console.log('Ignored missing value in result set.');
-											 console.log(err);
-											}
-									        
-									        table += '		</td>';
-									        
-									     
-									    
-									}
-									table += '	</tr>';
-										
-									cards += '	</ul>';
-									cards += '	</div>';
-									cards += '	</div>';
-									cards += '	</div>';
-									
-									
-									
-									
-								 
-									
-									
-									
-									tab_head += '<li class="nav-item">';
-                					tab_head += '	<a class="nav-link '+activeclass+'" data-toggle="pill" href="#sec_tab_'+key_out+'" role="tab" aria-controls="custom-content-below-home" aria-selected="true">'+classifier['classifier']+'</a>';
-              						tab_head += '</li>';
-              						 
-									tab_content += '<div class=" tab-pane fade '+activeclass+' show" id="sec_tab_'+key_out+'" role="tabpanel" aria-labelledby="custom-content-below-home-tab">';
-									
-									for (var key_s in classifier['secondary_info']) {
-									    if (classifier['secondary_info'].hasOwnProperty(key_s)) {
-									    	if(key_s=='test_features_html'){
-									    		
-									    		tab_content += '<div class="v-padding-10">';
-									    		tab_content += classifier['secondary_info'][key_s];
-									    		tab_content += '</div>';
-									    		continue;
-									    	}
-										}    
-									}
-								
-									tab_content += '		</div>';
-									
-								}
-								cards += '	</div>';
-								cards += '	</div>';
-								cards += '	</div>';
-								table += '	 </tbody>';
-								
-								table += '	</table>';
-								
-								
-								
-								table += '	</div>';
-								table += '	</div>';
-								table += '	</div>';
-								 
-
-
-
-								selectbox ='';
-								selectbox ="<select id='model_to_deploy' name='model_to_deploy' class=' form-control form-control-sm border-purple '>";
-								selectbox += deploy_model_options;
-								selectbox += "</select>"
-
-
-								/*
-								
-								html ='<div class="row">';
-								html +='<div class="col-lg-12 col-md-12 col-sm-12 padding-5 ">';
-								html += '<div class="card card-outline card-purple">';
-								html += '<div class="card-header">';
-								html += '	<h3 class="card-title">Results Comparison</h3>';
-								html += '</div>';	
-							    html += '	<div class="card-body">';
-								
-								 html += table;
-								
-								html += '	</div>';
-								html += '</div>';
-								html += '</div>';
-								html += '</div>';	
-								*/
-								
-								tab_head += '</div>';	
-								tab_content += '</div>';
-								
-								$("#prediction_output .primary-info .results .tabular").html(table);
-								$("#prediction_output .primary-info .results .cards").html(cards);
-								
-								
-								$("#prediction_output .secondary-info .results").append( tab_head );
-								$("#prediction_output .secondary-info .results").append( tab_content );
-								
-
-
-								$("#deployment_wrapper .select-box").html(selectbox);
-
-								$("#prediction_output").removeClass("hide");
-								convert_to_datatable();
-									
-							}
+							 
 								
 								function convert_to_datatable(){
 									$('.dataframe').DataTable({
@@ -695,27 +440,7 @@
 								}
 								 
 							</script>
-							<script type="text/javascript">
-								function get_algos_defaults(defaults_form_id, select_box_id, target_id){
-									
-									var defaults_url= "{% url 'csv_dataset_algos_defaults' %}";
-									//var defaults_form_id = "algos_defaults_form";
-									$("#"+defaults_form_id).remove();
-
-									var selected_algos = $('#'+select_box_id).val();
-									 
-									if(selected_algos != ""){
-										$f_html = '<form id="'+defaults_form_id+'">';
-										$f_html += '<input class="hide" required="required" name="selected_algos" type="text" value="' + selected_algos +'"/>';
-										$f_html += '</form>';
-	
-										$($f_html).appendTo('body');
-										ajax_submit(defaults_url, target_id, defaults_form_id, 'POST',  '', '', '');
-									}
-								}
-								
-							</script>
-
+							 
 			
 
 		</div>
@@ -759,7 +484,6 @@ var url= "";
 	
 	display_loader(".deploy-btn");
     var modelId = $("#model_to_deploy").val(); // Correct way to get value using jQuery
-	
     var deploy_model_url = "{% url 'deploy_model_url' 0 %}".replace(/0$/, modelId); // Replace placeholder with actual modelId
     disable_deploy = true;
 	ajax_submit(deploy_model_url,'','', 'POST',  '', after_deploy_model, after_deploy_model) ;

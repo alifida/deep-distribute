@@ -32,6 +32,8 @@ def get_algos_defaults(request):
     return util.myrender(request, 'dataset_csv/algos_defaults.html', data)
 
 
+
+ 
 @login_required
 @permission_required('datasource.change_dataset')
 def predict_dataset(request):
@@ -106,9 +108,11 @@ def predict_dataset(request):
             classifier = run_scikit_algo_cv(params, algo_params)
             
             classifier["classifier"] = algo
-            
+           
+
             if classifier["status"] ==  "success":
-                prepare_primary_chart_data(chart_data, classifier)
+               
+                prepare_chart_series(chart_data, classifier)
                
                 res_status &= True
                 
@@ -121,28 +125,40 @@ def predict_dataset(request):
             res_status &= False
             res_message += "<br/><b><u> Error occured for algo : " +algo+ ", Error: " +str(ex)+"</u></b>:  " 
     
-    charts = []
+    charts = {}
     
     colors ='["#ffc107","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#dc6835", "#dcbc35", "#4bb106", "#0666b1", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
-    
+    colors ='[ "#8842ff", "#4276ff", "#28a745", "#0666b1","#42ffae","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
     
     
     if "primary_series" in chart_data :
         primary_series_json = util.tojson(chart_data["primary_series"])
         primary_categories_json = util.tojson(chart_data["primary_categories"])
-        primary_chart = prepare_chart(primary_series_json, primary_categories_json, 23, "Summary", colors, 'auto')
-        charts.append(primary_chart)
+        primary_chart = prepare_chart(primary_series_json, primary_categories_json, 23, "Summary", colors, '300')
+        #charts["chart_1"]=primary_chart
+        charts["chart_1"]=util.tojson(primary_chart)
+        
+         
+
+        
         
     if "secondary_series" in chart_data :   
         colors ='[ "#dc6835", "#dcbc35", "#4bb106", "#0666b1","#ffc107","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
+        colors ='[ "#8842ff", "#4276ff", "#28a745", "#0666b1","#42ffae","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
         secondary_series_json = util.tojson(chart_data["secondary_series"])
         secondary_categories_json = util.tojson(chart_data["secondary_categories"])
-        secondary_chart = prepare_chart(secondary_series_json, secondary_categories_json, 31,  "Error Comparison" , colors, 'auto')
+        secondary_chart = prepare_chart(secondary_series_json, secondary_categories_json, 31,  "Error Comparison" , colors, '300')
         
-        charts.append(secondary_chart)
-        
-        
-        res["charts"] = charts
+        #charts["chart_2"]= secondary_chart
+        charts["chart_2"]=util.tojson(secondary_chart)
+         
+    charts = prepare_accuracy_chart(charts, chart_data)  
+    charts = prepare_fscore_chart(charts, chart_data)  
+    charts = prepare_precision_chart(charts, chart_data)  
+    charts = prepare_recall_chart(charts, chart_data)  
+    
+     
+    res["charts"] = charts
     
     if res_status :
         res["status"] = "success"
@@ -154,15 +170,73 @@ def predict_dataset(request):
     
     res["classifiers"] = classifiers
     
-    jsondata = util.tojson(res)  
 
-    return HttpResponse(jsondata);
     
+    return util.myrender(request, 'dataset_csv/review_results.html', res)
+    #jsondata = util.tojson(res)  
+    #return HttpResponse(jsondata);
+
+def prepare_accuracy_chart(charts, chart_data):
+    if "accuracy_series" in chart_data :   
+        colors ='[ "#dc6835", "#dcbc35", "#4bb106", "#0666b1","#ffc107","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
+        colors ='[ "#8842ff", "#4276ff", "#28a745", "#0666b1","#42ffae","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
+        series_json = util.tojson(chart_data["accuracy_series"])
+        categories_json = util.tojson(chart_data["accuracy_categories"])
+        chart = prepare_chart(series_json, categories_json, 24,  "Accuracy Comparison" , colors, '200')
+         
+        charts["chart_accuracy"]=util.tojson(chart)
+    return charts
+
+def prepare_fscore_chart(charts, chart_data):
+    if "fscore_series" in chart_data :   
+        colors ='[ "#dc6835", "#dcbc35", "#4bb106", "#0666b1","#ffc107","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
+        colors ='[ "#8842ff", "#4276ff", "#28a745", "#0666b1","#42ffae","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
+        series_json = util.tojson(chart_data["fscore_series"])
+        categories_json = util.tojson(chart_data["fscore_categories"])
+        chart = prepare_chart(series_json, categories_json, 24,  "FScore" , colors, '200')
+         
+        charts["chart_fscore"]=util.tojson(chart)
+    return charts
+
+def prepare_precision_chart(charts, chart_data):
+    if "precision_series" in chart_data :   
+        colors ='[ "#dc6835", "#dcbc35", "#4bb106", "#0666b1","#ffc107","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
+        colors ='["#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
+        series_json = util.tojson(chart_data["precision_series"])
+        categories_json = util.tojson(chart_data["precision_categories"])
+        chart = prepare_chart(series_json, categories_json, 24,  "Precision" , colors, '200')
+         
+        charts["chart_precision"]=util.tojson(chart)
+    return charts
+
+
+
+def prepare_recall_chart(charts, chart_data):
+    if "recall_series" in chart_data :   
+        colors ='[ "#dc6835", "#dcbc35", "#4bb106", "#0666b1","#ffc107","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
+        #colors ='[ "#8842ff", "#4276ff", "#28a745", "#0666b1","#42ffae","#17a2b8","#28a745","#dc3545","#c2de24","#32cab4", "#ca329b","#ff93c0", "#dc3545", "#5406b1", "#b106a7", "#b10631", "#ad8543", "#43ad44", "#ff0202", "#ffcf02", "#68ff02", "#02beff", "#0203ff", "#ff02fc", "#ff0207"]'
+        series_json = util.tojson(chart_data["recall_series"])
+        categories_json = util.tojson(chart_data["recall_categories"])
+        chart = prepare_chart(series_json, categories_json, 24,  "Recall" , colors, '200')
+         
+        charts["chart_recall"]=util.tojson(chart)
+    return charts
+
 def prepare_chart(series_json, categories_json, chart_type_id, title, colors, height='auto'):
     
-    chartType = ChartType.objects.get(pk=chart_type_id)
-    chartTemplate = chartType.template
-   
+        
+    chartTemplate =""
+
+    if(chart_type_id==31):
+        chartTemplate ='{ "chart":{"height":"____HEIGHT____","type":"line"},"exporting": {       "enabled":true,        "showTable": "false"    },"colors":____COLORS____,"title":{"text":"____TITLE____"},"xAxis":{"categories":____CATEGORIES____,"tickmarkPlacement":"off","title":{"enabled":false}},"yAxis":{"visible":true},"tooltip":{"pointFormat":"<span>{series.name}</span>: <b>{point.y:,.0f}</b><br/>","shared":true},"plotOptions":{"area":{"stacking":"normal","lineColor":"#d6a208","lineWidth":1,"marker":{"lineWidth":1,"lineColor":"#d6a208"}}},"series":____SERIES____}'
+    elif(chart_type_id==23):
+        chartTemplate ='{"chart":{"height":"____HEIGHT____",   "type":"column"}, "colors":____COLORS____,   "exporting": {       "enabled":"true"           },"title":{"text":"____TITLE____"},"xAxis":{"categories":____CATEGORIES____},"yAxis":{"visible":false},"tooltip":{"pointFormat":"<span style=\'color:{series.color}\'>{series.name}</span>: <b>{point.y:.3f}</b><br/>","shared":true},"plotOptions": {        "column": {            "pointPadding": "0.2",            "borderWidth": "0"        }    },"series":____SERIES____}'
+    elif(chart_type_id==24):
+        chartTemplate ='{"chart":{"height":"____HEIGHT____",   "type":"column"}, "colors":____COLORS____,   "exporting": {       "enabled":"false"           },"title":{"text":"____TITLE____"},"xAxis":{"categories":____CATEGORIES____},"yAxis":{"visible":false},"tooltip":{"pointFormat":"<span style=\'color:{series.color}\'>{series.name}</span>: <b>{point.y:.3f}</b><br/>","shared":true},"plotOptions": {        "column": {            "pointPadding": "0.2",            "borderWidth": "0"        }    },"series":____SERIES____}'
+    else: 
+        chartType = ChartType.objects.get(pk=chart_type_id)
+        chartTemplate = chartType.template
+
     chartTemplate = chartTemplate.replace("____CATEGORIES____", categories_json)
     chartTemplate = chartTemplate.replace("____HEIGHT____", height)
     chartTemplate = chartTemplate.replace("____COLORS____", colors)
@@ -170,16 +244,29 @@ def prepare_chart(series_json, categories_json, chart_type_id, title, colors, he
     chartTemplate = chartTemplate.replace("____TITLE____", title)
     return chartTemplate;  
     
-def prepare_primary_chart_data(chart_data, classifier):
     
-    print (classifier["classifier"])
+    
+def prepare_chart_series(chart_data, classifier):
+    chart_data = prepare_primary_chart_series(chart_data=chart_data, classifier=classifier)
+    chart_data = prepare_secondary_chart_series(chart_data=chart_data, classifier=classifier)
+    chart_data = prepare_accuracy_chart_series(chart_data=chart_data, classifier=classifier)
+    chart_data = prepare_precision_chart_series(chart_data=chart_data, classifier=classifier)
+    chart_data = prepare_recall_chart_series(chart_data=chart_data, classifier=classifier)
+    chart_data = prepare_fscore_chart_series(chart_data=chart_data, classifier=classifier)
+    
+    #chart_data = prepare_auc_chart_series(chart_data=chart_data, classifier=classifier)
+     
+    return chart_data
+
+
+def prepare_primary_chart_series(chart_data, classifier):
     if  "categories" not in chart_data.keys() and "primary_info" in  classifier.keys():
         categories = []
         for key, value in classifier['primary_info'].items():
             if is_number( classifier['primary_info'][key]):
                 categories.append(key)
     
-   
+    
         chart_data["primary_categories"] = categories
         
     primary_series_data = []
@@ -188,8 +275,7 @@ def prepare_primary_chart_data(chart_data, classifier):
             primary_series_data.append(classifier['primary_info'][category])
         except Exception as ex:
             print(ex)
-    
-       
+
     primary_series = {}
     primary_series["name"] =classifier['classifier']
     primary_series["data"] =primary_series_data
@@ -197,10 +283,9 @@ def prepare_primary_chart_data(chart_data, classifier):
     if "primary_series" not in  chart_data:
         chart_data["primary_series"]= []
     chart_data["primary_series"].append(primary_series)
+    return chart_data
     
-    
-    
-    
+def prepare_secondary_chart_series(chart_data, classifier):
     chart_data["secondary_categories"] = ["Errors"]
     secondary_series_data = classifier['secondary_info'] ['errors']
     #'Mean squared error'
@@ -213,10 +298,59 @@ def prepare_primary_chart_data(chart_data, classifier):
     if "secondary_series" not in  chart_data:
         chart_data["secondary_series"]= []
     chart_data["secondary_series"].append(secondary_series)
-     
-       
     return chart_data
+
+
+ 
+
+def prepare_accuracy_chart_series(chart_data, classifier):
+    chart_data["accuracy_categories"] = ["Accuracy"]
+    data = [classifier['primary_info'] ['Accuracy score']]
+    series = {}
+    series["name"] =classifier['classifier']
+    series["data"] =data
     
+    if "accuracy_series" not in  chart_data:
+        chart_data["accuracy_series"]= []
+    chart_data["accuracy_series"].append(series)
+    return chart_data
+def prepare_fscore_chart_series(chart_data, classifier):
+    chart_data["fscore_categories"] = ["fscore"]
+    data = [classifier['primary_info'] ['fscore']]
+    series = {}
+    series["name"] =classifier['classifier']
+    series["data"] =data
+    
+    if "fscore_series" not in  chart_data:
+        chart_data["fscore_series"]= []
+    chart_data["fscore_series"].append(series)
+    return chart_data
+
+
+def prepare_precision_chart_series(chart_data, classifier):
+    chart_data["precision_categories"] = ["precision"]
+    data = [classifier['primary_info'] ['precision']]
+    series = {}
+    series["name"] =classifier['classifier']
+    series["data"] =data
+    
+    if "precision_series" not in  chart_data:
+        chart_data["precision_series"]= []
+    chart_data["precision_series"].append(series)
+    return chart_data
+
+def prepare_recall_chart_series(chart_data, classifier):
+    chart_data["recall_categories"] = ["recall"]
+    data = [classifier['primary_info'] ['recall']]
+    series = {}
+    series["name"] =classifier['classifier']
+    series["data"] =data
+    
+    if "recall_series" not in  chart_data:
+        chart_data["recall_series"]= []
+    chart_data["recall_series"].append(series)
+    return chart_data
+
 def arrang_request_params(algo_params, algo,param_key, request):
     if param_key.startswith(algo) and not param_key.endswith("___type"):
         param_name = param_key.replace(algo + "_","")
@@ -226,7 +360,7 @@ def arrang_request_params(algo_params, algo,param_key, request):
         if 'warm_start' == param_name:
             print("----------")
             
-        print(param_name+"--------------")
+       
         if param_val == 'None':
             algo_params[param_name] = None  
             
@@ -350,7 +484,7 @@ def preview_dataset(request, pk):
    
 #     test = pandautil.get_details(dataset.dataset.path)
 #     testjson = util.tojson(test)
-    return util.myrender(request, 'dataset_csv/preview.html', data)
+    return util.myrender(request, 'dataset_csv/preview_new.html', data)
 
 
 @login_required

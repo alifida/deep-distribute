@@ -1,6 +1,8 @@
 
 body{background: #f4f6f9;}
-
+#result_comparison_datatable .dataTables_wrapper{
+	width: 100% !important;
+}
 .circle-2 {
 	width: 150px;
 	height: 150px;

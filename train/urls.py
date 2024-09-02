@@ -22,6 +22,7 @@ urlpatterns += [
     path('dataset/csv/preview/<int:pk>/', dataset_csv_controller.preview_dataset, name='preview_csv_dataset'),
     path('dataset/csv/algos/defaults', dataset_csv_controller.get_algos_defaults, name='csv_dataset_algos_defaults'),
     path('dataset/predict/', dataset_csv_controller.predict_dataset, name='predict_csv_dataset'),
+    
 ]
 
 

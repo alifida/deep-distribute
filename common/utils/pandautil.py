@@ -1096,7 +1096,7 @@ def run_scikit_algo_supply_test(params, algo_params):
          
         train = df
         test = df_test
-         
+        
         train.fillna(0, inplace=True)
         test.fillna(0, inplace=True)
        
@@ -1168,6 +1168,7 @@ def run_scikit_algo_supply_test(params, algo_params):
         
         res["status"] = "success"
         res["message"] = 'Request processed successfully'
+       
         params['key_attributes'] = key_attributes 
         # Save the trained model
         trained_model_id = save_model(algo, params)  
@@ -1504,7 +1505,7 @@ def get_results_from_matrics(test_target, cl_prediction, algo_type):
             print(e)
             
         try:
-            primary_info['Confusion matrix'] = metrics.confusion_matrix(test_target, cl_prediction)
+            primary_info['Confusion matrix'] = metrics.confusion_matrix(test_target, cl_prediction).tolist()
         except Exception as e:
             print(e)
             
@@ -1524,12 +1525,17 @@ def get_results_from_matrics(test_target, cl_prediction, algo_type):
             print(e)
             
         try:
-            primary_info['Multilabel confusion matrix'] = (metrics.multilabel_confusion_matrix(test_target, cl_prediction))
+            primary_info['Multilabel confusion matrix'] = metrics.multilabel_confusion_matrix(test_target, cl_prediction).tolist()
         except Exception as e:
             print(e)
             
         try:
-            primary_info['Precision recall fscore support'] = metrics.precision_recall_fscore_support(test_target, cl_prediction)
+            precision, recall, fscore, _ = metrics.precision_recall_fscore_support(test_target, cl_prediction, average='weighted')
+            primary_info['precision'] = precision
+            primary_info['recall'] = recall
+            primary_info['fscore'] = fscore
+
+            #primary_info['Precision recall fscore support'] = metrics.precision_recall_fscore_support(test_target, cl_prediction)
         except Exception as e:
             print(e)
             
