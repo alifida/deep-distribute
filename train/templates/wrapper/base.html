@@ -83,7 +83,12 @@
 
 	<script src="{% static "lib/sweetalert2/sweetalert2.min.js" %}"></script>
 	<script src="{% static "lib/toastr/toastr.min.js" %}"></script>
-	
+	<style>
+		.sidebar-mini.sidebar-collapse .content-wrapper, .sidebar-mini.sidebar-collapse .main-footer, .sidebar-mini.sidebar-collapse .main-header
+		{
+			margin-left:0px !important;
+		}
+	</style>
 	
 	<script src="{% static "js/custom.js" %}?version=1.8"></script>
 <body>
@@ -91,7 +96,7 @@
 
 	<div class="wrapper">
 		{% if user.is_authenticated %} {% include "wrapper/top_section.html" %} {% endif %} 
-		{% if user.is_authenticated %} {% include "wrapper/left_section.html" %} {% endif %} 
+		{% if user.is_authenticated and false %} {% include "wrapper/left_section.html" %} {% endif %} 
 	
 		{% block content %}{% endblock %} 
 		{% include "wrapper/bottom_section.html" %}

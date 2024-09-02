@@ -1214,7 +1214,7 @@ def save_model(model, params):
         # Create and save the TrainedModel object
         trained_model = TrainedModel(
             model_file=os.path.relpath(file_path, settings.MEDIA_ROOT),  # Store the relative path
-            description=f"{params.get('dataset_name')}",
+            description=f"{params.get('algo_name')}",
             status='Temp',
             user_id=user_id,
             dataset_id=dataset_id,
