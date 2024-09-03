@@ -323,7 +323,9 @@
 							<div class="col-lg-4 col-md-4 col-sm-12 offset-lg-4 offset-md-4 offset-sm-0">
 								<select id='model_to_deploy' name='model_to_deploy' class='mb-3 form-control form-control-sm border-purple '>
 									{% for classifier in classifiers %}
+									{% if classifier.trained_model_id %}
 									<option value="{{classifier.trained_model_id}}">{{classifier.classifier}}</option>
+									{% endif %}
 									{% endfor %}
 								</select>
 							</div>
