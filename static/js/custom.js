@@ -614,7 +614,9 @@ function ajax_submit(url, $targetId='',$formId='', $method='GET',   $serializedD
         	xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
     	},
 		success : function(response) {
-			
+			debugger;
+			console.log(response);
+			//---------------------------------
 			if(callbacksucccess!=undefined && callbacksucccess!=''){
 				callbacksucccess(response);
 			}else{
@@ -622,7 +624,7 @@ function ajax_submit(url, $targetId='',$formId='', $method='GET',   $serializedD
 					$("#" + $targetId).html(response);
 					afterAjaxResponse($targetId);	
 				}
-			
+				
 			}
 		
 		},

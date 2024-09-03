@@ -7,47 +7,23 @@ from train.services.KerasCatalogService import KerasCatalogService
 from common.utils import util
 from django.contrib import messages
 
-@login_required
-def list(request, dataset_id=None):
-    datasets = DatasetImgService.list(request.user.id)  # Adjusted to use the service layer
-    print("---------0-0-0-------------------");
-
-    print("\nAvailable Keras layers:")
-    print(KerasCatalogService.list_all_layers())
-
-    print("\nAvailable Keras optimizers:")
-    print(KerasCatalogService.list_all_optimizers())
 
 
+@login_required 
+
+def list(request):
+    data = {}
+    data ["section_heading"]=''
+    data['datasets']  = DatasetImgService.list(request.user.id)  # Adjusted to use the service layer
+    
+    data['dataset_count']=0
+    
+    if data['datasets'].exists():
+        data['dataset_count']=data['datasets'].count()
     
 
-    context = {
-            'datasets': datasets,
-            'dataset': {},
-            'stats': {},
-            
-    }
-    if len(datasets) > 0:
-        if dataset_id ==None:
-            dataset_id= datasets[0].id
-        
-         
-        dataset = DatasetImgService.get(dataset_id, True)
-        stats = dataset.gather_dataset_stats()
-        context = {
-            'datasets': datasets,
-            'dataset': dataset,
-            'stats': stats,
-            
-        }
-        
+    return util.myrender(request, 'dataset_images/simple_list.html', data)
 
-    #context['models']= models.items()
-    #context['strategies']= strategies
-
-
-
-    return util.myrender(request, 'dataset_images/list.html', context)
 
 @login_required
 def create(request):
@@ -65,10 +41,12 @@ def create(request):
             DatasetImgService.create(data_name=data_name, data_path=data_path, data_path_test=data_path_test, user=user)
             messages.success(request, "Dataset Saved successfully.")
             
-            return util.redirect('list_images_dataset')
+            form = DatasetImgForm()
+            #return util.redirect('list_images_dataset')
+            return util.myrender(request, 'dataset_images/create.html', {'form': form})
     else:
         form = DatasetImgForm()
-    return util.myrender(request, 'dataset_images/create.html', {'form': form})
+        return util.myrender(request, 'dataset_images/create.html', {'form': form})
 
 @login_required
 def edit(request, dataset_id):
@@ -113,3 +91,51 @@ def delete(request, dataset_id):
         return util.redirect('list_images_dataset')
     else:
         return HttpResponse("Method Not Allowed", status=405)
+
+
+
+'''
+
+@login_required
+def list(request, dataset_id=None):
+    datasets = DatasetImgService.list(request.user.id)  # Adjusted to use the service layer
+    print("---------0-0-0-------------------");
+
+    print("\nAvailable Keras layers:")
+    print(KerasCatalogService.list_all_layers())
+
+    print("\nAvailable Keras optimizers:")
+    print(KerasCatalogService.list_all_optimizers())
+
+
+    
+
+    context = {
+            'datasets': datasets,
+            'dataset': {},
+            'stats': {},
+            
+    }
+    if len(datasets) > 0:
+        if dataset_id ==None:
+            dataset_id= datasets[0].id
+        
+         
+        dataset = DatasetImgService.get(dataset_id, True)
+        stats = dataset.gather_dataset_stats()
+        context = {
+            'datasets': datasets,
+            'dataset': dataset,
+            'stats': stats,
+            
+        }
+        
+
+    #context['models']= models.items()
+    #context['strategies']= strategies
+
+
+
+    return util.myrender(request, 'dataset_images/list.html', context)
+
+    '''

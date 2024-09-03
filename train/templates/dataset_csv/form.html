@@ -1,51 +1,57 @@
 {% load crispy_forms_tags %} 
 
-<div class=" mb-3">
-	<div class="card   card-purple card-outline">
-		<div class="card-body padding-30">
-			<form method="post" enctype="multipart/form-data" id="dataset_form" action="{% url 'save_csv_dataset' %}" 
-                onsubmit="event.preventDefault();submit_dataset_form();">
-                {% csrf_token %}
-    
-    <div class="container">
-        <!-- Row for Form Fields -->
-        <div class="row mb-3">
-            <div class="col-md-12">	
-                 
-                <div class="form-group">
-                    <label for="{{ datasetForm.description.id_for_label }}">Description</label>
-                    {{ datasetForm.description }}
-                </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label for="{{ datasetForm.dataset.id_for_label }}">Dataset</label>
-                    {{ datasetForm.dataset }}
-                </div>
-            </div>
-        </div>
 
-        <!-- Submit Button Row -->
-        <div class="row">
-            <div class="col-md-12">
-                <button type="submit" class="btn btn-sm btn-outline-purple full-width right"><icon class="fa fa-upload h-padding-10"></icon> Upload</button>
-            </div>
-        </div>
-    </div>
-</form>
-		</div>
-	</div>
-</div>
+                    <form method="post" enctype="multipart/form-data" id="dataset_form" action="{% url 'save_csv_dataset' %}" 
+                        onsubmit="event.preventDefault();submit_dataset_form();">
+                        {% csrf_token %}
+            
+                        <div class="container">
+                            <!-- Row for Form Fields -->
+                            <div class="row mb-3">
+                                <div class="col-md-12">	
+                                    
+                                    <div class="form-group">
+                                        <label for="{{ datasetForm.description.id_for_label }}">Description</label>
+                                        {{ datasetForm.description }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="{{ datasetForm.dataset.id_for_label }}">Dataset</label>
+                                        {{ datasetForm.dataset }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button Row -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-sm btn-outline-purple full-width right"><icon class="fa fa-upload h-padding-10"></icon> Upload</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                
+
+
+
+
+
+
+
+ 
+                             
 <script type="text/javascript">
 
 	function submit_dataset_form(){
-		ajax_submit("{% url 'save_csv_dataset'%}",'dataset_form_wrapper','dataset_form','POST', '', on_dataset_success);
+		ajax_submit("{% url 'save_csv_dataset'%}",'csv_dataset_tab','dataset_form','POST', '', on_dataset_success);
 	}
 
 	function on_dataset_success(){
-		afterAjaxResponse('dataset_form_wrapper');	
-		ajax_submit("{% url 'list_csv_dataset'%}", 'dataset_list_wrapper');
-		ajax_submit("{% url 'save_csv_dataset'%}", 'dataset_form_wrapper');
+		afterAjaxResponse('csv_dataset_tab');	
+		ajax_submit("{% url 'save_csv_dataset'%}", 'csv_dataset_tab');
+        ajax_submit("{% url 'save_images_dataset'%}", 'images_dataset_tab');
+		ajax_submit("{% url 'list_all_datasets'%}", 'list_all_datasets');
 	}
 
 	function collapse_check_when_error($selector){
@@ -55,5 +61,5 @@
 			$($selector).collapse("hide");
 		}
 	}
-			collapse_check_when_error("#dataset_form_wrapper");
+			collapse_check_when_error("#csv_dataset_tab");
 </script>

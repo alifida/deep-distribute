@@ -1,19 +1,7 @@
-{% extends "wrapper/base.html" %} {% block content %} {% load static %}
+{% load crispy_forms_tags %} 
 
- 
-<div class="content-wrapper">
-    <div class="full-width v-padding-2"></div>
-	
-	<section class="content">
-		<div class="container-fluid ">
-            <div class="container mt-5">
-                <div class="col-8 padding-10">
-                    <h2>Upload Dataset</h2> 
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
-                        <form method="post" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data" id="dataset_form_img" action="{% url 'save_images_dataset' %}" 
+                    onsubmit="event.preventDefault();submit_dataset_images_form();">
                             {% csrf_token %}
                             <div class="mb-3">
                                 {{ form.data_name.label_tag }}
@@ -30,25 +18,41 @@
                                 {{ form.data_path_test }}
                                 {{ form.data_path_test.errors }}
                             </div>
+                             
                             <div class="row">
-                                <div class="col-12 center-inner ">
-                                    <a href="{% url 'list_images_dataset' %}" class="btn btn-danger btn-sm "   data-toggle="tooltip" data-placement="top" title="Cancel Changes"><i class="nav-icon fa fa-times"></i> &nbsp; Cancel</a>
-                                    <button type="submit" class="btn btn-success btn-sm "  data-toggle="tooltip" data-placement="top" title="Save Changes"><i class="nav-icon fa fa-check"></i> &nbsp; Save</button>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-sm btn-outline-purple full-width right"><icon class="fa fa-upload h-padding-10"></icon> Upload</button>
                                 </div>
                             </div>
                             
                         </form>
-                    </div>
-                </div>
-            </div>
-    
-    
+                     
+ 
 
 
-        </div>
-    </section>
-</div>
+ 
+                             
+<script type="text/javascript">
 
+	function submit_dataset_images_form(){
+		ajax_submit("{% url 'save_images_dataset'%}",'images_dataset_tab','dataset_form_img','POST', '', on_dataset_images_success);
+	}
 
-{% endblock%}
+	function on_dataset_images_success(){
+		afterAjaxResponse('list_all_datasets');	
+		 
 
+        ajax_submit("{% url 'save_csv_dataset'%}", 'csv_dataset_tab');
+        ajax_submit("{% url 'save_images_dataset'%}", 'images_dataset_tab');
+		ajax_submit("{% url 'list_all_datasets'%}", 'list_all_datasets');
+	}
+
+	function collapse_check_when_error($selector){
+		if($($selector).find( '.invalid-feedback').length > 0 ){
+			$($selector).collapse("show");
+		}else{
+			$($selector).collapse("hide");
+		}
+	}
+			//collapse_check_when_error("#images_dataset_tab");
+</script>

@@ -32,24 +32,8 @@
 	<div class="tab-content">
   	<div class="tab-pane active charts-wrapper" id="tab_1">
 		<div class="row h-padding-0 mb-2">
-			<div class="col-lg-6 col-md-6 col-sm-12">
-				<div class="card padding-10">
-				<div id="chart_1" class="">
-					<div class="chart"></div>
-					<span class="data hide"> {{charts.chart_1}} </span>
-				</div>
-				</div>
-			</div>
-			<div class="col-lg-6 col-md-6 col-sm-12">
-				<div class="card padding-10">
-				<div id="chart_2" class="">
-					<div class="chart"></div>
-					<span class="data hide"> {{charts.chart_2}} </span>
-				</div>
-				</div>
-			</div>
 			<div class="col-lg-3 col-md-3 col-sm-12">
-				<div class="card padding-10 mt-3">
+				<div class="card padding-10 mb-3">
 				<div id="chart_accuracy" class="">
 					<div class="chart"></div>
 					<span class="data hide"> {{charts.chart_accuracy}} </span>
@@ -57,7 +41,7 @@
 				</div>
 			</div>
 			<div class="col-lg-3 col-md-3 col-sm-12">
-				<div class="card padding-10 mt-3">
+				<div class="card padding-10 mb-3">
 				<div id="chart_precision" class="">
 					<div class="chart"></div>
 					<span class="data hide"> {{charts.chart_precision}} </span>
@@ -65,7 +49,7 @@
 				</div>
 			</div>
 			<div class="col-lg-3 col-md-3 col-sm-12">
-				<div class="card padding-10 mt-3">
+				<div class="card padding-10 mb-3">
 				<div id="chart_recall" class="">
 					<div class="chart"></div>
 					<span class="data hide"> {{charts.chart_recall}} </span>
@@ -73,13 +57,30 @@
 				</div>
 			</div>
 			<div class="col-lg-3 col-md-3 col-sm-12">
-				<div class="card padding-10 mt-3">
+				<div class="card padding-10 mb-3">
 				<div id="chart_fscore" class="">
 					<div class="chart"></div>
 					<span class="data hide"> {{charts.chart_fscore}} </span>
 				</div>
 				</div>
 			</div>
+			<div class="col-lg-12 col-md-12 col-sm-12 mb-2">
+				<div class="card padding-10">
+				<div id="chart_1" class="">
+					<div class="chart"></div>
+					<span class="data hide"> {{charts.chart_1}} </span>
+				</div>
+				</div>
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-12 hide-imp">
+				<div class="card padding-10">
+				<div id="chart_2" class="">
+					<div class="chart"></div>
+					<span class="data hide"> {{charts.chart_2}} </span>
+				</div>
+				</div>
+			</div>
+			
 		</div>
 		<div class="tabular row mt-3 padding-10">
 			<div class="card card-purple card-outline full-width">
@@ -100,9 +101,9 @@
 							<tr role="row">
 								<th>Regressor</th>
 								{% for key in classifiers.0.primary_info.keys %}
-								{% if key != "Confusion matrix" and key != "Multilabel confusion matrix" and key != "Classification report" %}
-								<th>{{ key }}</th>
-								{% endif %}
+									{% if key != "Confusion matrix" and key != "Multilabel confusion matrix" and key != "Classification report" %}
+										<th>{{ key }}</th>
+									{% endif %}
 								{% endfor %}
 							</tr>
 							{% endif %}
@@ -112,15 +113,15 @@
 							<tr role="row" class="{% cycle 'odd' 'even' %}">
 								<td>{{ classifier.classifier }}</td>
 								{% for key, value in classifier.primary_info.items %}
-								{% if key != "Confusion matrix" and key != "Multilabel confusion matrix" and key != "Classification report" %}
-								<td>
-									{% if value is iterable and value.0 is string %}
-									{{ value|join:", " }}
-									{% else %}
-									{{ value }}
+									{% if key != "Confusion matrix" and key != "Multilabel confusion matrix" and key != "Classification report" %}
+									<td>
+										{% if value is iterable and value.0 is string %}
+											{{ value|join:", " }}
+										{% else %}
+											{{ value }}
+										{% endif %}
+									</td>
 									{% endif %}
-								</td>
-								{% endif %}
 								{% endfor %}
 							</tr>
 							{% endfor %}
@@ -165,9 +166,14 @@
 															<div class="card-header">Confusion matrix</div>
 															<div class="card-body">
 																{% if value %}
+																<div class="row" id="confusion_{{classifier.id}}">
 																	{% for row in value %}
 																		{{ row  }}
 																	{% endfor %}
+																</div>
+																	<script>
+																		//displayConfusionMatrix("#confusion_{{classifier.id}}");
+																	</script>
 																{% else %}
 																	No data available
 																{% endif %}
@@ -343,13 +349,13 @@
     $('[data-toggle="tooltip"]').tooltip();
     disable_prediction = false;
     plot_chart("chart_1");
-    plot_chart("chart_2");
+    //plot_chart("chart_2");
     plot_chart("chart_accuracy");
     plot_chart("chart_fscore");
     plot_chart("chart_precision");
     plot_chart("chart_recall");
 
-    $("#chart_2 .highcharts-data-table").html("");
+    //$("#chart_2 .highcharts-data-table").html("");
     $("#chart_accuracy .highcharts-data-table").html("");
     $("#chart_precision .highcharts-data-table").html("");
     $("#chart_recall .highcharts-data-table").html("");

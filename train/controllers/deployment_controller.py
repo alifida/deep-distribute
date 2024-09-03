@@ -9,6 +9,7 @@ from common.utils import util
 import pandas as pd
 import joblib
 from django.shortcuts import get_object_or_404
+from train.services.DatasetImgService import DatasetImgService
 
 
 import csv
@@ -36,6 +37,31 @@ def list_deployed_models(request):
         data['default_model_id'] = data["model_list"][0].id
          
     return util.myrender(request, 'models/model_list.html', data)
+@login_required 
+@permission_required('datasource.view_dataset')
+def list_all_datasets(request):
+    data = {}
+    
+    data['dataset_count']=0
+     
+
+    if request.user.is_authenticated:
+        username = request.user
+        datasets_csv = Dataset.objects.filter(user_id=username.id)
+        data['dataset_csv_list'] = datasets_csv
+        if datasets_csv.exists():
+            data['dataset_count']=datasets_csv.count()
+
+    
+        data['dataset_images_list']  = DatasetImgService.list(request.user.id)  # Adjusted to use the service layer
+        
+        if data['dataset_images_list'].exists() and data['dataset_count'] == 0:
+            data['dataset_count']=data['dataset_images_list'].count()
+     
+
+
+
+    return util.myrender(request, 'models/list_all_datasets.html', data)
 
 
 @login_required
@@ -219,7 +245,7 @@ def deploy_trained_model(request, trained_model_id):
             TrainedModel.objects.filter(
                 dataset_id=dataset.id
             ).exclude(
-                status='Deployed'
+                id=trained_model_id
             ).delete()
         jsonResponse['status'] = 'success'
         jsonResponse['message'] = "Model deployed successfully";

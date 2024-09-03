@@ -32,7 +32,7 @@ urlpatterns += [
 urlpatterns += [
     path('dataset/images/list', dataset_images_controller.list, name="list_images_dataset"),
     path('dataset/images/list/<int:dataset_id>/', dataset_images_controller.list, name="list_images_dataset_with_id"),
-    path('dataset/images/new/', dataset_images_controller.create, name='create_images_dataset'),
+    path('dataset/images/new/', dataset_images_controller.create, name='save_images_dataset'),
     path('dataset/images/delete/<int:dataset_id>/', dataset_images_controller.delete, name="delete_images_dataset"),
     path('dataset/images/delete_confirm/<int:dataset_id>/', dataset_images_controller.delete_confirm, name="delete_images_dataset_confirm"),
     path('dataset/images/edit/<int:dataset_id>/', dataset_images_controller.edit, name='edit_images_dataset'),
@@ -59,6 +59,8 @@ urlpatterns += [
     path('home', deployment_controller.index, name='home'),
 
     path('home/', deployment_controller.index, name='home_'),
+    path('model/list/all-datasets/', deployment_controller.list_all_datasets, name='list_all_datasets'),
+
     path('model/deploy/model/<int:trained_model_id>', deployment_controller.deploy_trained_model, name='deploy_model_url'),
     path('model/deployed/', deployment_controller.list_deployed_models, name='list_deployed_models'),
     path('model/deployed/<int:pk>', deployment_controller.get_model_by_id, name='load_model_by_id'),

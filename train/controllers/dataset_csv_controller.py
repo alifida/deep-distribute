@@ -1,7 +1,7 @@
-
+from django.urls import reverse
 from django.shortcuts import redirect
-from train.models import Dataset, ChartType
-from train.forms.forms import DatasetForm, TestDatasetForm
+from train.models import ChartType
+from train.forms.forms import DatasetForm, TestDatasetForm, DatasetImgForm
 from common.utils import util, pandautil
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
@@ -13,6 +13,7 @@ from common.utils.pandautil import   get_scikit_classifiers,\
      get_scikit_transformer
 
 import json
+from train.services.DatasetService import DatasetService
 
 
 DEFAULT_TEST_PERCENT =.30
@@ -39,7 +40,7 @@ def get_algos_defaults(request):
 def predict_dataset(request):
      
     datasetId = request.POST.get("dataset_id", "")
-    dataset = Dataset.objects.get(pk=datasetId)
+    dataset = DatasetService.get_dataset(datasetId)
     
     algos = request.POST.getlist("algo",[])
     algo_type = request.POST.get("algo_type", "")
@@ -414,7 +415,6 @@ def save_dataset(request):
     if request.method == 'POST':
         datasetForm = DatasetForm(request.POST, request.FILES)
         if (datasetForm.is_valid()):
-            
        
             res = datasetForm.save(commit=False)
             res.user = request.user
@@ -424,12 +424,12 @@ def save_dataset(request):
             details = pandautil.get_details(res.dataset.path)
             
             
-            dataset = Dataset.objects.get(pk=res.pk)
-            #print(util.tojson(headers))
+            dataset = DatasetService.get_dataset(res.pk)
             dataset.metainfo = util.tojson(details)
-            Dataset.save(dataset)
+            DatasetService.update_dataset(dataset.id, metainfo=dataset.metainfo)    
             #createColumnWiseCharts(columnsChartData, dataset)
-            datasetForm = DatasetForm()
+            #datasetForm = DatasetForm()
+            return util.redirect('list_all_datasets')
         
     else:
         datasetForm = DatasetForm()
@@ -446,7 +446,8 @@ def getDatasets(request):
     
     if request.user.is_authenticated:
         username = request.user
-        datasets = Dataset.objects.filter(user_id=username.id)
+        datasets = DatasetService.list_datasets_by_user(username.id)
+
     return datasets
 
 
@@ -454,7 +455,9 @@ def getDatasets(request):
 def preview_dataset(request, pk):
     data = {}
     #details = {"test":"data"}
-    dataset = Dataset.objects.get(pk=pk)
+    
+    dataset = DatasetService.get_dataset(pk)
+
     
     data["classifiers"] = get_scikit_classifiers()
     data["clusters"] = get_scikit_cluster()
@@ -479,6 +482,7 @@ def preview_dataset(request, pk):
     
     data['dataset_list'] = getDatasets(request)
     
+    
     #data["details"] = details
     
    
@@ -487,15 +491,6 @@ def preview_dataset(request, pk):
     return util.myrender(request, 'dataset_csv/preview_new.html', data)
 
 
-@login_required
-@permission_required('datasource.delete_dataset')
-def delete_dataset(request, pk):
-    
-    if request.method == 'POST':
-        dataset = Dataset.objects.get(pk=pk)
-        res = dataset.delete()
-        print(res)
-    return redirect('model_welcome')
 
 @login_required 
 @permission_required('datasource.view_dataset')
@@ -521,20 +516,24 @@ def getDatasets(request):
     #datasets = Dataset.objects.all()
     if request.user.is_authenticated:
         username = request.user
-        datasets = Dataset.objects.filter(user_id=username.id)
+        datasets = DatasetService.list_datasets_by_user(username.id)
     return datasets
 
 
+ 
 @login_required
 @permission_required('datasource.delete_dataset')
-def deleteDataset(request, pk):
+def delete_dataset(request, pk):
     
     if request.method == 'POST':
-        dataset = Dataset.objects.get(pk=pk)
-        res = dataset.delete()
-        print(res)
-    return redirect('datasetIndex')
- 
+        DatasetService.delete_dataset(pk)
+        
+    res ={}
+    res['status_code'] = 200
+    res['message'] = 'Dataset Deleted successfully.'
+    res["redirectURL"] = reverse('model_welcome')
+    return HttpResponse(util.tojson(res))
+    #return redirect('datasetIndex')
 
  
 

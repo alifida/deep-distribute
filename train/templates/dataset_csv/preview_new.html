@@ -447,6 +447,7 @@
 	</section>
 </div>
 </div>
+
 <script type="text/javascript">
 var url= "";
 
@@ -501,18 +502,62 @@ var url= "";
 	hide_loader(".deploy-btn");
   }
     
-$(document).ready(function() {
-  	convert_to_datatable();
- });
+		
+
+
+
+		$(document).ready(function(){
+			convert_to_datatable();
+			$('[data-toggle="tooltip"]').tooltip();
+
+			
+		});
  
-	$(document).ready(function(){
-		// Initialize Bootstrap tooltips
-		$('[data-toggle="tooltip"]').tooltip();
-	});
- 
+
+
+
+		function displayConfusionMatrix(target_selector) {
+
+
+			var matrixStr = $(target_selector).html();
+			html  ="<div class='row'>";
+			
+			matrixStr=cleanMatrixString(matrixStr);
+			matrixStr=matrixStr.split(',');
+			matrixStr.forEach((item, index)=>{
+				var cellindex = index +1;
+				html +="<div class='col-lg-6 col-md-6 col-sm-6 matrix-cell matrix-cell-"+cellindex+"'>";
+				html += item;
+				html +="</div>";
+				
+			});
+
+			html +="</div>";
+			console.log(target_selector);
+			$(target_selector).html(html);
+		}
+
+		function cleanMatrixString(str){
+			console.log("Original String:", str);
+    
+			// Remove spaces
+			str = str.replaceAll(" ", "");
+			
+			// Replace `][` with a comma
+			str = str.replace(/\]\[/g, "],[");
+			
+			// Remove all remaining brackets
+			str = str.replace(/[\[\]]/g, "");
+			console.log(str);
+			return str;
+		}
+		
+		// Example usage
+		 
+		
        
 </script>
-
+ 
 {% endblock %}
 
 

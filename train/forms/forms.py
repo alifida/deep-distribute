@@ -37,7 +37,7 @@ class TestDatasetForm(forms.ModelForm):
             'dataset_test': 'Records to predict'  # Change this label to your desired text
         }
         widgets = {
-            'dataset_test': forms.FileInput(attrs={'class': 'form-control  form-control border-purple', 'accept': '.csv, .xlsx'}),
+            'dataset_test': forms.FileInput(attrs={'class': 'form-control border-purple', 'accept': '.csv, .xlsx'}),
         }
 
 
