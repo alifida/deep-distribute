@@ -25,6 +25,8 @@ from sklearn.model_selection._split import KFold
 
 import joblib
 
+from sklearn.preprocessing import LabelEncoder
+
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
@@ -657,6 +659,7 @@ def run_scikit_algo_percent_split(params, algo_params):
         elif Path(path).suffix=='.xls' or  Path(path).suffix=='.xlsx':
             df = pd.read_excel(path,engine='openpyxl')
         
+        df = encode_categorical_columns(df)           
         #df = pd.read_csv(path,encoding= 'unicode_escape')
         df.columns = remove_special_characters_in_df_cols(df.columns)
         df = prepare_df(df, key_attributes, class_label)
@@ -834,6 +837,7 @@ def run_scikit_algo_k_fold(params, algo_params):
         elif Path(path).suffix=='.xls' or  Path(path).suffix=='.xlsx':
             df = pd.read_excel(path,engine='openpyxl')
         
+        df = encode_categorical_columns(df)           
         #df = pd.read_csv(path,encoding= 'unicode_escape')
         df.columns = remove_special_characters_in_df_cols(df.columns)
         df = prepare_df(df, key_attributes, class_label)
@@ -1020,7 +1024,10 @@ def run_scikit_algo_supply_test(params, algo_params):
             df = pd.read_csv(path,encoding= 'unicode_escape')
         elif Path(path).suffix=='.xls' or  Path(path).suffix=='.xlsx':
             df = pd.read_excel(path,engine='openpyxl')   
-                 
+
+        # Encode categorical columns
+        df = encode_categorical_columns(df)
+        
         #df = pd.read_csv(path,encoding= 'unicode_escape')
         df.columns = remove_special_characters_in_df_cols(df.columns)
         df = prepare_df(df, key_attributes, class_label)
@@ -1030,7 +1037,8 @@ def run_scikit_algo_supply_test(params, algo_params):
         elif Path(path).suffix=='.xls' or  Path(path).suffix=='.xlsx':
             df_test = pd.read_excel(test_path,engine='openpyxl')
             
-                     
+                # Encode categorical columns
+        df_test = encode_categorical_columns(df_test)           
         #df_test = pd.read_csv(test_path,encoding= 'unicode_escape')
         df_test.columns = remove_special_characters_in_df_cols(df_test.columns)
         
@@ -1186,6 +1194,25 @@ def run_scikit_algo_supply_test(params, algo_params):
         print(e)
     finally:
         return res
+
+
+
+
+
+def encode_categorical_columns(df):
+    # Select columns that are of type object (string)
+    categorical_columns = df.select_dtypes(include=['object']).columns
+    
+    if len(categorical_columns) > 0:
+        print(f"Encoding categorical columns: {list(categorical_columns)}")
+        
+        # Label encode each categorical column
+        for col in categorical_columns:
+            le = LabelEncoder()
+            df[col] = le.fit_transform(df[col].astype(str))
+    
+    return df
+
 
 def save_model(model, params):
     """
