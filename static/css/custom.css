@@ -1,5 +1,59 @@
 
 body{background: #f4f6f9;}
+
+.blinking-div {
+	animation: blink 1s infinite; /* 1 second per blink, repeating infinitely */
+  }
+  
+  @keyframes blink {
+	0%, 100% { opacity: 1; } /* Fully visible at the start and end */
+	60% { opacity: .85; } /* Invisible in the middle */
+  }
+  
+  /* Responsive styles */
+  @media screen and (max-width: 768px) {
+	.banner {
+	  flex-direction: column;
+	  align-items: stretch;
+	}
+  
+	.circle {
+	  margin-top: 10px;
+	}
+  }
+
+
+
+
+
+.model-custom-box{
+	width: 56vw;
+}
+.model-custom-box .body{
+	padding: 1vw 10vw 1vw 1vw;
+    border: 0px;
+    border-radius: 5px;
+    float: left;
+    width: 60vw;
+    min-height: 8vw;
+    max-height: 8vw;
+}
+.model-custom-box .overlap-circle{
+	padding: 20px;
+    border-radius: 50%;
+    width: 12vw;
+    min-height: 12vw;
+    max-height: 12vw;
+    float: right;
+    position: absolute;
+    right: -5vw;
+    top: -2vw;
+    background: #3a4441;
+    border: 20px solid #f4f6f9;
+    color: #fff;
+}
+
+
 #result_comparison_datatable .dataTables_wrapper{
 	width: 100% !important;
 }
@@ -1444,6 +1498,7 @@ i.xxl{
 
 .text-70{font-size: 70px;}
 
+ 
 .circle{
 	border-radius: 50% !important;
 }

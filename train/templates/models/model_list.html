@@ -2,36 +2,46 @@
 
  
     <div class="row">
+
+
+        
+
         {% for model in model_list %}
         <div class="col-lg-12 col-md-12 col-sm-12 mb-4 h-padding-0">
 
-            <div class="card   card-purple card-outline">
-                <!-- Card Header -->
-                <div class="card-header">
-                    <div class="full-width">
-                        <h4>{{ model.description }}</h4>
-                    </div>
-                </div>
-                <!-- Card Body -->
-                <div class="card-body">
-                   
-                    <div class="row" id="model_form_wrapper_{{model.id}}">
-                        <div class="col-lg-12 col-md-12 col-sm-12" >
-                            <br/></br/>
-                            <i class="fa fa-circle-o-notch fa-spin center" class="text-xl"></i>
-                        </div>
-                    </div>
-
-                    <div class="row h-padding-0" >
-                        <div id="model_results_wrapper_{{model.id}}" class="col-lg-12 col-md-12 col-sm-12 h-padding-0" >
+                <div class="info-box">
+                    <div class="info-box-content left">
+                        <span class="info-box-number-1 text-lg mb-2">{{ model.description }}</span>
+                        <span class="text-md mb-1">"I'm your AI companion, trained and ready! Provide the following features to unlock predictions for ({{model.class_label}}) .</span>
+                        <span class="text-md mb-1"> {{model.key_attributes}}
                             
+                        </span>
+                    </div>
+                    <span class="info-box-icon bg-purple circle height-150 width-150 right pointer blinking-div" onclick="$('#model_form_wrapper_{{model.id}} ').toggle('slow')" >
+                        <span class="text-lg">Predict</span>
+                    </span>
+                </div>
+
+                
+
+                <div class="card   card-purple card-outline padding-20 " >
+                    <div id="model_form_wrapper_{{model.id}}" class="full-width hide ">
+                        <div class="row" >
+                            <div class="col-lg-12 col-md-12 col-sm-12" >
+                                <br/></br/>
+                                <i class="fa fa-circle-o-notch fa-spin center" class="text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="row h-padding-0" >
+                            <div id="model_results_wrapper_{{model.id}}" class="col-lg-12 col-md-12 col-sm-12 h-padding-0 " >
+                                <div class="full-width"  style="display:none;"></div>
+                            </div>
                         </div>
                     </div>
-
-                    
-                    <p class=" text-vs right v-margin-0"> {{ model.description }} on {{ model.dataset.description }} </p>
+                    <div class="full-width" >
+                        <p class=" text-vs right v-margin-0"> {{ model.description }} Trained on {{ model.dataset.description }} </p>
+                    </div>
                 </div>
-            </div>
         </div>
          
             {% if  model_list_count > 0 %}
