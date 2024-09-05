@@ -1,6 +1,24 @@
 
 body{background: #f4f6f9;}
 
+
+
+
+.matrix-box {
+	border: 1px solid #ddd;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 1.2em;
+	padding: 10px;
+	background-color: #ffffff;
+}
+ 
+.matrix-row {
+	margin-bottom: 10px;
+}
+
+
+
 .blinking-div {
 	animation: blink 1s infinite; /* 1 second per blink, repeating infinitely */
   }
@@ -23,6 +41,13 @@ body{background: #f4f6f9;}
   }
 
 
+ 
+.round-border-10{
+	border-radius:10px;
+} 
+.round-border{
+	border-radius:5px;
+}
 
 
 

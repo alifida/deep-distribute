@@ -161,19 +161,24 @@
 										<div class="row">
 											{% for key, value in classifier.primary_info.items %}
 												{% if key == "Confusion matrix" %}
-													<div class="col-lg-2 col-md-3 col-sm-12">
+													<div class="col-lg-2 col-md-3 col-sm-12 offset-lg-4 offset-md-2 offset-0">
 														<div class="card mb-3 card-outline card-purple">
 															<div class="card-header">Confusion matrix</div>
 															<div class="card-body">
 																{% if value %}
-																<div class="row" id="confusion_{{classifier.id}}">
-																	{% for row in value %}
-																		{{ row  }}
-																	{% endfor %}
-																</div>
-																	<script>
-																		//displayConfusionMatrix("#confusion_{{classifier.id}}");
-																	</script>
+																	<div class="full-width padding-20">
+																		{% for row in value%}
+																		<div class="row row matrix-row mb-0 round-border-10">
+																			{% for col in row%}
+																				<div class=" col matrix-box mb-0 round-border-10">
+																					{{col}}
+																				</div>
+																			{% endfor %}
+
+																		</div>
+																		{% endfor %}
+																	</div>
+																	 
 																{% else %}
 																	No data available
 																{% endif %}
@@ -182,18 +187,29 @@
 													</div>
 												{% endif %}
 												{% if key == "Multilabel confusion matrix" %}
-													<div class="col-lg-2 col-md-3 col-sm-12">
+													<div class="col-lg-2 col-md-3 col-sm-12 ">
 														<div class="card mb-3 card-outline card-purple">
 															<div class="card-header">Multilabel confusion matrix</div>
 															<div class="card-body" >
 																{% if value %}
-																		<div id="{{ classifier.classifier }}_matrix_2">
-																			{{ value  }}
+																	<div class="full-width padding-20">
+																		{% for row in value%}
+																		<div class=" row matrix-row mb-0 round-border-10">
+																			{% for col in row%}
+																				<div class="col matrix-box mb-0 round-border-10">
+																					{% for cell in col%}
+																						<div class=" col matrix-box mb-0 round-border-10">
+																							{{cell}}
+																						</div>
+																					{% endfor %}
+																				</div>
+																			{% endfor %}
+
 																		</div>
-																		<script>
-																			
-																			
-																		</script>
+																		{% endfor %}
+																		 
+																	</div>
+																	 
 																{% else %}
 																	No data available
 																{% endif %}
@@ -203,7 +219,7 @@
 													</div>
 												{% endif %}
 												{% if key == "Classification report" %}
-													<div class="col-lg-8 col-md-6 col-sm-12">
+													<div class="col-lg-8 col-md-6 col-sm-12 hide">
 														<div class="card mb-3 card-outline card-purple">
 															<div class="card-header">Classification report</div>
 															<div class="card-body">
@@ -392,3 +408,20 @@
     $("#" + target_id + " .chart").highcharts(chartmodel);
   }
 </script>
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+

@@ -808,6 +808,36 @@ function display_loader(selector, loader_class='small-right-loader'){
   function hide_loader(selector){
   	$(selector+" .loader").remove();
   }
+
+
+
+
+
+  function renderConfusionMatrix(elemSelector) {
+	var matrixString = $(elemSelector).text();
+	console.clear();
+	console.log(matrixString);
+	// Clean and split the string
+	const cleanedString = matrixString.replace(/\s*\[\s*/g, '[').replace(/\s*\]\s*/g, ']').replace(/\s*,\s*/g, ',');
+	const rows = cleanedString.split('] [').map(row => row.replace(/[\[\]]/g, ''));
+	const numRows = rows.length;
+	
+	const matrix = rows.map(row => row.split(',').map(Number));
+	
+	const container = $(elemSelector);
+	container.empty();
+	
+	// Generate the matrix rows and columns
+	matrix.forEach(row => {
+		const rowDiv = $('<div class="row matrix-row"></div>');
+		row.forEach(value => {
+			const box = $('<div class="col matrix-box"></div>');
+			box.text(value);
+			rowDiv.append(box);
+		});
+		container.append(rowDiv);
+	});
+}
 	
 $(document).ready(function(){
 	$(".remote-dropdown").click(function(event) {
