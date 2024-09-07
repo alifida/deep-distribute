@@ -114,9 +114,7 @@ def training(request, dataset_id=None):
     
     models = KerasCatalogService.list_all_models()
     strategies = KerasCatalogService.list_all_strategies()
-
-     
-
+ 
      
     print("\nAvailable Keras layers:")
     print(KerasCatalogService.list_all_layers())

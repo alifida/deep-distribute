@@ -1,5 +1,11 @@
 {% load crispy_forms_tags %} 
-
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="callout callout-info">
+                                Please upload a CSV or XLSX file where the data is comma-separated. Ensure the file has a .csv extension for CSV files.
+                            </div>
+                        </div>
+                    </div>
 
                     <form method="post" enctype="multipart/form-data" id="dataset_form" action="{% url 'save_csv_dataset' %}" 
                         onsubmit="event.preventDefault();submit_dataset_form();">

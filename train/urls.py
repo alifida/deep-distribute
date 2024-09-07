@@ -66,6 +66,7 @@ urlpatterns += [
     path('model/deployed/<int:pk>', deployment_controller.get_model_by_id, name='load_model_by_id'),
     path('model/deployed/predict', deployment_controller.predict_trained_model, name='predict_trained_model'),
     path('model/deployed/csv/template/<int:pk>', deployment_controller.download_csv_template, name='download_csv_template'),
+    path('model/deployed/delete/<int:pk>', deployment_controller.delete_model, name='delete_model_by_id'),
 ]
 
    

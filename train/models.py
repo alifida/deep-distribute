@@ -148,7 +148,7 @@ class Dataset_IMG(models.Model):
 
 class Training_job (models.Model):
     job_name = models.CharField(max_length=300)
-    dataset_img = models.ForeignKey(Dataset_IMG, on_delete=models.RESTRICT, related_name='training_jobs')
+    dataset_img = models.ForeignKey(Dataset_IMG, on_delete=models.CASCADE, related_name='training_jobs')
     status = models.CharField(max_length=300)
     started_at = models.DateTimeField(null=True)
     ended_at = models.DateTimeField(null=True)
@@ -156,6 +156,8 @@ class Training_job (models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
     parameter_settings = models.TextField(null=True)
     result = models.TextField(null=True)  # TextField to store metrics
+    training_log = models.TextField(null=True)  # TextField to store metrics
+    training_log_history = models.TextField(null=True)  # TextField to store metrics
     
     def __str__(self):
         return self.job_name 
@@ -216,7 +218,7 @@ class TrainedModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     dataset = models.ForeignKey('Dataset', on_delete=models.CASCADE, related_name='trained_models')
-    key_attributes = models.CharField(max_length=300, blank=True, null=True)
+    key_attributes = models.TextField(blank=True)
     class_label = models.TextField(blank=True)
     def __str__(self):
         return f"Model: {self.description or 'No description'} - Status: {self.status}"

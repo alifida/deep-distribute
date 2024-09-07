@@ -33,9 +33,9 @@ class TrainingServiceSingle:
         #process.join()  # Optionally wait for the process to complete
 
     @staticmethod
-    def start_training_process(job, model_name):
+    def start_training_process(training_params):
         print("before starting........")
-        TrainingServiceSingle.start_training.delay(job.id, model_name)
+        TrainingServiceSingle.start_training.delay(training_params)
         print("after starting........")
 
     @staticmethod
@@ -175,7 +175,22 @@ class TerminateOnFlagCallback(Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         training_job = TrainingJobDAO.get(self.job_id)
-        if training_job.status != JobStatus.RUNNING.value:  
+        
+        # Append new log to the history
+        history = json.loads(training_job.training_log_history) if training_job.training_log_history else []
+        history.append({'epoch': epoch + 1, 'logs': logs})
+        
+        # Update current epoch log and full history
+        TrainingJobDAO.update(
+            self.job_id,
+            status=JobStatus.RUNNING.value,
+            training_log=json.dumps({'epoch': epoch + 1, 'logs': logs}),  # Store current epoch log
+            training_log_history=json.dumps(history)  # Store full log history
+        )
+        
+        # Stop if the job status is no longer running
+        if training_job.status != JobStatus.RUNNING.value:
             self.model.stop_training = True
             print(f"Stopping training at the end of epoch {epoch}")
+
 

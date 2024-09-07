@@ -98,7 +98,47 @@ def download_csv_template(request, pk):
     return response
     
 
+@login_required 
+@permission_required('datasource.view_dataset')
+def delete_model(request, pk):
+    # Retrieve the trained model object
+    trained_model = get_object_or_404(TrainedModel, id=pk)
+    
+    jsonResponse = {}
 
+    # Check ownership
+    if trained_model.user != request.user:
+        jsonResponse['status'] = 'success'
+        jsonResponse['message'] = 'Your not authorized to use this object';
+        
+        return HttpResponse(util.tojson(jsonResponse))
+        
+    
+
+    try:
+        with transaction.atomic():
+            
+            TrainedModel.objects.filter(
+                id=pk
+            ).delete()
+        jsonResponse['status'] = 'success'
+        jsonResponse['message'] = "Model deleted successfully";
+        
+    
+    except Exception as e:
+        
+        jsonResponse['status'] = 'error'
+        jsonResponse['status_code'] = 500
+        jsonResponse['message'] = "Error while deleting : "+str(e)+"";
+        print(f"Error while deleting: {str(e)}")
+        
+        return HttpResponse(util.tojson(jsonResponse))
+    
+    jsonResponse['status_code'] = 200
+    jsonResponse["redirectURL"] = reverse('model_welcome')
+    
+    return HttpResponse(util.tojson(jsonResponse))
+    #return util.redirect("model_welcome")
 
 
 @login_required 

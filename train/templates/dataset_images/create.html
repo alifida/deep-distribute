@@ -1,5 +1,11 @@
 {% load crispy_forms_tags %} 
-
+<div class="row">
+    <div class="col-12">
+        <div class="callout callout-info">
+            Please upload a ZIP file that contains class-wise folders. Each folder should represent a class and must contain the corresponding images inside it.
+        </div>
+    </div>
+</div>
                     <form method="post" enctype="multipart/form-data" id="dataset_form_img" action="{% url 'save_images_dataset' %}" 
                     onsubmit="event.preventDefault();submit_dataset_images_form();">
                             {% csrf_token %}

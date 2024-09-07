@@ -121,5 +121,9 @@
         $("#model_results_wrapper_" + active_model).css('height', 'auto');
         active_model = "";
     }
+
+	function after_delete_model(res){
+		ajax_submit("{% url 'list_deployed_models'%}", 'model_list_wrapper');
+	}
 </script>
 {% endblock %}

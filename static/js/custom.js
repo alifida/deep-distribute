@@ -476,7 +476,7 @@ function onModelCloseBtn(){
 
 function load_local_model(modal_title, model_body) {
 	$('#local_modal_title').html(modal_title);
-	$('#local_modal_body').html($html);
+	$('#local_modal_body').html(model_body);
 	$('#local_modal').modal('show');
 	enable_popover();
 }
