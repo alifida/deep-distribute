@@ -485,9 +485,9 @@ var url= "";
 	
 	display_loader(".deploy-btn");
     var modelId = $("#model_to_deploy").val(); // Correct way to get value using jQuery
-    var deploy_model_url = "{% url 'deploy_model_url' 0 %}".replace(/0$/, modelId); // Replace placeholder with actual modelId
+    var deploy_csv_model_url = "{% url 'deploy_csv_model_url' 0 %}".replace(/0$/, modelId); // Replace placeholder with actual modelId
     disable_deploy = true;
-	ajax_submit(deploy_model_url,'','', 'POST',  '', after_deploy_model, after_deploy_model) ;
+	ajax_submit(deploy_csv_model_url,'','', 'POST',  '', after_deploy_model, after_deploy_model) ;
   }
   function after_deploy_model(raw){
 	res = $.parseJSON(raw);
@@ -496,7 +496,7 @@ var url= "";
 	   if(res.hasOwnProperty('redirectURL')){
 		  window.location.href = res.redirectURL;
 	  }
-  }
+  	}
 	   
 	disable_deploy= false;
 	hide_loader(".deploy-btn");

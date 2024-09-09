@@ -116,19 +116,16 @@ def start_training_post(request):
 
     return util.redirect('start_training' , dataset_id)
 
-from train.models import TrainedModel
+
 
 @login_required
 def get_training_result(request, dataset_id):
     res={}
-    trainingJob = TrainingJobService.getSingleByDatasetAndStatus(dataset_id, "COMPLETED")
+    trainingJob = TrainingJobService.getSingleByDataset(dataset_id)
     if trainingJob and trainingJob.result:
         res["results"] = json.loads(trainingJob.result)
-        model = TrainedModel.objects.filter(dataset_img_id=dataset_id).first()
-        if model:
-            res["model_id"] = model.id
-        
     
+
     return util.myrender(request, 'training/results.html', res)
 
 

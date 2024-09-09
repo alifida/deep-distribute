@@ -1,5 +1,5 @@
 import ast
-from train.models import Dataset, TrainedModel
+from train.models import Dataset, TrainedModel, Dataset_IMG
 from django.urls import reverse
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
@@ -10,7 +10,10 @@ import pandas as pd
 import joblib
 from django.shortcuts import get_object_or_404
 from train.services.DatasetImgService import DatasetImgService
-
+from train.services.TrainingJobService import TrainingJobService
+import tensorflow as tf
+import numpy as np
+from PIL import Image
 
 import csv
 
@@ -121,6 +124,11 @@ def delete_model(request, pk):
             TrainedModel.objects.filter(
                 id=pk
             ).delete()
+
+
+            if trained_model.dataset_img:
+                TrainingJobService.delete_by_dataset_img_id(trained_model.dataset_img.id)
+
         jsonResponse['status'] = 'success'
         jsonResponse['message'] = "Model deleted successfully";
         
@@ -143,7 +151,7 @@ def delete_model(request, pk):
 
 @login_required 
 @permission_required('datasource.view_dataset')
-def predict_trained_model(request):
+def predict_csv_trained_model(request):
 
     data = {}
     data["prediction_result"] = "Result will come here"
@@ -209,8 +217,62 @@ def predict_trained_model(request):
          
     return util.myrender(request, 'models/result_template.html', data)
 
+
+from tensorflow.keras.preprocessing.image import img_to_array
+
+ 
+def preprocess_image(image):
+    # Convert image to RGB if not already
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
+    # Resize image
+    image = image.resize((150, 150))  # Ensure dimensions match the model input
+    # Convert image to array
+    image_array = img_to_array(image)
+    # Normalize the image
+    image_array = image_array / 255.0
+    # Expand dimensions to match model input
+    image_array = np.expand_dims(image_array, axis=0)
+    return image_array
+
+@login_required 
+@permission_required('datasource.view_dataset')
+def predict_img_trained_model(request):
+    data = {}
+    data["prediction_result"] = "Result will come here"
+
+    if request.method == 'POST':
+        # Retrieve the uploaded image and model ID
+        file_data = request.FILES.get('image')
+        model_id = int(request.POST.get('model_id', -1))
+
+        if model_id > 0:
+            # Fetch the pre-trained model from the database
+            trained_model = get_object_or_404(TrainedModel, id=model_id)
+            model_path = trained_model.model_file.path
+            
+            # Load the Keras model
+            model = tf.keras.models.load_model(model_path)
+
+            if file_data:
+                # Pre-process the uploaded image for prediction
+                image = Image.open(file_data)
+                #image = image.resize((150, 150))  # Resize to the expected input size
+                #image_array = np.array(image) / 255.0  # Normalize the image
+                #image_array = np.expand_dims(image_array, axis=0)  # Add batch dimension
+
+                image_array = preprocess_image(image)
+                # Make a prediction
+                prediction = model.predict(image_array)
+
+                # Interpret the prediction result (Assuming binary classification)
+                class_label = str(trained_model.class_label)
+                predicted_class = 'Class 1' if prediction[0] > 0.5 else 'Class 0'
+
+                # Prepare the prediction result to display
+                data['prediction_result'] = f"Predicted {class_label}: {predicted_class}"
         
-        
+    return util.myrender(request, 'models/result_template.html', data)      
     
  
 @login_required 
@@ -224,8 +286,10 @@ def get_model_by_id(request, pk):
         model = fetch_model_by_id(pk=pk, username=username)
         if model:
             data['deployed_model']= model
-            data['deployed_model'].key_attributes = ast.literal_eval(data['deployed_model'].key_attributes)
+            if model.dataset:
+                data['deployed_model'].key_attributes = ast.literal_eval(data['deployed_model'].key_attributes)
             
+
             #print(data['deployed_model'].dataset.metainfo)
     return util.myrender(request, 'models/form_template.html', data)
 
@@ -248,9 +312,71 @@ def get_deployed_models(request):
 
 
 
+
+
+
 @login_required
 @permission_required('datasource.view_dataset')
-def deploy_trained_model(request, trained_model_id):
+def deploy_trained_img_model(request, trained_model_id):
+    """
+    Handle the deployment of a trained model.
+    
+    :param request: HTTP request containing the trained model ID.
+    :param trained_model_id: ID of the trained model to deploy.
+    :return: HTTP response indicating the result of the operation.
+    """
+    # Retrieve the trained model object
+    trained_model = get_object_or_404(TrainedModel, id=trained_model_id)
+    
+    jsonResponse = {}
+
+    # Check ownership
+    if trained_model.user != request.user:
+        jsonResponse['status'] = 'success'
+        jsonResponse['message'] = 'Your not authorized to use this object';
+        
+        return HttpResponse(util.tojson(jsonResponse))
+
+    try:
+        with transaction.atomic():
+            # Update the status of the current trained model to 'Deployed'
+            trained_model.status = 'Deployed'
+            trained_model.save()
+            
+            # Get the dataset associated with the trained model
+            dataset_img = Dataset_IMG.objects.get(id=trained_model.dataset_img_id)
+            
+            # Delete other trained models with the same dataset but not 'Deployed'
+            TrainedModel.objects.filter(
+                dataset_img_id=dataset_img.id
+            ).exclude(
+                id=trained_model_id
+            ).delete()
+        jsonResponse['status'] = 'success'
+        jsonResponse['message'] = "Model deployed successfully";
+        
+    
+    except Exception as e:
+        
+        jsonResponse['status'] = 'error'
+        jsonResponse['status_code'] = 500
+        jsonResponse['message'] = "Error during deployment: "+str(e)+"";
+        print(f"Error during deployment: {str(e)}")
+        
+        return HttpResponse(util.tojson(jsonResponse))
+    
+    jsonResponse['status_code'] = 200
+    jsonResponse["redirectURL"] = reverse('model_welcome')
+    
+    return HttpResponse(util.tojson(jsonResponse))
+    #return util.redirect("model_welcome")
+
+
+
+
+@login_required
+@permission_required('datasource.view_dataset')
+def deploy_trained_csv_model(request, trained_model_id):
     """
     Handle the deployment of a trained model.
     

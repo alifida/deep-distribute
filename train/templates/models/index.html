@@ -16,7 +16,7 @@
                 <div class="col-lg-9 col-md-8 col-sm-12">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h3 class="m-0 text-dark left">Models</h3>
+                            <h3 class="m-0 text-dark left">Pre Trained Models</h3>
                         </div>
                         <div class="col-sm-6">
                         </div>
@@ -24,7 +24,7 @@
                     <div class="row mb-2">
                         <div class="col-lg-12 col-md-12 col-sm-12" id="model_list_wrapper">
                             <br /><br />
-                            <i class="fa fa-circle-o-notch fa-spin center" class="text-xl"></i>
+                            <i class="fa fa-circle-o-notch fa-spin center" ></i>
                         </div>
                     </div>
                 </div>
@@ -110,7 +110,7 @@
         if (disable_prediction == false) {
             display_loader(".prediction-btn" + model_id);
             disable_prediction = true;
-            ajax_submit("{% url 'predict_trained_model' %}", 'model_results_wrapper_' + model_id, 'model_prediction_form_' + model_id, 'POST', '', after_submit_model_prediction_form);
+            ajax_submit("{% url 'predict_csv_trained_model' %}", 'model_results_wrapper_' + model_id, 'model_prediction_form_' + model_id, 'POST', '', after_submit_model_prediction_form);
         }
     }
 
@@ -119,8 +119,39 @@
         disable_prediction = false;
         $("#model_results_wrapper_" + active_model).html(res);
         $("#model_results_wrapper_" + active_model).css('height', 'auto');
+        $("#model_results_wrapper_" + active_model).show('slow');
+
         active_model = "";
     }
+
+
+
+
+    function submit_model_prediction_form_img(model_id) {
+        active_model = model_id;
+        if (disable_prediction == false) {
+            display_loader(".prediction-btn" + model_id);
+            disable_prediction = true;
+            ajax_submit("{% url 'predict_img_trained_model' %}", 'model_results_wrapper_' + model_id, 'model_prediction_form_' + model_id, 'POST', '', after_submit_model_prediction_form);
+        }
+    }
+
+    function after_submit_model_prediction_form_img(res) {
+        hide_loader(".prediction-btn_" + active_model);
+        disable_prediction = false;
+        $("#model_results_wrapper_" + active_model).html(res);
+        $("#model_results_wrapper_" + active_model).css('height', 'auto');
+
+        active_model = "";
+    }
+
+
+
+
+
+
+
+
 
 	function after_delete_model(res){
 		ajax_submit("{% url 'list_deployed_models'%}", 'model_list_wrapper');

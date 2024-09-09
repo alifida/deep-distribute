@@ -32,9 +32,9 @@
                      
                 </div> <!-- end of col dataset grid -->
             </div>
-            {% if dataset %}
             <div class="row v-margin-10"> 
-                <div class="col-8" > <!-- start of col datset detail -->  
+            {% if dataset %}
+                <div class="col-lg-9 col-md-9 col-sm-12" > <!-- start of col datset detail -->  
                     <div class="card mb-3 card-purple card-outline">
                         <div class="card-header">
                             <div class="row">
@@ -248,15 +248,82 @@
                             
                         </div>
                     </div>
-                </div>                       
-                <div class="col-4" > <!-- start of col datset detail -->  
+                    <div class="card mb-2 hide-imp" id="training_progress" >
+                        
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <span class="text-md"><i class="fa fa-circle-o-notch fa-spin"></i>Training Progress
+                                        <span class="spinner loader  bg-transparent small-right-loader" ><i class="fas fa-circle-notch center fa-spin center-inner text-lg " ></i></span>
+                                    </span>
+                                </div>
+                                <div class="col-12">
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <span class="progress-description"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="results_wrapper" class="full-width"></div>
+
+                </div> 
+                <script>
+                    job_status ='NOT_KNOWN';
+                    function get_training_progress(){
+                        console.log(job_status);
+                        if (job_status !== 'NOT_KNOWN' && job_status !== 'RUNNING') {
+                            clearInterval(progressInterval);
+                            return;
+                        }
+
+                        ajax_submit("{% url 'get_training_progress' dataset.id 0 %}", '', '', 'POST', '', after_get_training_progress);
+
+                    }
+                    function after_get_training_progress(raw){
+                        res = $.parseJSON(raw);
+                        console.log(res);
+                        if(res.log != null && res.log !=''){
+                            log_html = "<span>Epoch : "+res.log.epoch+"/"+res.total_epochs+"..... Accuracy: "+res.log.logs.accuracy+", Precision: "+res.log.logs.precision+", Recall: "+res.log.logs.recall+", auc: "+res.log.logs.auc+"</span><br/>";
+                            $("#training_progress .progress-description").append(log_html);
+
+                            percent_complete = 0;
+                            percent_complete = (res.log.epoch/res.total_epochs) * 100;
+                            $("#training_progress .progress-bar").css("width", percent_complete + "%");
+                        }
+
+                        job_status =res.job_status;
+                        if (job_status !== 'NOT_KNOWN' && job_status !== 'RUNNING') {
+                            $("#training_progress .spinner").html("");
+                            clearInterval(progressInterval);
+                            get_training_results();
+                            
+                            
+                        }
+                        if ($("#training_progress .progress-description").html().length > 0) {
+                            $("#training_progress").removeClass('hide-imp');
+                            
+                        }
+
+
+                         
+                    }
+                    
+
+                    let progressInterval = setInterval(get_training_progress, 3000);
+                </script> 
+                                     
+                <div class="col-lg-3 col-md-3 col-sm-12" > <!-- start of col datset detail -->  
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
                                 <div class="col-12  ">
                                     <h5 class="left">{{ dataset.data_name }}</h5>
                                     <div class="right">
-                                        
                                         <a href="{% url 'delete_images_dataset_confirm' dataset.id %}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Delete Dataset"><i class="nav-icon fa fa-trash"></i> &nbsp; Delete</a>
                                     </div>
                                 </div>
@@ -330,9 +397,16 @@
                  
 
 
+                {% endif %}
+                
             </div>
-            {% endif %}
-             
+            
+
+
+
+
+            
+
  
 
                 {% if dataset %}
@@ -419,6 +493,12 @@
 </div>
 
 
+<script>
+    function get_training_results(){
+        ajax_submit("{% url 'get_training_result' dataset.id %}", 'results_wrapper', '', 'POST', '');
+        
+    }
+</script>
  
 
 

@@ -1226,7 +1226,7 @@ def save_model(model, params):
     dataset_id = params.get('dataset_id')
     algo_name = params.get('algo_name')
     
-    directory = os.path.join(settings.MEDIA_ROOT, str(user_id), 'trained_models', str(dataset_id))
+    directory = os.path.join(settings.MEDIA_ROOT, str(user_id), 'trained_models','csv', str(dataset_id))
     if not os.path.exists(directory):
         os.makedirs(directory)
 
@@ -1245,6 +1245,7 @@ def save_model(model, params):
             status='Temp',
             user_id=user_id,
             dataset_id=dataset_id,
+             
             key_attributes = params['key_attributes'],
             class_label = params['class_label']
         )

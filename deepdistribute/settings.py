@@ -46,11 +46,25 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles' ,
-    'crispy_forms'
+    'crispy_forms',
+    'django_q'
+   # 'background_task'
   
-    
-     
 ]
+
+# settings.py
+
+Q_CLUSTER = {
+    'name': 'deep-distribute',
+    'workers': 1,
+    'recycle': 5,
+    'timeout': 1000000,
+    'queue_limit': 10,
+    'bulk': 1,
+    'orm': 'default',
+}
+
+     
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

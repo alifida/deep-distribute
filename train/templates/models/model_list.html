@@ -17,7 +17,7 @@
                             
                         </span>
                     </div>
-                    <span class="info-box-icon bg-purple circle height-150 width-150 right pointer blinking-div" onclick="$('#model_form_wrapper_{{model.id}} ').toggle('slow')" >
+                    <span class="info-box-icon {%if model.dataset %} bg-purple {%endif%} {%if model.dataset_img %} bg-success {%endif%} circle height-150 width-150 right pointer blinking-div" onclick="$('#model_form_wrapper_{{model.id}} ').toggle('slow')" >
                         <span class="text-lg">Predict</span>
                     </span>
                 </div>
@@ -32,12 +32,13 @@
                                 <i class="fa fa-circle-o-notch fa-spin center" class="text-xl"></i>
                             </div>
                         </div>
-                        <div class="row h-padding-0" >
-                            <div id="model_results_wrapper_{{model.id}}" class="col-lg-12 col-md-12 col-sm-12 h-padding-0 " >
-                                <div class="full-width"  style="display:none;"></div>
-                            </div>
+                    </div>
+                    <div class="row h-padding-0" >
+                        <div id="model_results_wrapper_{{model.id}}" class="col-lg-12 col-md-12 col-sm-12 h-padding-0 " >
+                            <div class="full-width"  style="display:none;"></div>
                         </div>
                     </div>
+
                     <div class="full-width " >
                         
                         <button type="button" class="pointer left btn btn-sm btn-danger" onclick="$('#delete_confirmation_model_{{model.id}}').fadeIn('slow')">

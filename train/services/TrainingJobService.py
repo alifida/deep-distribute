@@ -37,6 +37,7 @@ class TrainingJobService:
     
 
         
+    
 
     @staticmethod
     def get(job_id):
@@ -46,7 +47,13 @@ class TrainingJobService:
     def update(job_id, **kwargs):
         TrainingJobDAO.update(job_id, **kwargs)
 
-
+    @staticmethod
+    def getSingleByDataset(datasetId):
+        return TrainingJobDAO.getSingleByDataset(datasetId)
+    @staticmethod
+    def getSingleByDatasetAndStatus(datasetId, status):
+        return TrainingJobDAO.getSingleByDatasetAndStatus(datasetId, status)
+    
     @staticmethod
     def startTraining(training_params):
        
@@ -55,17 +62,18 @@ class TrainingJobService:
        user=training_params['user']
        dataset_id=training_params['dataset_id']
        strategy=training_params['strategy']
+       training_params['user'] = user.id
        # save job 
        training_job = TrainingJobService.create(dataset_id=dataset_id, user=user, algo_name=algo_name, parameter_settings=training_params)
+       training_params['user'] = user
        training_params['training_job'] = training_job
        print (training_job.id)
-       
        # get job_id and start training
        #trainingJob = TrainingJobService.get(job_id)
        #TrainingService.start_training_process(trainingJob.id)
         
        if strategy == 1 or strategy=='Single GPU':
-           TrainingServiceSingle.start_training(training_params)
+           TrainingServiceSingle.start_training_process(training_params)
        elif strategy == 2 or  strategy=='GPSingleU Cluster Parameter Server':
            TrainingServicePS.start_training(training_params)
        elif strategy == 3 or  strategy=='GPU Cluster Custom':
@@ -74,6 +82,8 @@ class TrainingJobService:
        else:
             # Handle any other cases if needed
             pass  # or do something else
+       
+       return training_job.id
         
 
     @staticmethod
@@ -91,3 +101,9 @@ class TrainingJobService:
     @staticmethod
     def list_by_dataset(dataset_id):
         return TrainingJobDAO.list_by_dataset(dataset_id=dataset_id)
+    
+    @staticmethod
+    def delete_by_dataset_img_id(dataset_img_id):
+        return TrainingJobDAO.delete_by_dataset_img_id(dataset_img_id)
+    
+    

@@ -217,9 +217,12 @@ class TrainedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    dataset = models.ForeignKey('Dataset', on_delete=models.CASCADE, related_name='trained_models')
+    dataset = models.ForeignKey('Dataset', on_delete=models.CASCADE, related_name='trained_models', blank=True, null=True)
+    dataset_img = models.ForeignKey('Dataset_IMG', on_delete=models.CASCADE, related_name='trained_models', blank=True, null=True)
+    
     key_attributes = models.TextField(blank=True)
     class_label = models.TextField(blank=True)
+    
     def __str__(self):
         return f"Model: {self.description or 'No description'} - Status: {self.status}"
 

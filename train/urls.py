@@ -47,10 +47,12 @@ urlpatterns += [
     path('training/jobs/start/', training_controller.start_training_post, name='start_training_post'),
     path('training/job/training/<int:dataset_id>/', training_controller.training, name="start_training"),
     path('training/jobs/stop/<int:job_id>/', training_controller.stop_training, name='stop_training'),
+    path('training/jobs/progress/<int:dataset_id>/<int:job_id>/', training_controller.get_training_progress, name='get_training_progress'),
+    path('training/jobs/result/<int:dataset_id>/', training_controller.get_training_result, name='get_training_result'),
 
     #path('deep/jobs/delete_confirm/<int:dataset_id>/', TrainingController.delete_confirm, name="training_job_delete_confirm"),
     path('deep/jobs/delete/<int:job_id>/', training_controller.delete, name='training_job_delete'),
-
+    
 ]
 
 #DeploymentController
@@ -61,10 +63,12 @@ urlpatterns += [
     path('home/', deployment_controller.index, name='home_'),
     path('model/list/all-datasets/', deployment_controller.list_all_datasets, name='list_all_datasets'),
 
-    path('model/deploy/model/<int:trained_model_id>', deployment_controller.deploy_trained_model, name='deploy_model_url'),
+    path('model/deploy/csv/model/<int:trained_model_id>', deployment_controller.deploy_trained_csv_model, name='deploy_csv_model_url'),
+    path('model/deploy/images/model/<int:trained_model_id>', deployment_controller.deploy_trained_img_model, name='deploy_img_model_url'),
     path('model/deployed/', deployment_controller.list_deployed_models, name='list_deployed_models'),
     path('model/deployed/<int:pk>', deployment_controller.get_model_by_id, name='load_model_by_id'),
-    path('model/deployed/predict', deployment_controller.predict_trained_model, name='predict_trained_model'),
+    path('model/deployed/csv/predict', deployment_controller.predict_csv_trained_model, name='predict_csv_trained_model'),
+    path('model/deployed/images/predict', deployment_controller.predict_img_trained_model, name='predict_img_trained_model'),
     path('model/deployed/csv/template/<int:pk>', deployment_controller.download_csv_template, name='download_csv_template'),
     path('model/deployed/delete/<int:pk>', deployment_controller.delete_model, name='delete_model_by_id'),
 ]

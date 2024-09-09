@@ -1,4 +1,4 @@
-{% if deployed_model.key_attributes %}
+{% if deployed_model.dataset and deployed_model.key_attributes %}
 <div id="model_prediction_form_wrapper_{{deployed_model.id}}" class="full-width">
     <form method="post" id="model_prediction_form_{{deployed_model.id}}" onsubmit="event.preventDefault();submit_model_prediction_form('{{deployed_model.id}}');">
         {% csrf_token %}
@@ -13,8 +13,8 @@
         </div>
         <div class="row">
             <div class="col-lg-3 col-md-4 col-sm-12 ">
-                <label for="supply_dataset_{{deployed_model.id}}">supply_dataset:</label>
-                <input type="file"  class="form-control border-purple " name="supply_dataset" id="supply_dataset_{{deployed_model.id}}" onchange="toggleRequiredFields('{{deployed_model.id}}')"/>
+                <label for="supply_dataset_{{deployed_model.id}}">Supply Dataset:</label>
+                <input type="file"  class="form-control border-purple " name="supply_dataset" id="supply_dataset_{{deployed_model.id}}" onchange="toggleRequiredFields('{{deployed_model.id}}')" accept=".csv, .xlsx, .xls"/>
             </div>
             
             <div class="col-lg-6 col-md-6 col-sm-12 offset-lg-3 offset-md-4 offset-sm-0">
@@ -33,3 +33,30 @@
     
 </div>
 {% endif %}
+
+
+
+{% if deployed_model.dataset_img %}
+<div id="model_prediction_form_wrapper_{{deployed_model.id}}" class="full-width">
+    <form method="post" id="model_prediction_form_{{deployed_model.id}}" onsubmit="event.preventDefault();submit_model_prediction_form_img('{{deployed_model.id}}');">
+        {% csrf_token %}
+        <input type="hidden" name="model_id" value="{{deployed_model.id}}" />
+         
+        <div class="row">
+            <div class="col-lg-3 col-md-4 col-sm-12 ">
+                <label for="image_{{deployed_model.id}}">Upload Image:</label>
+                <input type="file"  class="form-control border-success " name="image" id="image_{{deployed_model.id}}" accept=".png, .jpg, .jpeg"/>
+            </div>
+            
+            <div class="col-lg-6 col-md-6 col-sm-12 offset-lg-3 offset-md-4 offset-sm-0">
+                <div class="full-width padding-15" > </div>
+                <button type="submit" class="btn btn-outline-success right"><span class="prediction-btn_{{deployed_model.id}}">Predict {{deployed_model.class_label}}</span></button>
+                <button type="reset" class="btn btn-outline-secondary right mr-3"><span class="reset-btn">Reset </span></button>
+            </div>
+        </div>
+         
+    </form>
+</div>
+<hr/>
+{% endif %}
+

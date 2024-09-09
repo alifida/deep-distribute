@@ -1,0 +1,63 @@
+<div class="card hide-imp" id="model_results_card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Accuracy:</dt>
+            <dd class="col-sm-9">{{ results.accuracy }}</dd>
+
+            <dt class="col-sm-3">precision</dt>
+            <dd class="col-sm-9">{{ results.precision }}</dd>
+
+            <dt class="col-sm-3">recall</dt>
+            <dd class="col-sm-9">{{ results.recall }}</dd>
+
+            <dt class="col-sm-3">auc</dt>
+            <dd class="col-sm-9">{{ results.auc }}</dd>
+
+            <dt class="col-sm-3">score</dt>
+            <dd class="col-sm-9">{{ results.score }}</dd>
+            <input type="hidden" id="model_to_deploy" value="{{model_id}}" />
+            <!-- Include dataset statistics fetched by gather_dataset_stats() -->
+             
+        </dl>
+    </div>
+    <div class="card-footer">
+        <div class="row">
+            <div class="col-12 center-inner ">
+                <button id="deploy_btn" onclick="deploy_model();"  class=" form-control form-control-sm  btn  btn-purple btn-block btn-sm right hide-imp "><span class="deploy-btn">Deploy For furture Use</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    if($("#model_to_deploy").val()==''){
+        $("#deploy_btn").addClass('hide-imp');
+        $("#model_results_card").addClass('hide-imp');
+    }else{
+        $("#deploy_btn").removeClass('hide-imp');
+        $("#model_results_card").removeClass('hide-imp');
+        
+    }
+
+    function deploy_model(){
+	
+        display_loader(".deploy-btn");
+        var modelId = $("#model_to_deploy").val(); // Correct way to get value using jQuery
+        var deploy_img_model_url = "{% url 'deploy_img_model_url' 0 %}".replace(/0$/, modelId); // Replace placeholder with actual modelId
+        disable_deploy = true;
+        ajax_submit(deploy_img_model_url,'','', 'POST',  '', after_deploy_model, after_deploy_model) ;
+      }
+      function after_deploy_model(raw){
+        res = $.parseJSON(raw);
+        show_alert(res.status, res.message);
+        if(res.status=='success'){
+           if(res.hasOwnProperty('redirectURL')){
+              window.location.href = res.redirectURL;
+          }
+          }
+           
+        disable_deploy= false;
+        hide_loader(".deploy-btn");
+      }
+</script>
