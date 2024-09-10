@@ -36,3 +36,18 @@
         
 {% endfor %}
 
+
+{% if prediction_result %}
+ 
+<div class="row ">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class=" center-inner ">
+            <div class="padding-20 bg-success center round-border-10" style="display: inline-block;">
+                <h2> {{ prediction_result }} </h2>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endif %}
+

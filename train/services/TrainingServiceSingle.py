@@ -237,7 +237,8 @@ class TrainingServiceSingle:
             # Save the model to the file
             model.save(file_path)
             print(f"Model saved successfully to {file_path}")
-
+            dataset_img = params['training_job'].dataset_img
+            stats = dataset_img.gather_dataset_stats()
             # Create and save the TrainedModel object
             trained_model = TrainedModel(
                 model_file=os.path.relpath(file_path, settings.MEDIA_ROOT),  # Store the relative path
@@ -245,9 +246,8 @@ class TrainingServiceSingle:
                 status='Temp',
                 user_id=user_id,
                 dataset_img_id=dataset_id,
-                 
-                #key_attributes = params['key_attributes'],
-                #class_label = params['class_label']
+                
+                class_label = stats['train']['class_names']
             )
             trained_model.save()
             print("TrainedModel saved to the database successfully.")

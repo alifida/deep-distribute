@@ -14,6 +14,8 @@ from train.services.TrainingJobService import TrainingJobService
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import ast
+import json
 
 import csv
 
@@ -219,23 +221,31 @@ def predict_csv_trained_model(request):
 
 
 from tensorflow.keras.preprocessing.image import img_to_array
-
- 
-def preprocess_image(image):
+def preprocess_image(image, model):
     # Convert image to RGB if not already
     if image.mode != 'RGB':
         image = image.convert('RGB')
-    # Resize image
-    image = image.resize((150, 150))  # Ensure dimensions match the model input
+
+    # Get the input size directly from the model
+    input_shape = model.input_shape  # Get input shape from the model
+    
+    # If the input shape includes a batch size (None), we ignore it
+    target_size = (input_shape[1], input_shape[2])  # Get the target height and width
+
+    # Resize image according to the model's input size
+    image = image.resize(target_size)
+
     # Convert image to array
     image_array = img_to_array(image)
-    # Normalize the image
+
+    # Normalize the image (optional: depends on your model, you can adjust accordingly)
     image_array = image_array / 255.0
+
     # Expand dimensions to match model input
     image_array = np.expand_dims(image_array, axis=0)
+    
     return image_array
 
-@login_required 
 @permission_required('datasource.view_dataset')
 def predict_img_trained_model(request):
     data = {}
@@ -257,24 +267,27 @@ def predict_img_trained_model(request):
             if file_data:
                 # Pre-process the uploaded image for prediction
                 image = Image.open(file_data)
-                #image = image.resize((150, 150))  # Resize to the expected input size
-                #image_array = np.array(image) / 255.0  # Normalize the image
-                #image_array = np.expand_dims(image_array, axis=0)  # Add batch dimension
+                image_array = preprocess_image(image, model)
 
-                image_array = preprocess_image(image)
                 # Make a prediction
                 prediction = model.predict(image_array)
 
-                # Interpret the prediction result (Assuming binary classification)
-                class_label = str(trained_model.class_label)
-                predicted_class = 'Class 1' if prediction[0] > 0.5 else 'Class 0'
-
+                # Fetch class labels (assumes trained_model stores them as JSON or list)
+                class_labels = ast.literal_eval(trained_model.class_label)  # Expecting a list of class labels
+                 
+                if len(class_labels) > 2:
+                    # For N-class (multi-class) predictions
+                    predicted_class_index = np.argmax(prediction[0])  # Get the index of the highest probability class
+                    predicted_class = class_labels[predicted_class_index]  # Get the class label
+                else:
+                    # For binary classification
+                    predicted_class = class_labels[1] if prediction[0][0] > 0.5 else class_labels[0]
+                    print (prediction[0][0])
                 # Prepare the prediction result to display
-                data['prediction_result'] = f"Predicted {class_label}: {predicted_class}"
+                data['prediction_result'] = predicted_class
         
-    return util.myrender(request, 'models/result_template.html', data)      
-    
- 
+    return util.myrender(request, 'models/result_template.html', data)
+
 @login_required 
 @permission_required('datasource.view_dataset')
 def get_model_by_id(request, pk):

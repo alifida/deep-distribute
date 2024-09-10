@@ -124,7 +124,7 @@ def get_training_result(request, dataset_id):
     trainingJob = TrainingJobService.getSingleByDatasetAndStatus(dataset_id, "COMPLETED")
     if trainingJob and trainingJob.result:
         res["results"] = json.loads(trainingJob.result)
-        model = TrainedModel.objects.filter(dataset_img_id=dataset_id).first()
+        model = TrainedModel.objects.filter(dataset_img_id=dataset_id).last()
         if model:
             res["model_id"] = model.id
         
