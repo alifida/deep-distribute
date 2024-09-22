@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-*7o+es^8we7)hedbkteh0a5bw&0-0#w=z-alv^7$3(8mntm*!=
 DEBUG = True
 
 #ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost','192.168.10.106', '192.168.10.71','192.168.100.109','192.168.100.112', '192.168.10.12', '192.168.10.92', '192.168.137.80']
+ALLOWED_HOSTS = ['localhost','gpu.predictive-lab.com', '192.168.10.106', '192.168.10.71','192.168.100.109','192.168.100.112', '192.168.10.12', '192.168.10.92', '192.168.137.80']
 CLUSTER_DETAIL_URL = 'http://192.168.100.112:8000/api/cluster/detail'
 SHARED_DIRECTORY = 'E:\\dataset\\training_tmp'
 
@@ -118,7 +118,7 @@ DATABASES = {
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
     'NAME': 'deep-distribute',
     'USER': 'postgres',
-    'PASSWORD': 'window',
+    'PASSWORD': 'szabist',
     #'PASSWORD': 'Window@98',
     'HOST': 'localhost',
     'PORT': '5432',

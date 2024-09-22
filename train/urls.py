@@ -57,9 +57,9 @@ urlpatterns += [
 
 #DeploymentController
 urlpatterns += [
-    #path('home', deployment_controller.index, name='model_welcome'),
+    path('home', deployment_controller.index, name='model_welcome'),
     path('home', deployment_controller.index, name='home'),
-    #path('home/', deployment_controller.index, name='home_'),
+    path('home/', deployment_controller.index, name='home_'),
 
     path('model/list/all-datasets/', deployment_controller.list_all_datasets, name='list_all_datasets'),
 
