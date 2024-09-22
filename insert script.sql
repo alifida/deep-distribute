@@ -1,3 +1,481 @@
+-- public.auth_group definition
+
+-- Drop table
+
+-- DROP TABLE public.auth_group;
+
+CREATE TABLE public.auth_group (
+	id serial4 NOT NULL,
+	"name" varchar(150) NOT NULL,
+	CONSTRAINT auth_group_name_key UNIQUE (name),
+	CONSTRAINT auth_group_pkey PRIMARY KEY (id)
+);
+CREATE INDEX auth_group_name_a6ea08ec_like ON public.auth_group USING btree (name varchar_pattern_ops);
+
+
+-- public.auth_user definition
+
+-- Drop table
+
+-- DROP TABLE public.auth_user;
+
+CREATE TABLE public.auth_user (
+	id serial4 NOT NULL,
+	"password" varchar(128) NOT NULL,
+	last_login timestamptz NULL,
+	is_superuser bool NOT NULL,
+	username varchar(150) NOT NULL,
+	first_name varchar(150) NOT NULL,
+	last_name varchar(150) NOT NULL,
+	email varchar(254) NOT NULL,
+	is_staff bool NOT NULL,
+	is_active bool NOT NULL,
+	date_joined timestamptz NOT NULL,
+	CONSTRAINT auth_user_pkey PRIMARY KEY (id),
+	CONSTRAINT auth_user_username_key UNIQUE (username)
+);
+CREATE INDEX auth_user_username_6821ab7c_like ON public.auth_user USING btree (username varchar_pattern_ops);
+
+
+-- public.django_content_type definition
+
+-- Drop table
+
+-- DROP TABLE public.django_content_type;
+
+CREATE TABLE public.django_content_type (
+	id serial4 NOT NULL,
+	app_label varchar(100) NOT NULL,
+	model varchar(100) NOT NULL,
+	CONSTRAINT django_content_type_app_label_model_76bd3d3b_uniq UNIQUE (app_label, model),
+	CONSTRAINT django_content_type_pkey PRIMARY KEY (id)
+);
+
+
+-- public.django_migrations definition
+
+-- Drop table
+
+-- DROP TABLE public.django_migrations;
+
+CREATE TABLE public.django_migrations (
+	id serial4 NOT NULL,
+	app varchar(255) NOT NULL,
+	"name" varchar(255) NOT NULL,
+	applied timestamptz NOT NULL,
+	CONSTRAINT django_migrations_pkey PRIMARY KEY (id)
+);
+
+
+-- public.django_q_ormq definition
+
+-- Drop table
+
+-- DROP TABLE public.django_q_ormq;
+
+CREATE TABLE public.django_q_ormq (
+	id serial4 NOT NULL,
+	"key" varchar(100) NOT NULL,
+	payload text NOT NULL,
+	"lock" timestamptz NULL,
+	CONSTRAINT django_q_ormq_pkey PRIMARY KEY (id)
+);
+
+
+-- public.django_q_schedule definition
+
+-- Drop table
+
+-- DROP TABLE public.django_q_schedule;
+
+CREATE TABLE public.django_q_schedule (
+	id serial4 NOT NULL,
+	func varchar(256) NOT NULL,
+	hook varchar(256) NULL,
+	args text NULL,
+	kwargs text NULL,
+	schedule_type varchar(1) NOT NULL,
+	repeats int4 NOT NULL,
+	next_run timestamptz NULL,
+	task varchar(100) NULL,
+	"name" varchar(100) NULL,
+	minutes int2 NULL,
+	cron varchar(100) NULL,
+	"cluster" varchar(100) NULL,
+	CONSTRAINT django_q_schedule_minutes_check CHECK ((minutes >= 0)),
+	CONSTRAINT django_q_schedule_pkey PRIMARY KEY (id)
+);
+
+
+-- public.django_q_task definition
+
+-- Drop table
+
+-- DROP TABLE public.django_q_task;
+
+CREATE TABLE public.django_q_task (
+	"name" varchar(100) NOT NULL,
+	func varchar(256) NOT NULL,
+	hook varchar(256) NULL,
+	args text NULL,
+	kwargs text NULL,
+	"result" text NULL,
+	started timestamptz NOT NULL,
+	stopped timestamptz NOT NULL,
+	success bool NOT NULL,
+	id varchar(32) NOT NULL,
+	"group" varchar(100) NULL,
+	attempt_count int4 NOT NULL,
+	CONSTRAINT django_q_task_pkey PRIMARY KEY (id)
+);
+CREATE INDEX django_q_task_id_32882367_like ON public.django_q_task USING btree (id varchar_pattern_ops);
+
+
+-- public.django_session definition
+
+-- Drop table
+
+-- DROP TABLE public.django_session;
+
+CREATE TABLE public.django_session (
+	session_key varchar(40) NOT NULL,
+	session_data text NOT NULL,
+	expire_date timestamptz NOT NULL,
+	CONSTRAINT django_session_pkey PRIMARY KEY (session_key)
+);
+CREATE INDEX django_session_expire_date_a5c62663 ON public.django_session USING btree (expire_date);
+CREATE INDEX django_session_session_key_c0390e0f_like ON public.django_session USING btree (session_key varchar_pattern_ops);
+
+
+-- public.django_site definition
+
+-- Drop table
+
+-- DROP TABLE public.django_site;
+
+CREATE TABLE public.django_site (
+	id serial4 NOT NULL,
+	"domain" varchar(100) NOT NULL,
+	"name" varchar(50) NOT NULL,
+	CONSTRAINT django_site_domain_a2e37b91_uniq UNIQUE (domain),
+	CONSTRAINT django_site_pkey PRIMARY KEY (id)
+);
+CREATE INDEX django_site_domain_a2e37b91_like ON public.django_site USING btree (domain varchar_pattern_ops);
+
+
+-- public.train_charttype definition
+
+-- Drop table
+
+-- DROP TABLE public.train_charttype;
+
+CREATE TABLE public.train_charttype (
+	id serial4 NOT NULL,
+	"name" varchar(50) NULL,
+	"type" varchar(50) NOT NULL,
+	status varchar(20) NULL,
+	"template" text NOT NULL,
+	CONSTRAINT train_charttype_pkey PRIMARY KEY (id)
+);
+
+
+-- public.train_clusternode definition
+
+-- Drop table
+
+-- DROP TABLE public.train_clusternode;
+
+CREATE TABLE public.train_clusternode (
+	id serial4 NOT NULL,
+	node_type varchar(10) NOT NULL,
+	ip_address varchar(15) NOT NULL,
+	port int4 NOT NULL,
+	CONSTRAINT train_clusternode_pkey PRIMARY KEY (id)
+);
+
+
+-- public.train_permission definition
+
+-- Drop table
+
+-- DROP TABLE public.train_permission;
+
+CREATE TABLE public.train_permission (
+	id serial4 NOT NULL,
+	"name" varchar(100) NOT NULL,
+	CONSTRAINT train_permission_pkey PRIMARY KEY (id)
+);
+
+
+-- public.auth_permission definition
+
+-- Drop table
+
+-- DROP TABLE public.auth_permission;
+
+CREATE TABLE public.auth_permission (
+	id serial4 NOT NULL,
+	"name" varchar(255) NOT NULL,
+	content_type_id int4 NOT NULL,
+	codename varchar(100) NOT NULL,
+	CONSTRAINT auth_permission_content_type_id_codename_01ab375a_uniq UNIQUE (content_type_id, codename),
+	CONSTRAINT auth_permission_pkey PRIMARY KEY (id),
+	CONSTRAINT auth_permission_content_type_id_2f476e4b_fk_django_co FOREIGN KEY (content_type_id) REFERENCES public.django_content_type(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX auth_permission_content_type_id_2f476e4b ON public.auth_permission USING btree (content_type_id);
+
+
+-- public.auth_user_groups definition
+
+-- Drop table
+
+-- DROP TABLE public.auth_user_groups;
+
+CREATE TABLE public.auth_user_groups (
+	id serial4 NOT NULL,
+	user_id int4 NOT NULL,
+	group_id int4 NOT NULL,
+	CONSTRAINT auth_user_groups_pkey PRIMARY KEY (id),
+	CONSTRAINT auth_user_groups_user_id_group_id_94350c0c_uniq UNIQUE (user_id, group_id),
+	CONSTRAINT auth_user_groups_group_id_97559544_fk_auth_group_id FOREIGN KEY (group_id) REFERENCES public.auth_group(id) DEFERRABLE INITIALLY DEFERRED,
+	CONSTRAINT auth_user_groups_user_id_6a12ed8b_fk_auth_user_id FOREIGN KEY (user_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX auth_user_groups_group_id_97559544 ON public.auth_user_groups USING btree (group_id);
+CREATE INDEX auth_user_groups_user_id_6a12ed8b ON public.auth_user_groups USING btree (user_id);
+
+
+-- public.auth_user_user_permissions definition
+
+-- Drop table
+
+-- DROP TABLE public.auth_user_user_permissions;
+
+CREATE TABLE public.auth_user_user_permissions (
+	id serial4 NOT NULL,
+	user_id int4 NOT NULL,
+	permission_id int4 NOT NULL,
+	CONSTRAINT auth_user_user_permissions_pkey PRIMARY KEY (id),
+	CONSTRAINT auth_user_user_permissions_user_id_permission_id_14a6b632_uniq UNIQUE (user_id, permission_id),
+	CONSTRAINT auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm FOREIGN KEY (permission_id) REFERENCES public.auth_permission(id) DEFERRABLE INITIALLY DEFERRED,
+	CONSTRAINT auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id FOREIGN KEY (user_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX auth_user_user_permissions_permission_id_1fbb5f2c ON public.auth_user_user_permissions USING btree (permission_id);
+CREATE INDEX auth_user_user_permissions_user_id_a95ead1b ON public.auth_user_user_permissions USING btree (user_id);
+
+
+-- public.django_admin_log definition
+
+-- Drop table
+
+-- DROP TABLE public.django_admin_log;
+
+CREATE TABLE public.django_admin_log (
+	id serial4 NOT NULL,
+	action_time timestamptz NOT NULL,
+	object_id text NULL,
+	object_repr varchar(200) NOT NULL,
+	action_flag int2 NOT NULL,
+	change_message text NOT NULL,
+	content_type_id int4 NULL,
+	user_id int4 NOT NULL,
+	CONSTRAINT django_admin_log_action_flag_check CHECK ((action_flag >= 0)),
+	CONSTRAINT django_admin_log_pkey PRIMARY KEY (id),
+	CONSTRAINT django_admin_log_content_type_id_c4bce8eb_fk_django_co FOREIGN KEY (content_type_id) REFERENCES public.django_content_type(id) DEFERRABLE INITIALLY DEFERRED,
+	CONSTRAINT django_admin_log_user_id_c564eba6_fk_auth_user_id FOREIGN KEY (user_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX django_admin_log_content_type_id_c4bce8eb ON public.django_admin_log USING btree (content_type_id);
+CREATE INDEX django_admin_log_user_id_c564eba6 ON public.django_admin_log USING btree (user_id);
+
+
+-- public.registration_registrationprofile definition
+
+-- Drop table
+
+-- DROP TABLE public.registration_registrationprofile;
+
+CREATE TABLE public.registration_registrationprofile (
+	id serial4 NOT NULL,
+	activation_key varchar(64) NOT NULL,
+	user_id int4 NOT NULL,
+	activated bool NOT NULL,
+	CONSTRAINT registration_registrationprofile_pkey PRIMARY KEY (id),
+	CONSTRAINT registration_registrationprofile_user_id_key UNIQUE (user_id),
+	CONSTRAINT registration_registr_user_id_5fcbf725_fk_auth_user FOREIGN KEY (user_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED
+);
+
+
+-- public.registration_supervisedregistrationprofile definition
+
+-- Drop table
+
+-- DROP TABLE public.registration_supervisedregistrationprofile;
+
+CREATE TABLE public.registration_supervisedregistrationprofile (
+	registrationprofile_ptr_id int4 NOT NULL,
+	CONSTRAINT registration_supervisedregistrationprofile_pkey PRIMARY KEY (registrationprofile_ptr_id),
+	CONSTRAINT registration_supervi_registrationprofile__0a59f3b2_fk_registrat FOREIGN KEY (registrationprofile_ptr_id) REFERENCES public.registration_registrationprofile(id) DEFERRABLE INITIALLY DEFERRED
+);
+
+
+-- public.train_dataset definition
+
+-- Drop table
+
+-- DROP TABLE public.train_dataset;
+
+CREATE TABLE public.train_dataset (
+	id serial4 NOT NULL,
+	description varchar(300) NOT NULL,
+	dataset varchar(100) NOT NULL,
+	dataset_test varchar(100) NULL,
+	process_details text NOT NULL,
+	processed_at timestamptz NOT NULL,
+	metainfo text NOT NULL,
+	source_dataset_id_id int4 NULL,
+	user_id int4 NOT NULL,
+	CONSTRAINT train_dataset_pkey PRIMARY KEY (id),
+	CONSTRAINT train_dataset_source_dataset_id_id_190b04e7_fk_train_dataset_id FOREIGN KEY (source_dataset_id_id) REFERENCES public.train_dataset(id) DEFERRABLE INITIALLY DEFERRED,
+	CONSTRAINT train_dataset_user_id_793c7b0b_fk_auth_user_id FOREIGN KEY (user_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX train_dataset_source_dataset_id_id_190b04e7 ON public.train_dataset USING btree (source_dataset_id_id);
+CREATE INDEX train_dataset_user_id_793c7b0b ON public.train_dataset USING btree (user_id);
+
+
+-- public.train_dataset_img definition
+
+-- Drop table
+
+-- DROP TABLE public.train_dataset_img;
+
+CREATE TABLE public.train_dataset_img (
+	id serial4 NOT NULL,
+	data_name varchar(300) NOT NULL,
+	data_path varchar(300) NOT NULL,
+	metainfo text NOT NULL,
+	processed_at timestamptz NOT NULL,
+	delete_at timestamptz NULL,
+	status varchar(300) NOT NULL,
+	user_id int4 NOT NULL,
+	extracted_path text NOT NULL,
+	data_path_test varchar(300) NOT NULL,
+	extracted_path_test text NOT NULL,
+	CONSTRAINT train_dataset_img_pkey PRIMARY KEY (id),
+	CONSTRAINT train_dataset_img_user_id_f0f52aad_fk_auth_user_id FOREIGN KEY (user_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX train_dataset_img_user_id_f0f52aad ON public.train_dataset_img USING btree (user_id);
+
+
+-- public.train_trainedmodel definition
+
+-- Drop table
+
+-- DROP TABLE public.train_trainedmodel;
+
+CREATE TABLE public.train_trainedmodel (
+	id serial4 NOT NULL,
+	model_file varchar(100) NULL,
+	description varchar(300) NULL,
+	status varchar(100) NOT NULL,
+	created_at timestamptz NOT NULL,
+	updated_at timestamptz NOT NULL,
+	key_attributes text NOT NULL,
+	class_label text NOT NULL,
+	dataset_id int4 NULL,
+	user_id int4 NOT NULL,
+	dataset_img_id int4 NULL,
+	CONSTRAINT train_trainedmodel_pkey PRIMARY KEY (id),
+	CONSTRAINT train_trainedmodel_dataset_id_8d4a44ab_fk_train_dataset_id FOREIGN KEY (dataset_id) REFERENCES public.train_dataset(id) DEFERRABLE INITIALLY DEFERRED,
+	CONSTRAINT train_trainedmodel_dataset_img_id_cbb2b55f_fk_train_dat FOREIGN KEY (dataset_img_id) REFERENCES public.train_dataset_img(id) DEFERRABLE INITIALLY DEFERRED,
+	CONSTRAINT train_trainedmodel_user_id_b0461349_fk_auth_user_id FOREIGN KEY (user_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX train_trainedmodel_dataset_id_8d4a44ab ON public.train_trainedmodel USING btree (dataset_id);
+CREATE INDEX train_trainedmodel_dataset_img_id_cbb2b55f ON public.train_trainedmodel USING btree (dataset_img_id);
+CREATE INDEX train_trainedmodel_user_id_b0461349 ON public.train_trainedmodel USING btree (user_id);
+
+
+-- public.train_training_job definition
+
+-- Drop table
+
+-- DROP TABLE public.train_training_job;
+
+CREATE TABLE public.train_training_job (
+	id serial4 NOT NULL,
+	job_name varchar(300) NOT NULL,
+	status varchar(300) NOT NULL,
+	started_at timestamptz NULL,
+	ended_at timestamptz NULL,
+	algo varchar(300) NOT NULL,
+	dataset_img_id int4 NOT NULL,
+	user_id int4 NOT NULL,
+	"result" text NULL,
+	parameter_settings text NULL,
+	training_log text NULL,
+	training_log_history text NULL,
+	CONSTRAINT train_training_job_pkey PRIMARY KEY (id),
+	CONSTRAINT train_training_job_dataset_img_id_099728da_fk_train_dat FOREIGN KEY (dataset_img_id) REFERENCES public.train_dataset_img(id) DEFERRABLE INITIALLY DEFERRED,
+	CONSTRAINT train_training_job_user_id_1526950c_fk_auth_user_id FOREIGN KEY (user_id) REFERENCES public.auth_user(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX train_training_job_dataset_img_id_099728da ON public.train_training_job USING btree (dataset_img_id);
+CREATE INDEX train_training_job_user_id_1526950c ON public.train_training_job USING btree (user_id);
+
+
+-- public.uac_group_config definition
+
+-- Drop table
+
+-- DROP TABLE public.uac_group_config;
+
+CREATE TABLE public.uac_group_config (
+	id serial4 NOT NULL,
+	welcome_url varchar(150) NULL,
+	group_id int4 NULL,
+	CONSTRAINT uac_group_config_pkey PRIMARY KEY (id),
+	CONSTRAINT uac_group_config_group_id_4eb08854_fk_auth_group_id FOREIGN KEY (group_id) REFERENCES public.auth_group(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX uac_group_config_group_id_4eb08854 ON public.uac_group_config USING btree (group_id);
+
+
+-- public.auth_group_permissions definition
+
+-- Drop table
+
+-- DROP TABLE public.auth_group_permissions;
+
+CREATE TABLE public.auth_group_permissions (
+	id serial4 NOT NULL,
+	group_id int4 NOT NULL,
+	permission_id int4 NOT NULL,
+	CONSTRAINT auth_group_permissions_group_id_permission_id_0cd325b0_uniq UNIQUE (group_id, permission_id),
+	CONSTRAINT auth_group_permissions_pkey PRIMARY KEY (id),
+	CONSTRAINT auth_group_permissio_permission_id_84c5c92e_fk_auth_perm FOREIGN KEY (permission_id) REFERENCES public.auth_permission(id) DEFERRABLE INITIALLY DEFERRED,
+	CONSTRAINT auth_group_permissions_group_id_b120cbf9_fk_auth_group_id FOREIGN KEY (group_id) REFERENCES public.auth_group(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX auth_group_permissions_group_id_b120cbf9 ON public.auth_group_permissions USING btree (group_id);
+CREATE INDEX auth_group_permissions_permission_id_84c5c92e ON public.auth_group_permissions USING btree (permission_id);
+
+
+-- public.train_chart definition
+
+-- Drop table
+
+-- DROP TABLE public.train_chart;
+
+CREATE TABLE public.train_chart (
+	id serial4 NOT NULL,
+	"name" varchar(1000) NOT NULL,
+	dataset_attribute varchar(1000) NULL,
+	"data" text NOT NULL,
+	dataset_id int4 NULL,
+	type_id int4 NULL,
+	CONSTRAINT train_chart_pkey PRIMARY KEY (id),
+	CONSTRAINT train_chart_dataset_id_82e1454f_fk_train_dataset_id FOREIGN KEY (dataset_id) REFERENCES public.train_dataset(id) DEFERRABLE INITIALLY DEFERRED,
+	CONSTRAINT train_chart_type_id_823bcdfa_fk_train_charttype_id FOREIGN KEY (type_id) REFERENCES public.train_charttype(id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX train_chart_dataset_id_82e1454f ON public.train_chart USING btree (dataset_id);
+CREATE INDEX train_chart_type_id_823bcdfa ON public.train_chart USING btree (type_id);
+
+
 INSERT INTO public.auth_group
 (id, "name")
 VALUES(1, 'admin');
