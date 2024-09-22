@@ -9,8 +9,8 @@ from .views import welcome
      
 urlpatterns = [
     path('', RedirectView.as_view(url="home", permanent=True)),
-    path('welcome', welcome, name='welcome_'),
-    path('welcome/', welcome, name='welcome'),
+    #path('welcome', welcome, name='welcome_'),
+    #path('welcome/', welcome, name='welcome'),
 ]
 
 
@@ -57,10 +57,10 @@ urlpatterns += [
 
 #DeploymentController
 urlpatterns += [
-    path('home', deployment_controller.index, name='model_welcome'),
+    #path('home', deployment_controller.index, name='model_welcome'),
     path('home', deployment_controller.index, name='home'),
+    #path('home/', deployment_controller.index, name='home_'),
 
-    path('home/', deployment_controller.index, name='home_'),
     path('model/list/all-datasets/', deployment_controller.list_all_datasets, name='list_all_datasets'),
 
     path('model/deploy/csv/model/<int:trained_model_id>', deployment_controller.deploy_trained_csv_model, name='deploy_csv_model_url'),

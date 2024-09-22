@@ -15,7 +15,8 @@ return redirect(reverse('profile', kwargs={"user_id": userid}))
 # Create your views here.
 @login_required
 def welcome(request):
-    redirect_url =''
+    redirect_url ='home'
+    print('-----sdsf------------------')
     userpk = request.user.id
     groups  = request.user.groups.all()
     if not groups:
@@ -28,3 +29,5 @@ def welcome(request):
             redirect_url = config[0].welcome_url
     
     return redirect(redirect_url)
+
+ 

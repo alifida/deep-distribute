@@ -21,7 +21,7 @@ import csv
 
 
 @login_required
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def index(request): 
     data ={}
     return util.myrender(request, 'models/index.html', data)
@@ -29,7 +29,7 @@ def index(request):
 
 
 @login_required 
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def list_deployed_models(request):
     data = {}
     data ["section_heading"]='Deployed Models'
@@ -43,7 +43,7 @@ def list_deployed_models(request):
          
     return util.myrender(request, 'models/model_list.html', data)
 @login_required 
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def list_all_datasets(request):
     data = {}
     
@@ -104,7 +104,7 @@ def download_csv_template(request, pk):
     
 
 @login_required 
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def delete_model(request, pk):
     # Retrieve the trained model object
     trained_model = get_object_or_404(TrainedModel, id=pk)
@@ -152,7 +152,7 @@ def delete_model(request, pk):
 
 
 @login_required 
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def predict_csv_trained_model(request):
 
     data = {}
@@ -246,7 +246,7 @@ def preprocess_image(image, model):
     
     return image_array
 
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def predict_img_trained_model(request):
     data = {}
     data["prediction_result"] = "Result will come here"
@@ -289,7 +289,7 @@ def predict_img_trained_model(request):
     return util.myrender(request, 'models/result_template.html', data)
 
 @login_required 
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def get_model_by_id(request, pk):
     data = {}
     data['deployed_model'] = {}
@@ -329,7 +329,7 @@ def get_deployed_models(request):
 
 
 @login_required
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def deploy_trained_img_model(request, trained_model_id):
     """
     Handle the deployment of a trained model.
@@ -388,7 +388,7 @@ def deploy_trained_img_model(request, trained_model_id):
 
 
 @login_required
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def deploy_trained_csv_model(request, trained_model_id):
     """
     Handle the deployment of a trained model.

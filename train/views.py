@@ -15,6 +15,7 @@ return redirect(reverse('profile', kwargs={"user_id": userid}))
 # Create your views here.
 @login_required
 def welcome(request):
+    print("-----------------------")
     redirect_url ='home'
     userpk = request.user.id
     groups  = request.user.groups.all()

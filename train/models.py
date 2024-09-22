@@ -252,4 +252,13 @@ class Chart(models.Model):
     data = models.TextField()
     def __str__(self):
         return self.name 
-      
+
+
+
+class Permission(models.Model):
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        permissions = [
+            ("enduser_basic", "Can perform basic operations"),
+        ]

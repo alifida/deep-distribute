@@ -22,7 +22,7 @@ DEFAULT_TRAINING_PERCENT =.70
 
 
 @login_required
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def get_algos_defaults(request):
     
     data ={}
@@ -36,7 +36,7 @@ def get_algos_defaults(request):
 
  
 @login_required
-@permission_required('datasource.change_dataset')
+@permission_required('train.enduser_basic')
 def predict_dataset(request):
      
     datasetId = request.POST.get("dataset_id", "")
@@ -408,8 +408,8 @@ def arrang_request_params(algo_params, algo,param_key, request):
             
     
 @login_required
-@permission_required('datasource.add_dataset')
-@permission_required('datasource.change_dataset')
+@permission_required('train.enduser_basic')
+@permission_required('train.enduser_basic')
 def save_dataset(request):
     data = {}
     if request.method == 'POST':
@@ -440,7 +440,7 @@ def save_dataset(request):
 
 
 @login_required
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def getDatasets(request):
     #datasets = Dataset.objects.all()
     
@@ -451,7 +451,7 @@ def getDatasets(request):
     return datasets
 
 
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def preview_dataset(request, pk):
     data = {}
     #details = {"test":"data"}
@@ -493,7 +493,7 @@ def preview_dataset(request, pk):
 
 
 @login_required 
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def list_dataset(request):
     data = {}
     data ["section_heading"]=''
@@ -511,7 +511,7 @@ def list_dataset(request):
     
     
 @login_required
-@permission_required('datasource.view_dataset')
+@permission_required('train.enduser_basic')
 def getDatasets(request):
     #datasets = Dataset.objects.all()
     if request.user.is_authenticated:
