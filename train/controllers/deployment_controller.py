@@ -257,34 +257,37 @@ def predict_img_trained_model(request):
         model_id = int(request.POST.get('model_id', -1))
 
         if model_id > 0:
-            # Fetch the pre-trained model from the database
-            trained_model = get_object_or_404(TrainedModel, id=model_id)
-            model_path = trained_model.model_file.path
-            
-            # Load the Keras model
-            model = tf.keras.models.load_model(model_path)
+            # Disable GPU for single image prediction
+            import tensorflow as tf
+            with tf.device('/CPU:0'):  # Force TensorFlow to use CPU
+                # Fetch the pre-trained model from the database
+                trained_model = get_object_or_404(TrainedModel, id=model_id)
+                model_path = trained_model.model_file.path
+                
+                # Load the Keras model
+                model = tf.keras.models.load_model(model_path)
 
-            if file_data:
-                # Pre-process the uploaded image for prediction
-                image = Image.open(file_data)
-                image_array = preprocess_image(image, model)
+                if file_data:
+                    # Pre-process the uploaded image for prediction
+                    image = Image.open(file_data)
+                    image_array = preprocess_image(image, model)
 
-                # Make a prediction
-                prediction = model.predict(image_array)
+                    # Make a prediction
+                    prediction = model.predict(image_array)
 
-                # Fetch class labels (assumes trained_model stores them as JSON or list)
-                class_labels = ast.literal_eval(trained_model.class_label)  # Expecting a list of class labels
-                 
-                if len(class_labels) > 2:
-                    # For N-class (multi-class) predictions
-                    predicted_class_index = np.argmax(prediction[0])  # Get the index of the highest probability class
-                    predicted_class = class_labels[predicted_class_index]  # Get the class label
-                else:
-                    # For binary classification
-                    predicted_class = class_labels[1] if prediction[0][0] > 0.5 else class_labels[0]
-                    print (prediction[0][0])
-                # Prepare the prediction result to display
-                data['prediction_result'] = predicted_class
+                    # Fetch class labels (assumes trained_model stores them as JSON or list)
+                    class_labels = ast.literal_eval(trained_model.class_label)  # Expecting a list of class labels
+                     
+                    if len(class_labels) > 2:
+                        # For N-class (multi-class) predictions
+                        predicted_class_index = np.argmax(prediction[0])  # Get the index of the highest probability class
+                        predicted_class = class_labels[predicted_class_index]  # Get the class label
+                    else:
+                        # For binary classification
+                        predicted_class = class_labels[1] if prediction[0][0] > 0.5 else class_labels[0]
+                        print (prediction[0][0])
+                    # Prepare the prediction result to display
+                    data['prediction_result'] = predicted_class
         
     return util.myrender(request, 'models/result_template.html', data)
 

@@ -286,15 +286,22 @@
                     }
                     function after_get_training_progress(raw){
                         res = $.parseJSON(raw);
-                        console.log(res);
-                        if(res.log != null && res.log !=''){
-                            log_html = "<span>Epoch : "+res.log.epoch+"/"+res.total_epochs+"..... Accuracy: "+res.log.logs.accuracy+", Precision: "+res.log.logs.precision+", Recall: "+res.log.logs.recall+", auc: "+res.log.logs.auc+"</span><br/>";
-                            $("#training_progress .progress-description").append(log_html);
-
-                            percent_complete = 0;
-                            percent_complete = (res.log.epoch/res.total_epochs) * 100;
-                            $("#training_progress .progress-bar").css("width", percent_complete + "%");
-                        }
+                        //console.log(res);
+                        if (job_status == 'RUNNING') {
+                            if(res.log == null || res.log ==''){
+                                log_html = "<span> Training is scheduled.... </span><br/>";
+                                $("#training_progress .progress-description").html(log_html);
+                            }else{
+                                log_html = "<span>Epoch : "+res.log.epoch+"/"+res.total_epochs+"..... Accuracy: "+res.log.logs.accuracy+", Precision: "+res.log.logs.precision+", Recall: "+res.log.logs.recall+", auc: "+res.log.logs.auc+"</span><br/>";
+                                $("#training_progress .progress-description").append(log_html);
+                                
+                                percent_complete = 0;
+                                percent_complete = (res.log.epoch/res.total_epochs) * 100;
+                                $("#training_progress .progress-bar").css("width", percent_complete + "%");
+                            }
+                            
+                            
+                    }
 
                         job_status =res.job_status;
                         if (job_status !== 'NOT_KNOWN' && job_status !== 'RUNNING') {
