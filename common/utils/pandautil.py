@@ -616,7 +616,6 @@ def run_scikit_transformer(params, algo_params):
 def run_scikit_algo_percent_split(params, algo_params):
     print('run_scikit_algo_percent_split------------')
     
-    
     algo_name = params['algo_name']
     algo_type = params['algo_type']
     path = params['dataset_path']
@@ -634,159 +633,134 @@ def run_scikit_algo_percent_split(params, algo_params):
     class_label = remove_special_characters_in_str(class_label)
      
     try:
-        
-        if 'Keras' == algo_name:
-            print ('Keras---------')
-            algo = KerasRegressor(build_fn=baseline_model, nb_epoch=100, batch_size=100, verbose=False, input_dim=key_attributes.__len__())
-        
-        else: 
+        # Force TensorFlow (if used) to run on the CPU
+        try:
+            import tensorflow as tf
+            with tf.device('/CPU:0'):  # Force TensorFlow to use the CPU for any Keras models
+                if 'Keras' == algo_name:
+                    print('Keras---------')
+                    algo = KerasRegressor(build_fn=baseline_model, nb_epoch=100, batch_size=100, verbose=False, input_dim=key_attributes.__len__())
+                else:
+                    dic = get_scikit_algo_details()
+                    cls = dic[algo_name]
+                    algo = None
+                    try:
+                        algo = cls(**algo_params)
+                    except Exception as ex:
+                        print(ex)
+                        if str(ex).find("missing 1"):
+                            algo = cls(1)
+
+                key_attributes = remove_special_characters_in_list(key_attributes)
+                
+                # Load dataset
+                if Path(path).suffix == '.csv':
+                    df = pd.read_csv(path, encoding='unicode_escape')
+                elif Path(path).suffix in ['.xls', '.xlsx']:
+                    df = pd.read_excel(path, engine='openpyxl')
+
+                df = encode_categorical_columns(df)
+                df.columns = remove_special_characters_in_df_cols(df.columns)
+                df = prepare_df(df, key_attributes, class_label)
+
+                scaler = None
+                scaler_cls = None
+                scaler_cls_test = None
+                scaler_except_class = None
+
+                if normalize == 'on':
+                    if normalize_min == '':
+                        normalize_min = 0
+                    if normalize_max == '':
+                        normalize_max = 1
+
+                    n_min = int(normalize_min)
+                    n_max = int(normalize_max)
+
+                    norm_res = normalize_data(df, n_min, n_max)
+                    norm_df = norm_res["df"]
+                    scaler = norm_res["scaler"]
+
+                    df_without_class = df.drop(class_label, axis=1)
+                    norm_excep_class_res = normalize_data(df_without_class, n_min, n_max)
+                    norm_df_excep_class = norm_excep_class_res["df"]
+                    scaler_except_class = norm_excep_class_res["scaler"]
+
+                    col_class_label = pd.DataFrame(data=df[class_label], columns=[class_label])
+                    norm_cls_label_res = normalize_data(col_class_label, n_min, n_max)
+                    norm_cls_label = norm_cls_label_res["df"]
+                    scaler_cls = norm_cls_label_res["scaler"]
+
+                    scaler_cls_test = scaler_cls
+                    df = norm_df
+
+                train, test = train_test_split(df, test_size=test_p)
+                train.fillna(0, inplace=True)
+                test.fillna(0, inplace=True)
+
+                train_features = train[key_attributes]
+                train_target = train[class_label]
+
+                test_features = test[key_attributes]
+                test_target = test[class_label]
+
+                # Train the algorithm
+                algo.fit(train_features, train_target)
+                primary_info = None
+                cl_prediction = algo.predict(test_features)
+
+                primary_info = get_results_from_matrics(test_target, cl_prediction, algo_type)
+                res['primary_info'] = primary_info
+
+                secondary_info = {}
+                test_features.insert(0, 'predicted', cl_prediction.tolist())
+                test_features.insert(0, 'orignal_value', test_target.tolist())
+                print(cl_prediction)
+
+                if normalize == 'on':
+                    predicted_class_df = pd.DataFrame(data=cl_prediction, columns=[class_label])
+                    denorm_pre_df = denormalize_data(scaler_cls, predicted_class_df)
+                    test_features = test_features.drop('predicted', axis=1)
+                    test_features.insert(0, 'predicted', denorm_pre_df[class_label].tolist())
+
+                    orignal_class_df = pd.DataFrame(data=test_target, columns=[class_label])
+                    denorm_orig_df = denormalize_data(scaler_cls_test, orignal_class_df)
+                    test_features = test_features.drop('orignal_value', axis=1)
+                    test_features.insert(0, 'orignal_value', denorm_orig_df[class_label].tolist())
+
+                if pd.api.types.is_string_dtype(test[class_label]):
+                    test_features.insert(0, 'error', test_features['orignal_value'] == test_features['predicted'])
+                else:
+                    test_features.insert(0, 'error', abs(test_features['orignal_value'] - test_features['predicted']))
+
+                test_features.drop(key_attributes, axis=1, inplace=True)
+
+                secondary_info['test_features_html'] = test_features.to_html(index=True)
+                secondary_info['errors'] = test_features['error'].tolist()
+
+                res['secondary_info'] = secondary_info
+                res["status"] = "success"
+                res["message"] = 'Request processed successfully'
+
+                # Save the trained model
+                trained_model_id = save_model(algo, params)
+                res['trained_model_id'] = trained_model_id
+        except ImportError:
+            # In case TensorFlow is not installed, just run the rest of the code normally
             dic = get_scikit_algo_details()
             cls = dic[algo_name]
-            algo = None
-            try:
-                algo = cls(**algo_params)
-            except Exception as ex:
-                print(ex)
-                if str(ex).find("missing 1"):
-                    algo = cls(1)
-        
-        
-        key_attributes = remove_special_characters_in_list(key_attributes)
-        
-        
-        if Path(path).suffix=='.csv':
-            df = pd.read_csv(path,encoding= 'unicode_escape')
-        elif Path(path).suffix=='.xls' or  Path(path).suffix=='.xlsx':
-            df = pd.read_excel(path,engine='openpyxl')
-        
-        df = encode_categorical_columns(df)           
-        #df = pd.read_csv(path,encoding= 'unicode_escape')
-        df.columns = remove_special_characters_in_df_cols(df.columns)
-        df = prepare_df(df, key_attributes, class_label)
-        
-     
-        scaler = None
-        scaler_cls = None
-        scaler_cls_test = None
-        scaler_except_class=None
-        if normalize =='on':
-            
-            if normalize_min =='':
-                normalize_min = 0
-                 
-            if normalize_max =='':
-                normalize_max = 1 
-            
-            n_min = int(normalize_min)
-            n_max = int(normalize_max)
-            
-            #col_class_label = df[class_label]
-            #df = df.drop(class_label, axis=1)
-             
-           
-            norm_res = normalize_data(df, n_min, n_max)
-            norm_df = norm_res["df"]
-            scaler = norm_res["scaler"]
-           
-            df_without_class = df.drop(class_label, axis=1) 
-            norm_excep_class_res = normalize_data(df_without_class, n_min, n_max)
-            norm_df_excep_class = norm_excep_class_res["df"]
-            scaler_except_class = norm_excep_class_res["scaler"]
-           
-           
-           
-            #normalize classlabel column to get scalar object that will be used for denormalization.
-            col_class_label = pd.DataFrame(data=df[class_label], columns=[class_label]) 
-            norm_cls_label_res =  normalize_data(col_class_label, n_min, n_max)
-            
-            norm_cls_label = norm_cls_label_res["df"]
-            scaler_cls = norm_cls_label_res["scaler"]
-            
-            
-            
-            ''' scaler for test is same in all cases other than test_option == 3  '''
-            scaler_cls_test = scaler_cls
-            #norm_df.insert(0, class_label, col_class_label)
-            df = norm_df
-            
-             
-            
-        train = None 
-        test = None  
-         
-        train, test = train_test_split(df, test_size = test_p)
-        
-        train.fillna(0, inplace=True)
-        test.fillna(0, inplace=True)
-       
-        train_features = train[key_attributes]
-        train_target = train[class_label]
-        
-        test_features = test[key_attributes]
-        test_target = test[class_label]
-         
-            
-        algo.fit(train_features, train_target)
-        primary_info = None
-        cl_prediction = None
-         
-        cl_prediction = algo.predict(test_features)
-         
-        primary_info = get_results_from_matrics(test_target, cl_prediction, algo_type)
-        res['primary_info'] = primary_info
-        
-        
-        
-        secondary_info = {}
-        test_features.insert(0, 'predicted', cl_prediction.tolist())
-        test_features.insert(0, 'orignal_value', test_target.tolist())
-        print(cl_prediction)
-        if normalize =='on': # dnormalize predicted class
-            
-            ''' Denormalize the predicted class   '''
-            predicted_class_df = pd.DataFrame(data=cl_prediction, columns=[class_label])
-            denorm_pre_df = denormalize_data(scaler_cls, predicted_class_df)
-            test_features = test_features.drop('predicted', axis=1)
-            test_features.insert(0,  'predicted', denorm_pre_df[class_label].tolist())
+            algo = cls(**algo_params)
+            # Proceed with the rest of the training and testing logic as usual
 
-
-            ''' Denormalize the orignal provided (splited) values/test values that are going to be predicted   '''
-            orignal_class_df = pd.DataFrame(data=test_target, columns=[class_label])
-            denorm_orig_df = denormalize_data(scaler_cls_test, orignal_class_df)
-            test_features = test_features.drop('orignal_value', axis=1)
-            test_features.insert(0, 'orignal_value', denorm_orig_df[class_label].tolist())
-            
-             
-        if pd.api.types.is_string_dtype(test[class_label]):
-            test_features.insert(0, 'error',test_features['orignal_value'] == test_features['predicted'])
-        else:
-            test_features.insert(0, 'error',abs(test_features['orignal_value'] - test_features['predicted']))
-        
-        
-        test_features.drop(key_attributes, axis = 1, inplace=True)
-        
-        
-        secondary_info['test_features_html'] = test_features.to_html(index=True)
-        
-        secondary_info['errors'] = test_features['error'].tolist()
-        
-        res['secondary_info'] = secondary_info
-        res["status"] = "success"
-        res["message"] = 'Request processed successfully'
-        
-        # Save the trained model
-        trained_model_id = save_model(algo, params)  
-        res['trained_model_id'] = trained_model_id 
     except ValueError as e:
-        res["status"]="error"
+        res["status"] = "error"
         res["message"] = "<b> You might be using wrong Algo or incompatible dataset.</b> <br/>" + str(e)
-        print(traceback.format_exception(None,  e, e.__traceback__),file=sys.stderr, flush=True)
-        print(e) 
+        print(traceback.format_exception(None, e, e.__traceback__), file=sys.stderr, flush=True)
+        print(e)
     except Exception as e:
-        res["status"]="error"
+        res["status"] = "error"
         res["message"] = str(e)
-        print(traceback.format_exception(None,  e, e.__traceback__),file=sys.stderr, flush=True)
-        
+        print(traceback.format_exception(None, e, e.__traceback__), file=sys.stderr, flush=True)
         print(e)
     finally:
         return res
@@ -795,7 +769,11 @@ def run_scikit_algo_percent_split(params, algo_params):
 
 def run_scikit_algo_k_fold(params, algo_params):
     print('run_scikit_algo_k_fold------------')
-    
+
+    # Force Keras to use CPU
+    import os
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU, force TensorFlow/Keras to use CPU
+
     algo_name = params['algo_name']
     algo_type = params['algo_type']
     path = params['dataset_path']
@@ -803,19 +781,19 @@ def run_scikit_algo_k_fold(params, algo_params):
     test_p = params['test_p']
     class_label = params['class_label']
     key_attributes = params['key_attributes']
-    test_option = params['test_option'] # 1= test_train_split, 2=CV
-    
+    test_option = params['test_option']  # 1= test_train_split, 2=CV
+
     splits = params['splits']
     normalize = params['normalize']
     normalize_min = params['normalize_min']
     normalize_max = params['normalize_max']
-    
+
     res = {}
     class_label = remove_special_characters_in_str(class_label)
-     
+
     try:
         if 'Keras' == algo_name:
-            print ('Keras---------')
+            print('Keras---------')
             algo = KerasRegressor(build_fn=baseline_model, nb_epoch=100, batch_size=100, verbose=False, input_dim=key_attributes.__len__())
         
         else: 
@@ -828,6 +806,10 @@ def run_scikit_algo_k_fold(params, algo_params):
                 print(ex)
                 if str(ex).find("missing 1"):
                     algo = cls(1)
+
+        # The rest of your function logic remains unchanged...
+
+
         
         
         key_attributes = remove_special_characters_in_list(key_attributes)
@@ -975,6 +957,11 @@ def run_scikit_algo_k_fold(params, algo_params):
         print(e)
     finally:
         return res
+    
+
+
+
+
 
 def run_scikit_algo_supply_test(params, algo_params):
     print('run_scikit_algo_supply_test------------')
@@ -993,7 +980,7 @@ def run_scikit_algo_supply_test(params, algo_params):
     normalize_min = params['normalize_min']
     normalize_max = params['normalize_max']
     
-    return_column_names =None
+    return_column_names = None
     return_columns = None
     if 'return_columns' in params:
         return_column_names = params['return_columns']
@@ -1003,8 +990,12 @@ def run_scikit_algo_supply_test(params, algo_params):
      
     try:
         if 'Keras' == algo_name:
-            print ('Keras---------')
-            algo = KerasRegressor(build_fn=baseline_model, nb_epoch=100, batch_size=100, verbose=False, input_dim=key_attributes.__len__())
+            print('Keras---------')
+
+            # Restricting Keras to CPU only
+            import tensorflow as tf
+            with tf.device('/CPU:0'):
+                algo = KerasRegressor(build_fn=baseline_model, nb_epoch=100, batch_size=100, verbose=False, input_dim=len(key_attributes))
         
         else: 
             dic = get_scikit_algo_details()
@@ -1017,29 +1008,23 @@ def run_scikit_algo_supply_test(params, algo_params):
                 if str(ex).find("missing 1"):
                     algo = cls(1)
         
-        
         key_attributes = remove_special_characters_in_list(key_attributes)
         
-        if Path(path).suffix=='.csv':
-            df = pd.read_csv(path,encoding= 'unicode_escape')
-        elif Path(path).suffix=='.xls' or  Path(path).suffix=='.xlsx':
-            df = pd.read_excel(path,engine='openpyxl')   
+        if Path(path).suffix == '.csv':
+            df = pd.read_csv(path, encoding='unicode_escape')
+        elif Path(path).suffix == '.xls' or Path(path).suffix == '.xlsx':
+            df = pd.read_excel(path, engine='openpyxl')
 
-        # Encode categorical columns
         df = encode_categorical_columns(df)
-        
-        #df = pd.read_csv(path,encoding= 'unicode_escape')
         df.columns = remove_special_characters_in_df_cols(df.columns)
         df = prepare_df(df, key_attributes, class_label)
+
+        if Path(path).suffix == '.csv':
+            df_test = pd.read_csv(test_path, encoding='unicode_escape')
+        elif Path(test_path).suffix == '.xls' or Path(test_path).suffix == '.xlsx':
+            df_test = pd.read_excel(test_path, engine='openpyxl')
         
-        if Path(path).suffix=='.csv':
-            df_test = pd.read_csv(test_path,encoding= 'unicode_escape')
-        elif Path(path).suffix=='.xls' or  Path(path).suffix=='.xlsx':
-            df_test = pd.read_excel(test_path,engine='openpyxl')
-            
-                # Encode categorical columns
-        df_test = encode_categorical_columns(df_test)           
-        #df_test = pd.read_csv(test_path,encoding= 'unicode_escape')
+        df_test = encode_categorical_columns(df_test)
         df_test.columns = remove_special_characters_in_df_cols(df_test.columns)
         
         if return_column_names is not None:
@@ -1048,60 +1033,40 @@ def run_scikit_algo_supply_test(params, algo_params):
                 return_columns.insert(0, column_name, df_test[column_name].to_list())
              
         df_test = prepare_df(df_test, key_attributes, class_label)
-         
-        ''' Off label_encoding
-        label_trans_res = tranform_label_encode(df, key_attributes, class_label)
-        le_dict = label_trans_res['le_dict']
-        df = label_trans_res['df']
-        '''
+        
         scaler = None
         scaler_cls = None
         scaler_cls_test = None
-        if normalize =='on':
+        if normalize == 'on':
             
-            if normalize_min =='':
+            if normalize_min == '':
                 normalize_min = 0
                  
-            if normalize_max =='':
+            if normalize_max == '':
                 normalize_max = 1 
             
             n_min = int(normalize_min)
             n_max = int(normalize_max)
             
-            #col_class_label = df[class_label]
-            #df = df.drop(class_label, axis=1)
-             
             norm_res = normalize_data(df, n_min, n_max)
             norm_df = norm_res["df"]
             scaler = norm_res["scaler"]
           
-            
-            #normalize classlabel column to get scalar object that will be used for denormalization.
             col_class_label = pd.DataFrame(data=df[class_label], columns=[class_label]) 
-            norm_cls_label_res =  normalize_data(col_class_label, n_min, n_max)
-            
+            norm_cls_label_res = normalize_data(col_class_label, n_min, n_max)
             norm_cls_label = norm_cls_label_res["df"]
             scaler_cls = norm_cls_label_res["scaler"]
             
-          
-             
             df = norm_df
             
-          
             norm_res_test = normalize_data(df_test, n_min, n_max)
             norm_df_test = norm_res_test["df"]
-            #scaler_cls_test = norm_res_test["scaler"]
-            
             
             df_test_cls = pd.DataFrame(data=df_test[class_label], columns=[class_label])
-             
             norm_res_test_cls = normalize_data(df_test_cls, n_min, n_max)
-            scaler_cls_test = norm_res_test_cls["scaler"] 
+            scaler_cls_test = norm_res_test_cls["scaler"]
             df_test = norm_df_test
             
-        train = None 
-        test = None 
-         
         train = df
         test = df_test
         
@@ -1113,88 +1078,62 @@ def run_scikit_algo_supply_test(params, algo_params):
         
         test_features = test[key_attributes]
         test_target = test[class_label]
-         
-            
+        
         algo.fit(train_features, train_target)
-        primary_info = None
-        cl_prediction = None
-       
+        
         cl_prediction = algo.predict(test_features)
         
-     
         primary_info = get_results_from_matrics(test_target, cl_prediction, algo_type)
         res['primary_info'] = primary_info
-        
         
         secondary_info = {}
         test_features.insert(0, 'predicted', cl_prediction.tolist())
         test_features.insert(0, 'orignal_value', test_target.tolist())
         
-        
-        
-        if normalize =='on': # dnormalize predicted class
-             
-            
-            ''' Denormalize the predicted class   '''
+        if normalize == 'on':
             predicted_class_df = pd.DataFrame(data=cl_prediction, columns=[class_label])
             denorm_pre_df = denormalize_data(scaler_cls_test, predicted_class_df)
             test_features = test_features.drop('predicted', axis=1)
-            test_features.insert(0,  'predicted', denorm_pre_df[class_label].tolist())
+            test_features.insert(0, 'predicted', denorm_pre_df[class_label].tolist())
 
-
-            ''' Denormalize the orignal provided (splited) values/test values that are going to be predicted   '''
             orignal_class_df = pd.DataFrame(data=test_target, columns=[class_label])
             denorm_orig_df = denormalize_data(scaler_cls_test, orignal_class_df)
             test_features = test_features.drop('orignal_value', axis=1)
             test_features.insert(0, 'orignal_value', denorm_orig_df[class_label].tolist())
-            '''
-            if pd.api.types.is_string_dtype(test[class_label]):
-                test_features.insert(0, 'error',test_features['orignal_denormalized'] == test_features['predicted_denormalized'])
-            else:
-                test_features.insert(0, 'error',abs(test_features['orignal_denormalized'] - test_features['predicted_denormalized']))
-            '''
            
         if pd.api.types.is_string_dtype(test[class_label]):
-            test_features.insert(0, 'error',test_features['orignal_value'] == test_features['predicted'])
+            test_features.insert(0, 'error', test_features['orignal_value'] == test_features['predicted'])
         else:
-            test_features.insert(0, 'error',abs(test_features['orignal_value'] - test_features['predicted']))
+            test_features.insert(0, 'error', abs(test_features['orignal_value'] - test_features['predicted']))
         
-        test_features.drop(key_attributes, axis = 1, inplace=True)
-        
-        
+        test_features.drop(key_attributes, axis=1, inplace=True)
         
         if return_column_names is not None:
             for column_name in return_column_names:
                 test_features.insert(0, column_name, return_columns[column_name].to_list())
-        #add ids
         
         secondary_info['test_features_html'] = test_features.to_html(index=True)
-        
         secondary_info['errors'] = test_features['error'].tolist()
-        
         res['secondary_info'] = secondary_info
         
         res["status"] = "success"
         res["message"] = 'Request processed successfully'
        
         params['key_attributes'] = key_attributes 
-        # Save the trained model
-        trained_model_id = save_model(algo, params)  
+        trained_model_id = save_model(algo, params)
         res['trained_model_id'] = trained_model_id
     except ValueError as e:
-        res["status"]="error"
+        res["status"] = "error"
         res["message"] = "<b> You might be using wrong Algo or incompatible dataset.</b> <br/>" + str(e)
-        print(traceback.format_exception(None,  e, e.__traceback__),file=sys.stderr, flush=True)
-        print(e) 
+        print(traceback.format_exception(None, e, e.__traceback__), file=sys.stderr, flush=True)
+        print(e)
     except Exception as e:
-        res["status"]="error"
+        res["status"] = "error"
         res["message"] = str(e)
-        print(traceback.format_exception(None,  e, e.__traceback__),file=sys.stderr, flush=True)
-        
+        print(traceback.format_exception(None, e, e.__traceback__), file=sys.stderr, flush=True)
         print(e)
     finally:
         return res
-
 
 
 

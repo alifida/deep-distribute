@@ -154,71 +154,109 @@ def delete_model(request, pk):
 @login_required 
 @permission_required('train.enduser_basic')
 def predict_csv_trained_model(request):
-
     data = {}
-    data["prediction_result"] = "Result will come here"
+    #data["prediction_result"] = "Result will come here"
 
     if request.method == 'POST':
         # Retrieve form and file data
         form_data = {key.replace("__key_attrib_",""): value for key, value in request.POST.items() if key != 'csrfmiddlewaretoken' and key.startswith("__key_attrib_")}
-         
+        
         file_data = request.FILES.get('supply_dataset')
         model_id = int(request.POST.get('model_id', -1))
 
         if model_id > 0:
-            # Fetch the trained model
-            trained_model = get_object_or_404(TrainedModel, id=model_id)
-            model_path = trained_model.model_file.path
-            
-            # Load the model
-            model = joblib.load(model_path)
+            # Disable GPU if TensorFlow is inadvertently imported
+            try:
+                import tensorflow as tf
+                with tf.device('/CPU:0'):  # Force TensorFlow to use the CPU if it is involved
+                    # Fetch the trained model
+                    trained_model = get_object_or_404(TrainedModel, id=model_id)
+                    model_path = trained_model.model_file.path
 
-            if file_data:
-                # Handle the uploaded CSV file
-                if file_data.name.endswith('.csv'):
-                    df = pd.read_csv(file_data)
-                elif file_data.name.endswith(('.xls', '.xlsx')):
-                    df = pd.read_excel(file_data)
-            else:
-                # Handle single record from form data
-                df = pd.DataFrame([form_data])
+                    # Load the scikit-learn model
+                    model = joblib.load(model_path)
 
-            # Ensure the dataframe columns match the model’s expected features
-            expected_features = model.get_params().get('feature_names_in_', None)
-            if expected_features:
-                df = df[expected_features]
+                    if file_data:
+                        # Handle the uploaded CSV file
+                        if file_data.name.endswith('.csv'):
+                            df = pd.read_csv(file_data)
+                        elif file_data.name.endswith(('.xls', '.xlsx')):
+                            df = pd.read_excel(file_data)
+                    else:
+                        # Handle single record from form data
+                        df = pd.DataFrame([form_data])
 
-            # Make predictions
-            predictions = model.predict(df)
-            columns = ast.literal_eval(trained_model.key_attributes)
-            class_label = str(trained_model.class_label)
-            columns.append(class_label)
+                    # Ensure the dataframe columns match the model’s expected features
+                    expected_features = model.get_params().get('feature_names_in_', None)
+                    if expected_features:
+                        df = df[expected_features]
 
-            # Create a DataFrame with the key attributes from the original df
-            predictions_df = df[columns[:-1]].copy()  # All columns except the class label
+                    # Make predictions
+                    predictions = model.predict(df)
+                    columns = ast.literal_eval(trained_model.key_attributes)
+                    class_label = str(trained_model.class_label)
+                    columns.append(class_label)
 
-            # Add the predictions as a new column
-            predictions_df[class_label] = predictions
-            print("********")
+                    # Create a DataFrame with the key attributes from the original df
+                    predictions_df = df[columns[:-1]].copy()  # All columns except the class label
 
-            # Iterate over the DataFrame
-            predictions_list = []
+                    # Add the predictions as a new column
+                    predictions_df[class_label] = predictions
 
-            for index, row in predictions_df.iterrows():
-                row_data = {}
-                for col in columns:
-                    if col != class_label:
-                        row_data[col] = row[col]
-                row_data[class_label] = row[class_label]
-                predictions_list.append(row_data)
-                
-                 
-            data['predictions'] = predictions_list
-            data["class_label"] = class_label
- 
-         
+                    # Iterate over the DataFrame to prepare the output
+                    predictions_list = []
+                    for index, row in predictions_df.iterrows():
+                        row_data = {}
+                        for col in columns:
+                            if col != class_label:
+                                row_data[col] = row[col]
+                        row_data[class_label] = row[class_label]
+                        predictions_list.append(row_data)
+
+                    data['predictions'] = predictions_list
+                    data["class_label"] = class_label
+
+            except ImportError:
+                # If TensorFlow isn't installed, just proceed as normal
+                # Fetch the trained model and load without TensorFlow
+                trained_model = get_object_or_404(TrainedModel, id=model_id)
+                model_path = trained_model.model_file.path
+                model = joblib.load(model_path)
+
+                if file_data:
+                    # Handle the uploaded CSV file
+                    if file_data.name.endswith('.csv'):
+                        df = pd.read_csv(file_data)
+                    elif file_data.name.endswith(('.xls', '.xlsx')):
+                        df = pd.read_excel(file_data)
+                else:
+                    df = pd.DataFrame([form_data])
+
+                expected_features = model.get_params().get('feature_names_in_', None)
+                if expected_features:
+                    df = df[expected_features]
+
+                predictions = model.predict(df)
+                columns = ast.literal_eval(trained_model.key_attributes)
+                class_label = str(trained_model.class_label)
+                columns.append(class_label)
+
+                predictions_df = df[columns[:-1]].copy()
+                predictions_df[class_label] = predictions
+
+                predictions_list = []
+                for index, row in predictions_df.iterrows():
+                    row_data = {}
+                    for col in columns:
+                        if col != class_label:
+                            row_data[col] = row[col]
+                    row_data[class_label] = row[class_label]
+                    predictions_list.append(row_data)
+
+                data['predictions'] = predictions_list
+                data["class_label"] = class_label
+
     return util.myrender(request, 'models/result_template.html', data)
-
 
 from tensorflow.keras.preprocessing.image import img_to_array
 def preprocess_image(image, model):

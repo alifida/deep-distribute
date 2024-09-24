@@ -9,6 +9,8 @@ from .views import welcome
      
 urlpatterns = [
     path('', RedirectView.as_view(url="home", permanent=True)),
+    path('dashboard', RedirectView.as_view(url="home", permanent=True)),
+    path('dashboard/', RedirectView.as_view(url="home", permanent=True)),
     #path('welcome', welcome, name='welcome_'),
     #path('welcome/', welcome, name='welcome'),
 ]
