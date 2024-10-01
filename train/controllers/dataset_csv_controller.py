@@ -1,3 +1,5 @@
+from cProfile import label
+
 from django.urls import reverse
 from django.shortcuts import redirect
 from train.models import ChartType
@@ -522,7 +524,7 @@ def getDatasets(request):
 
  
 @login_required
-@permission_required('datasource.delete_dataset')
+########@permission_required('datasource.delete_dataset')
 def delete_dataset(request, pk):
     
     if request.method == 'POST':

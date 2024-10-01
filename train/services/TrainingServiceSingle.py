@@ -25,8 +25,7 @@ import joblib
 from train.models import TrainedModel
 
 
- 
-    
+
 class TrainingServiceSingle:
     
     @staticmethod
@@ -45,8 +44,6 @@ class TrainingServiceSingle:
 
     @staticmethod
     def start_training_process__old(job, model_name):
-        
-        
         process = Process(target=TrainingServiceSingle.start_training,args=(job, model_name,))
         process.start()
         #process.join()  # Optionally wait for the process to complete
@@ -61,28 +58,63 @@ class TrainingServiceSingle:
 
     @staticmethod
     def start_training(training_params):
-        
-         
-
         if not TrainingServiceSingle.is_gpu_available():
             raise RuntimeError("GPU is not available for training right now. Please try again later.")
         else:
             TrainingServiceSingle.release_gpu();
             print(" GPU available.....................................")
-        
-        
+
         from train.models import Training_job
         from train.dao.TrainingJobDAO import TrainingJobDAO
         from tensorflow.keras.optimizers import Adam, SGD, RMSprop, Adadelta , Adagrad, Adamax, Nadam, Ftrl # Import other optimizers as needed
 
-
-
         try:
-
             # Extracting paths from training job
             dataset_path_train = training_params['training_job'].dataset_img.extracted_path
             dataset_path_test = training_params['training_job'].dataset_img.extracted_path_test
+            ####################################################################################################
 
+            # Set up the dataset
+            if training_params['augmentation'] and training_params['augmentation'].lower() != 'none':
+                augmentation_params = eval(training_params['augmentation'])
+            else:
+                augmentation_params = {}
+
+            # Set up the dataset
+            train_datagen = ImageDataGenerator(
+                rescale=1. / 255,
+                validation_split=float(training_params['validation_split']),
+                **augmentation_params  # Using augmentation if any
+            )
+
+            train_generator = train_datagen.flow_from_directory(
+                dataset_path_train,
+                target_size=(150, 150),
+                batch_size=int(training_params['batch_size']),
+                class_mode='categorical',
+                subset='training'
+            )
+
+            validation_generator = train_datagen.flow_from_directory(
+                dataset_path_train,
+                target_size=(150, 150),
+                batch_size=int(training_params['batch_size']),
+                class_mode='categorical',
+                subset='validation'
+            )
+
+            test_datagen = ImageDataGenerator(rescale=1. / 255)
+
+            test_generator = test_datagen.flow_from_directory(
+                dataset_path_test,
+                target_size=(150, 150),
+                batch_size=int(training_params['batch_size']),
+                class_mode='categorical',
+                shuffle=False
+            )
+            # Get the number of classes
+            num_classes = train_generator.num_classes
+            ####################################################################################################
             # Dynamically load the model based on model_name
             base_model = KerasCatalogService.get_model_object(training_params['algo_name'])
 
@@ -93,7 +125,7 @@ class TrainingServiceSingle:
             # Add custom layers on top of the base model
             x = base_model.output
             x = GlobalAveragePooling2D()(x)
-            x = Dense(1, activation='sigmoid')(x)  # Assuming binary classification
+            x = Dense(num_classes, activation='softmax')(x)  # Assuming binary classification
 
             # Create the final model
             model = Model(inputs=base_model.input, outputs=x)
@@ -120,51 +152,21 @@ class TrainingServiceSingle:
                 optimizer = Ftrl(learning_rate=learning_rate)
 
             # Compile the model with dynamic parameters
-            model.compile(optimizer=optimizer, 
-                        loss=training_params['loss_function'], 
+            model.compile(optimizer=optimizer,
+                        loss=training_params['loss_function'],
                         metrics=['accuracy', Precision(), Recall(), AUC()])
 
-            # Set up the dataset
-            if training_params['augmentation'] and training_params['augmentation'].lower() != 'none':
-                augmentation_params = eval(training_params['augmentation'])
-            else:
-                augmentation_params = {}
 
-            # Set up the dataset
-            train_datagen = ImageDataGenerator(
-                rescale=1./255,
-                validation_split=float(training_params['validation_split']),
-                **augmentation_params  # Using augmentation if any
-            )
-            train_generator = train_datagen.flow_from_directory(
-                dataset_path_train,
-                target_size=(150, 150),
-                batch_size=int(training_params['batch_size']),
-                class_mode='binary',
-                subset='training'
-            )
-
-            validation_generator = train_datagen.flow_from_directory(
-                dataset_path_train,
-                target_size=(150, 150),
-                batch_size=int(training_params['batch_size']),
-                class_mode='binary',
-                subset='validation'
-            )
-
-            test_datagen = ImageDataGenerator(rescale=1./255)
-            test_generator = test_datagen.flow_from_directory(
-                dataset_path_test,
-                target_size=(150, 150),
-                batch_size=int(training_params['batch_size']),
-                class_mode='binary',
-                shuffle=False
-            )
+            # # Set up early stopping callback
+            # early_stopping = EarlyStopping(monitor='val_loss',
+            #                             patience=int(training_params['early_stopping_patience']),
+            #                             restore_best_weights=True)
 
             # Set up early stopping callback
-            early_stopping = EarlyStopping(monitor='val_loss', 
-                                        patience=int(training_params['early_stopping_patience']),
-                                        restore_best_weights=True)
+            early_stopping = EarlyStopping(monitor='val_accuracy',
+                                           patience=int(training_params['early_stopping_patience']),
+                                           restore_best_weights=True,
+                                           mode='max')
 
             # Train the model with the callback
             terminate_on_flag_callback = TerminateOnFlagCallback(training_params['training_job'].id)
@@ -176,17 +178,43 @@ class TrainingServiceSingle:
             model_id = TrainingServiceSingle.save_model(model, training_params)
 
             # Predictions on test set
+            #####predictions = model.predict(test_generator)
+
+            # Calculate metrics
+            ####actual_labels = test_generator.classes
+            ###binary_predictions = (predictions > 0.5).astype(int).flatten()
+
+            # accuracy = tf.keras.metrics.BinaryAccuracy()(actual_labels, binary_predictions).numpy()
+            # precision = tf.keras.metrics.Precision()(actual_labels, binary_predictions).numpy()
+            # recall = tf.keras.metrics.Recall()(actual_labels, binary_predictions).numpy()
+            # auc = tf.keras.metrics.AUC()(actual_labels, binary_predictions).numpy()
+            # f1 = f1_score(actual_labels, binary_predictions)
+
+            from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, f1_score
+
+            # Predictions on test set
             predictions = model.predict(test_generator)
 
             # Calculate metrics
             actual_labels = test_generator.classes
-            binary_predictions = (predictions > 0.5).astype(int).flatten()
+            # Use argmax to get predicted class labels for multiclass
+            predicted_classes = predictions.argmax(axis=1)
 
-            accuracy = tf.keras.metrics.BinaryAccuracy()(actual_labels, binary_predictions).numpy()
-            precision = tf.keras.metrics.Precision()(actual_labels, binary_predictions).numpy()
-            recall = tf.keras.metrics.Recall()(actual_labels, binary_predictions).numpy()
-            auc = tf.keras.metrics.AUC()(actual_labels, binary_predictions).numpy()
-            f1 = f1_score(actual_labels, binary_predictions)
+            # Compute metrics using scikit-learn
+            accuracy = accuracy_score(actual_labels, predicted_classes)
+            precision = precision_score(actual_labels, predicted_classes, average='weighted')  # Use 'weighted' for multiclass
+            recall = recall_score(actual_labels, predicted_classes, average='weighted')
+            # For AUC, use probabilities (only for the positive class, if binary) or a one-vs-rest approach for multiclass
+            auc = roc_auc_score(test_generator.classes, predictions,
+                                multi_class='ovr')  # One-vs-Rest AUC for multiclass
+            f1 = f1_score(actual_labels, predicted_classes, average='weighted')  # Use 'weighted' for multiclass
+
+            # Print metrics
+            print(f"Accuracy: {accuracy}")
+            print(f"Precision: {precision}")
+            print(f"Recall: {recall}")
+            print(f"AUC: {auc}")
+            print(f"F1 Score: {f1}")
 
             # Prepare results in JSON format
             results = {
