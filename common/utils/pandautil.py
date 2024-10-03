@@ -1066,10 +1066,10 @@ def run_scikit_algo_supply_test(params, algo_params):
             norm_res_test_cls = normalize_data(df_test_cls, n_min, n_max)
             scaler_cls_test = norm_res_test_cls["scaler"]
             df_test = norm_df_test
-            
         train = df
         test = df_test
         
+        #Fill null vaues with 0    
         train.fillna(0, inplace=True)
         test.fillna(0, inplace=True)
        
@@ -1911,7 +1911,35 @@ def get_columns_list(path):
 
 
 
+#  Encoding for refrence
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
+def encode_categorical_columns(df):
+    # Select columns that are of type object (string)
+    categorical_columns = df.select_dtypes(include=['object']).columns
+    encodings = {}  # Dictionary to hold the mappings for each column
 
+    if len(categorical_columns) > 0:
+        print(f"Encoding categorical columns: {list(categorical_columns)}")
+        
+        # Label encode each categorical column
+        for col in categorical_columns:
+            le = LabelEncoder()
+            df[col] = le.fit_transform(df[col].astype(str))
+            # Store the mapping in a dictionary
+            encodings[col] = dict(zip(le.classes_, le.transform(le.classes_)))
+
+    return df, encodings
+
+# Example usage:
+# df_encoded, encodings = encode_categorical_columns(your_dataframe)
+
+# To reverse the encoding:
+def reverse_encoding(df, encodings):
+    for col, mapping in encodings.items():
+        reverse_mapping = {v: k for k, v in mapping.items()}
+        df[col] = df[col].map(reverse_mapping)
+    return df
 
     '''
