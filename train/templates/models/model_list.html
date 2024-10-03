@@ -9,8 +9,20 @@
                 <div class="info-box">
                     <div class="info-box-content left">
                         <span class="info-box-number-1 text-lg mb-2">{{ model.description }}</span>
-                        <span class="text-md mb-1">I'm your AI companion model, trained and ready for predictions!</span>
+
+                        {%if model.dataset%}
+                        <span class="text-md mb-1">I'm your AI companion model, trained on {{ model.dataset.description }} dataset and ready for predictions!</span>
                         <!--- <span class="text-md mb-1"> {{model.key_attributes}} --->
+                        {%endif%}
+
+                        {%if model.dataset_img%}
+                        <span class="text-md mb-1">I'm your AI companion model, trained on {{ model.dataset_img.data_name }} dataset and ready for predictions!</span>
+                        <!--- <span class="text-md mb-1"> {{model.key_attributes}} --->
+                        {%endif%}
+
+
+
+                        
                             
                         </span>
                     </div>
