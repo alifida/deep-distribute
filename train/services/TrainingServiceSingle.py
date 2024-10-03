@@ -157,6 +157,7 @@ class TrainingServiceSingle:
                         metrics=['accuracy', Precision(), Recall(), AUC()])
 
 
+
             # # Set up early stopping callback
             # early_stopping = EarlyStopping(monitor='val_loss',
             #                             patience=int(training_params['early_stopping_patience']),

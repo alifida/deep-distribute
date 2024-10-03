@@ -3,9 +3,6 @@
  
     <div class="row">
 
-
-        
-
         {% for model in model_list %}
         <div class="col-lg-12 col-md-12 col-sm-12 mb-4 h-padding-0">
 
@@ -64,7 +61,14 @@
                             </div>
                            
                         </div>
+                        {%if model.dataset%}
                         <p class=" text-vs right v-margin-0"> {{ model.description }} Trained on {{ model.dataset.description }} </p>
+                        {%endif%}
+
+                        {%if model.dataset_img%}
+                        <p class=" text-vs right v-margin-0"> {{ model.description }} Trained on {{ model.dataset_img.data_name }} </p>
+                        {%endif%}
+                    
                     </div>
                 </div>
         </div>
