@@ -18,10 +18,20 @@ class TrainingJobDAO:
 
     @staticmethod
     def get(job_id):
+         
+         
+        print('TrainingJOBDAO get '+str(job_id) )
+        print("******************************")
+        print("******************************")
         return Training_job.objects.get(id=job_id)
 
     @staticmethod
     def update(job_id, **kwargs):
+        print('updating training job '+str(job_id) )
+        print(kwargs)
+        print("====================================")
+        print("====================================")
+        print("====================================")
         Training_job.objects.filter(id=job_id).update(**kwargs)
 
 
