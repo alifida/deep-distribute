@@ -97,4 +97,15 @@ class KerasCatalogService:
         base_model = model_constructor(weights='imagenet', include_top=False, input_shape=input_shape)
         return base_model
         
-
+def init_all_models():
+    for algo_name in KerasCatalogService.MODELS_DICT:
+        print(algo_name)
+        if algo_name =="NASNetLarge":
+            input_shape=(331, 331, 3)
+        else:
+            input_shape=(224, 224, 3)
+        model_constructor = KerasCatalogService.MODELS_DICT[algo_name]
+        base_model = model_constructor(weights='imagenet', include_top=False, input_shape=input_shape)
+        print("="*100)
+if __name__=='__main__':
+    init_all_models()

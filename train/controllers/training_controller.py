@@ -212,7 +212,7 @@ def training(request, dataset_id=None):
 
     context['models']= models.items()
     context['strategies']= strategies
-
+    context['allowed_models'] = ["DenseNet121", "InceptionV3", "MobileNetV2", "ResNet50", "ResNet101", "VGG16", "VGG19", "Xception"]
 
 
     return util.myrender(request, 'training/start.html', context)

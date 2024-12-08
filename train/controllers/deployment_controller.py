@@ -23,7 +23,9 @@ import csv
 @login_required
 @permission_required('train.enduser_basic')
 def index(request): 
-    data ={}
+    current_user=request.user
+    print(current_user)
+    data ={"current_user":current_user}
     return util.myrender(request, 'models/index.html', data)
 
 

@@ -695,26 +695,7 @@
 								}
 								 
 							</script>
-							<script type="text/javascript">
-								function get_algos_defaults(defaults_form_id, select_box_id, target_id){
-									
-									var defaults_url= "{% url 'csv_dataset_algos_defaults' %}";
-									//var defaults_form_id = "algos_defaults_form";
-									$("#"+defaults_form_id).remove();
-
-									var selected_algos = $('#'+select_box_id).val();
-									 
-									if(selected_algos != ""){
-										$f_html = '<form id="'+defaults_form_id+'">';
-										$f_html += '<input class="hide" required="required" name="selected_algos" type="text" value="' + selected_algos +'"/>';
-										$f_html += '</form>';
-	
-										$($f_html).appendTo('body');
-										ajax_submit(defaults_url, target_id, defaults_form_id, 'POST',  '', '', '');
-									}
-								}
-								
-							</script>
+							
 
 			
 
@@ -788,6 +769,29 @@ $(document).ready(function() {
  
        
 </script>
+
+
+<script type="text/javascript">
+	function csv_dataset_algos_defaults(defaults_form_id, select_box_id, target_id){
+		
+		var defaults_url= "{% url 'csv_dataset_algos_defaults' %}";
+		//var defaults_form_id = "algos_defaults_form";
+		$("#"+defaults_form_id).remove();
+
+		var selected_algos = $('#'+select_box_id).val();
+		 
+		if(selected_algos != ""){
+			$f_html = '<form id="'+defaults_form_id+'">';
+			$f_html += '<input class="hide" required="required" name="selected_algos" type="text" value="' + selected_algos +'"/>';
+			$f_html += '</form>';
+
+			$($f_html).appendTo('body');
+			ajax_submit(defaults_url, target_id, defaults_form_id, 'POST',  '', '', '');
+		}
+	}
+	
+</script>
+
 
 {% endblock %}
 

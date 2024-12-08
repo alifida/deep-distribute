@@ -29,8 +29,24 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-4 col-sm-12">
-                    <div class="row mb-2">
+                    <!-- <div class="row mb-2">
+                        <div class="col-sm-4">  </div>
                         <div class="col-sm-6">
+                            
+                            <div class="m-0 text-dark left6">
+                                {% if current_user.is_authenticated %}
+                                <button onclick="startJupyter('{{ current_user.username }}')">Developer Mode btn</button>
+                                
+                                {% else %}
+                                <a href="http://119.159.146.175:7722/tree">Developer Mode</a>
+                                {% endif %}
+                                
+                            </div>
+                        </div>
+
+                    </div> -->
+                    <div class="row mb-2">
+                        <div class="col-sm-2">
                             <h3 class="m-0 text-dark left">Datasets</h3>
                         </div>
                         <div class="col-sm-6">
@@ -38,6 +54,20 @@
                                 <i class="fas fa-database h-margin-5"></i> Upload Dataset
                             </a>
                         </div>
+
+                        <div class="col-sm-2">
+                            <!-- <h3 class="m-0 text-dark left"></h3> -->
+                        </div>
+
+                        <div class="col-sm-2">
+                            {% if current_user.is_authenticated %}
+                                <button class = "btn btn-outline-purple btn-sm right"  onclick="startJupyter('{{ current_user.username }}')">Developer Mode</button>
+                                
+                                {% else %}
+                                <a href="">Developer Mode</a>
+                                {% endif %}                            
+                        </div>
+
                     </div>
                     <div class="collapse" id="dataset_form_wrapper">
                         <div class="mb-3">
@@ -87,6 +117,35 @@
 		
     });
 </script>
+
+
+
+<script>
+    async function startJupyter(username) {
+        // Make a POST request using fetch
+        const response = await fetch("http://119.159.146.175:5000/start", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",  // Set Content-Type to JSON
+            },
+            body: JSON.stringify({ username: username })  // Send the data as JSON
+        });
+
+        // Parse the response from the Flask server
+        const data = await response.json();
+
+        if (data.url) {
+            // Redirect to the URL returned by the Flask API
+            window.location.href = data.url;
+        } else {
+            // Handle the error if no URL is provided
+            alert("Error: " + data.error);
+        }
+    }
+</script>
+
+
+
 
 <script type="text/javascript">
     function toggleRequiredFields(model_id) {

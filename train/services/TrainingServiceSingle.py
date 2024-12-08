@@ -115,8 +115,8 @@ class TrainingServiceSingle:
             base_model = KerasCatalogService.get_model_object(training_params['algo_name'])
 
             # Freeze the layers of the base model
-            for layer in base_model.layers:
-                layer.trainable = False
+            # for layer in base_model.layers:
+            #     layer.trainable = False
 
             # Add custom layers on top of the base model
             x = base_model.output

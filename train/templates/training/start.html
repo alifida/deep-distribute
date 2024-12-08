@@ -58,8 +58,11 @@
                                                 <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="Select the model architecture you want to use for training."></i>
                                             </label>
                                             <select id="model" name="model" class="form-control border-purple">
+                                                <!-- <option value="">{{ 'select model' }}</option>-->
                                                 {% for mkey, mval in models %}
-                                                    <option value="{{ mkey }}">{{ mkey }}</option>
+                                                    {% if mkey in allowed_models%}
+                                                        <option value="{{ mkey }}">{{ mkey }}</option>
+                                                    {% endif %}
                                                 {% endfor %}
                                             </select>
                                         </div>
