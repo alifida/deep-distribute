@@ -6,6 +6,11 @@
 # Node artifact files
 node_modules/
 dist/
+*.pkl
+*.h5
+*.csv
+
+venv/
 
 # Compiled Java class files
 *.class
@@ -53,3 +58,5 @@ Thumbs.db
 *.csv
 
 
+*.pkl
+*.pkl
