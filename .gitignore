@@ -11,6 +11,7 @@ dist/
 *.csv
 
 venv/
+venv_win/
 
 # Compiled Java class files
 *.class
