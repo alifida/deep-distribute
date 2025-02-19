@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ['localhost','gpu.predictive-lab.com', '192.168.10.120', '192.16
 CLUSTER_DETAIL_URL = 'http://192.168.100.112:8000/api/cluster/detail'
 SHARED_DIRECTORY = 'E:\\dataset\\training_tmp'
 
+CUSTOM_TRAINING_PS_URL="http://localhost:8000/training-jobs/start"
 
 
 # Application definition
@@ -118,8 +119,8 @@ DATABASES = {
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
     'NAME': 'deep-distribute',
     'USER': 'postgres',
-    'PASSWORD': 'szabist',
-    #'PASSWORD': 'Window@98',
+    #'PASSWORD': 'szabist',
+    'PASSWORD': 'window',
     'HOST': 'localhost',
     'PORT': '5432',
     'CONN_MAX_AGE': 1

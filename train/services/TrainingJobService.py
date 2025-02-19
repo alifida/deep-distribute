@@ -5,6 +5,7 @@
 from train.dao.TrainingJobDAO import TrainingJobDAO
 from train.services.TrainingServicePS import TrainingServicePS
 from train.services.TrainingServiceSingle import TrainingServiceSingle
+from train.services.TrainingCustom import TrainingServiceCustom
 #from train.services.TrainingService_without_parameter_server import TrainingService
 from train.services.DatasetImgService import DatasetImgService
 from common.utils.util import get_unique_string, get_current_time
@@ -77,8 +78,8 @@ class TrainingJobService:
        elif strategy == 2 or  strategy=='GPSingleU Cluster Parameter Server':
            TrainingServicePS.start_training(training_params)
        elif strategy == 3 or  strategy=='GPU Cluster Custom':
-            #TrainingServiceCustom.start_training(trainingJob, model)
-            pass
+            TrainingServiceCustom.start_training(training_params)
+            
        else:
             # Handle any other cases if needed
             pass  # or do something else

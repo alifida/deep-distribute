@@ -22,7 +22,7 @@ class Dataset_IMG(models.Model):
     def __str__(self):
         return self.data_name 
 
-    def gather_dataset_stats(self):
+    def gather_dataset_stats(self, include_images_url=False):
         if not self.extracted_path or not os.path.exists(self.extracted_path):
             return {
                     'train':
@@ -43,7 +43,7 @@ class Dataset_IMG(models.Model):
                             }
                     }
         
-        train = self.get_dataset_details(self.extracted_path, 'train')
+        train = self.get_dataset_details(self.extracted_path, 'train', include_images_url)
         test = {
                     'total_classes': 0,
                     'class_names': [],
@@ -52,7 +52,7 @@ class Dataset_IMG(models.Model):
                     'image_size': ''
                 }
         if self.extracted_path_test or not os.path.exists(self.extracted_path_test):
-            test = self.get_dataset_details(self.extracted_path_test, 'test')
+            test = self.get_dataset_details(self.extracted_path_test, 'test', include_images_url)
 
         return {
             'train': train,
@@ -60,7 +60,7 @@ class Dataset_IMG(models.Model):
         }            
     
 
-    def get_dataset_details(self, extracted_path, ds_type):
+    def get_dataset_details(self, extracted_path, ds_type, get_dataset_details):
         class_directories = next(os.walk(extracted_path))[1]
         total_classes = len(class_directories)
         class_names = class_directories
@@ -80,8 +80,14 @@ class Dataset_IMG(models.Model):
                 
                 # Get preview images URLs
                 dataseturl = os.path.join(str(self.id), ds_type)
-                preview_images = self.get_preview_images(dataseturl, class_dir)
+                if get_dataset_details:
+                    num_images = num_examples
+                else:
+                    num_images = 5
+                preview_images = self.get_preview_images(dataseturl, class_dir, num_images)
                 
+
+
                 # Append class-wise details
                 classwise_details.append({
                     'class_name': class_dir,
@@ -168,13 +174,21 @@ class Training_job (models.Model):
     def get_result(self):
         return json.loads(self.result) if self.result else None
 
+
+class Cluster(models.Model):
+    name = models.CharField(max_length=300)
+    status = models.CharField(max_length=300)
+    def __str__(self):
+        return f"Cluster: {self.name} ({self.status})"
+    
 class ClusterNode(models.Model):
     NODE_CHOICES = (
         ('worker', 'Worker'),
         ('ps', 'Parameter Server')
     )
+    cluster = models.ForeignKey('Cluster', on_delete=models.CASCADE,  blank=True, null=True)
     node_type = models.CharField(max_length=10, choices=NODE_CHOICES)
-    ip_address = models.CharField(max_length=15)
+    ip_address = models.GenericIPAddressField()
     port = models.IntegerField()
 
     def __str__(self):

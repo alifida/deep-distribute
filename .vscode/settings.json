@@ -1,3 +1,12 @@
 {
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#1e336d",
+        "titleBar.activeBackground": "#1e336d",
+        "titleBar.activeForeground": "#ffffff",
+        "icon.foreground": "#406313",
+        "symbolIcon.colorForeground": "#ff0000",
+        "icon.colorForeground": "#ff0000",
+        "activityBar.inactiveForeground": "#377bbb"
+      },
     "mayank1513.trello-kanban.Workspace.filePath": ".tkb"
 }

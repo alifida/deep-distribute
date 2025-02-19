@@ -1,4 +1,4 @@
-netstat -ano | findstr :2222
+netstat -ano | findstr :89
 
 taskkill /PID   /F
 

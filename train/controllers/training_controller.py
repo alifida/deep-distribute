@@ -70,6 +70,8 @@ def start_training_post(request):
         dataset_id = request.POST.get('dataset_id')
         model = request.POST.get('model')
         strategy = request.POST.get('strategy')
+        #cluster = request.POST.get('cluster')
+        cluster = 3
 
         epochs = request.POST.get('epochs', 10)  # Default to 10 if not provided
         batch_size = request.POST.get('batch_size', 32)  # Default to 32 if not provided
@@ -87,6 +89,7 @@ def start_training_post(request):
             'dataset_id': dataset_id,
             'user': request.user, 
             'strategy': strategy, 
+            'cluster': cluster,
             'algo_name': model, 
             'epochs': epochs, 
             'batch_size' : batch_size, 
