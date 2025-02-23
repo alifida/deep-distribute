@@ -295,8 +295,26 @@
                                 log_html = "<span> Training is scheduled.... </span><br/>";
                                 $("#training_progress .progress-description").html(log_html);
                             }else{
-                                log_html = "<span>Epoch : "+res.log.epoch+"/"+res.total_epochs+"..... Accuracy: "+res.log.logs.accuracy+", Precision: "+res.log.logs.precision+", Recall: "+res.log.logs.recall+", auc: "+res.log.logs.auc+"</span><br/>";
-                                $("#training_progress .progress-description").append(log_html);
+                                if(res.strategy =='GPU Cluster Custom'){
+                                    log_html = "<span>";
+                                        log_line ="";
+                                        $.each(res.log, function(key, value) {
+
+                                            log_line += key + ": " + value + " | ";  // Add each key-value pair
+                                        });
+                                        log_line = log_line.slice(0, -3);  // Remove the last " | " added after the last pair
+                                        last_line = $("#training_progress .progress-description span:last").html();
+                                        if (last_line !=log_line){
+                                            log_html = "<span>" + log_line + "</span><br/>";
+                                            $("#training_progress .progress-description").append(log_html);
+                                        }
+                                        
+                                }else{
+
+                                    log_html = "<span>Epoch : "+res.log.epoch+"/"+res.total_epochs+"..... Accuracy: "+res.log.logs.accuracy+", Precision: "+res.log.logs.precision+", Recall: "+res.log.logs.recall+", auc: "+res.log.logs.auc+"</span><br/>";
+                                    $("#training_progress .progress-description").append(log_html);
+                                    
+                                }
                                 
                                 percent_complete = 0;
                                 percent_complete = (res.log.epoch/res.total_epochs) * 100;
@@ -304,7 +322,7 @@
                             }
                             
                             
-                    }
+                        }
 
                         job_status =res.job_status;
                         if (job_status !== 'NOT_KNOWN' && job_status !== 'RUNNING') {

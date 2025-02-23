@@ -3,12 +3,20 @@ from django.conf import settings
 from django.forms.models import model_to_dict
 import json
 from train.dao.DatasetImgDAO import DatasetImgDAO
+from train.dao.ClusterNodeDAO import ClusterNodeDAO
 class TrainingServiceCustom:
 
     @staticmethod
     def start_training(training_params):
         # URL of the FastAPI endpoint to post the training params
-        url = settings.CUSTOM_TRAINING_PS_URL   
+        #url = settings.CUSTOM_TRAINING_PS_URL 
+        ps_url = ""
+        cluster_id = training_params["cluster"]
+        nodes = ClusterNodeDAO.get_by_cluster_node_type(cluster_id,'ps')
+        if nodes:
+            ps_url = f"http://{nodes[0].ip_address}:{nodes[0].port}/training-jobs/start"
+        else:
+            return None
         training_job = model_to_dict(training_params.get("training_job"))
         
         
@@ -29,7 +37,7 @@ class TrainingServiceCustom:
                 "dataset_img": training_job["dataset_img"],
                 "status": training_job["status"],
                 "algo": training_job["algo"],
-                "user": training_job["user"],  # Serialize ForeignKey as user ID
+                "user": training_job["user"], 
                 "parameter_settings": parameter_settings,
                  
             }
@@ -45,9 +53,9 @@ class TrainingServiceCustom:
         }
         
         try:
-            url +="/"+str(training_job['id'])
+            ps_url +="/"+str(training_job['id'])
             # Sending POST request to FastAPI
-            response = requests.post(url, json=payload)
+            response = requests.post(ps_url, json=payload)
             
             # Check if the request was successful (status code 200)
             if response.status_code == 200:

@@ -9,7 +9,7 @@ from train.services.TrainingJobService import TrainingJobService
 from common.utils import util
 from train.utils.JobStatus import JobStatus
 from django.forms.models import model_to_dict
-
+from train.services.ClusterService import ClusterService
 
 from train.forms.forms import DatasetImgForm
 from train.services.DatasetImgService import DatasetImgService
@@ -162,6 +162,7 @@ def get_training_progress(request,dataset_id, job_id):
         parameter_settings = trainingJob.parameter_settings.replace("'", '"')
         parameter_settings = json.loads(parameter_settings)
         res['total_epochs'] = parameter_settings['epochs']; 
+        res['strategy'] = parameter_settings['strategy']
         res['job_status'] = trainingJob.status
     
     else:
@@ -179,7 +180,7 @@ def training(request, dataset_id=None):
     
     models = KerasCatalogService.list_all_models()
     strategies = KerasCatalogService.list_all_strategies()
- 
+    clusters = ClusterService.list()
      
     print("\nAvailable Keras layers:")
     print(KerasCatalogService.list_all_layers())
@@ -214,6 +215,7 @@ def training(request, dataset_id=None):
         
 
     context['models']= models.items()
+    context['clusters'] = clusters
     context['strategies']= strategies
     context['allowed_models'] = ["DenseNet121", "InceptionV3", "MobileNetV2", "ResNet50", "ResNet101", "VGG16", "VGG19", "Xception"]
 

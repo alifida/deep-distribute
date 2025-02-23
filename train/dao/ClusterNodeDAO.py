@@ -10,6 +10,21 @@ class ClusterNodeDAO:
     @staticmethod
     def get(node_id):
         return ClusterNode.objects.get(id=node_id)
+    
+    @staticmethod
+    def get_by_cluster_node_type(cluster_id, node_type):
+        try:
+            # Fetch the ClusterNodes by cluster_id and node_type
+            nodes = ClusterNode.objects.filter(cluster_id=cluster_id, node_type=node_type)
+            
+            # Return the nodes if they exist, otherwise return None
+            if nodes.exists():
+                return nodes
+            return None
+        except Exception as e:
+            # You can log the exception if necessary or handle other exceptions
+            print(f"An error occurred: {e}")
+            return None
 
     @staticmethod
     def update(node_id, **kwargs):
