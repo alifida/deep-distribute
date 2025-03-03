@@ -1,25 +1,33 @@
 <div class="card hide-imp" id="model_results_card">
+    
+    
+
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">Accuracy:</dt>
-            <dd class="col-sm-9">{{ results.accuracy }}</dd>
-
-            <dt class="col-sm-3">precision</dt>
-            <dd class="col-sm-9">{{ results.precision }}</dd>
-
-            <dt class="col-sm-3">recall</dt>
-            <dd class="col-sm-9">{{ results.recall }}</dd>
-
-            <dt class="col-sm-3">auc</dt>
-            <dd class="col-sm-9">{{ results.auc }}</dd>
-
-            <dt class="col-sm-3">score</dt>
-            <dd class="col-sm-9">{{ results.score }}</dd>
-            <input type="hidden" id="model_to_deploy" value="{{model_id}}" />
+            {% for key, value in results.items %}
+                <dt class="col-sm-3">{{ key|capfirst }}:</dt>
+                <dd class="col-sm-9">
+                    {% if value is iterable and not value is string %}
+                        <dl class="row">
+                            {% for subkey, subvalue in value.items %}
+                                <dt class="col-sm-3">{{ subkey|capfirst }}:</dt>
+                                <dd class="col-sm-9">{{ subvalue }}</dd>
+                            {% endfor %}
+                        </dl>
+                    {% else %}
+                        {{ value }}
+                    {% endif %}
+                </dd>
+            {% endfor %}
+            <input type="hidden" id="model_to_deploy" value="{{ model_id }}" />
             <!-- Include dataset statistics fetched by gather_dataset_stats() -->
-             
         </dl>
     </div>
+        
+
+
+
+    
     <div class="card-footer">
         <div class="row">
             <div class="col-12 center-inner ">

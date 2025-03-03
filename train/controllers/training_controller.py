@@ -123,19 +123,47 @@ from train.models import TrainedModel
 
 @login_required
 def get_training_result(request, dataset_id):
-    res={}
+    res = {}
     trainingJob = TrainingJobService.getSingleByDatasetAndStatus(dataset_id, "COMPLETED")
+    
     if trainingJob and trainingJob.result:
-        res["results"] = json.loads(trainingJob.result)
+        # Safely parse the 'result' object and its nested keys
+        try:
+            parsed_result = json.loads(trainingJob.result)  # Parse the outer layer of JSON
+            res["results"] = safely_parse_json(parsed_result)  # Parse nested JSONs
+        except json.JSONDecodeError:
+            res["results"] = trainingJob.result  # If not a valid JSON string, keep the original
+        
         model = TrainedModel.objects.filter(dataset_img_id=dataset_id).last()
         if model:
             res["model_id"] = model.id
-        
-    
+
     return util.myrender(request, 'training/results.html', res)
 
 
 
+def safely_parse_json(value):
+    """Helper function to safely parse a JSON string into a dictionary."""
+    try:
+        
+        if isinstance(value, int) or isinstance(value, float) :
+            return str(value)
+
+        if isinstance(value, str):
+            try:
+                return json.loads(value)  # Try to parse the string as JSON
+            except json.JSONDecodeError:
+                return value  # Return the original value if parsing fails
+        elif isinstance(value, dict):
+            # If the value is a dictionary, recursively parse its values
+            return {key: safely_parse_json(val) for key, val in value.items()}
+        elif isinstance(value, list):
+            # If the value is a list, recursively parse its items
+            return [safely_parse_json(item) for item in value]
+        else:
+            return value  # Return the value as is for other types (e.g., int, float, None)
+    except :
+        return value    
 
 
 @login_required

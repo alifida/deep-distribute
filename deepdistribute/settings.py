@@ -31,7 +31,7 @@ CLUSTER_DETAIL_URL = 'http://192.168.100.112:8000/api/cluster/detail'
 SHARED_DIRECTORY = 'E:\\dataset\\training_tmp'
 
 #CUSTOM_TRAINING_PS_URL="http://192.168.18.19:9000/training-jobs/start"
-DATASET_HOST_URL="http://192.168.18.19:89"
+DATASET_HOST_URL="http://192.168.10.120:89"
 
 # Application definition
 
@@ -119,8 +119,8 @@ DATABASES = {
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
     'NAME': 'deep-distribute',
     'USER': 'postgres',
-    #'PASSWORD': 'szabist',
-    'PASSWORD': 'window',
+    'PASSWORD': 'szabist',
+    #'PASSWORD': 'window',
     'HOST': 'localhost',
     'PORT': '5432',
     'CONN_MAX_AGE': 1
