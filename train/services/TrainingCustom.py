@@ -72,7 +72,7 @@ class TrainingServiceCustom:
 def set_dataset_details(dataset_id, init_params):
      
     dataset = DatasetImgDAO.get(dataset_id)
-    init_params["dataset_details"] = dataset.gather_dataset_stats()
+    init_params["dataset_details"] = dataset.gather_dataset_stats(include_images_url=True)
     init_params["dataset_details"]["host_url"] = settings.DATASET_HOST_URL
     return init_params
  
