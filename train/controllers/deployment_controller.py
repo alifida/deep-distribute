@@ -202,7 +202,14 @@ def predict_csv_trained_model(request):
                     df.fillna(0, inplace=True)  # Replace NaN values with 0, or you could fill with the mean/median
 
                     # Make predictions
-                    predictions = model.predict(df)
+                    #predictions = model.predict(df)
+                    try:
+                        predictions = model.predict(df)
+                    except Exception as e:
+                        # Catch any exception and pass the error message to the template
+                        error_message = str(e)  # Get the string representation of the exception
+                        data['error'] = f"An error occurred: {error_message}"
+                        return util.myrender(request, 'error.html', data)
                     columns = ast.literal_eval(trained_model.key_attributes)
                     class_label = str(trained_model.class_label)
                     columns.append(class_label)
@@ -250,8 +257,15 @@ def predict_csv_trained_model(request):
                 # This assumes that you used some form of categorical encoding during training
                 # For example, using LabelEncoder or OneHotEncoder
                 df = encode_categorical_columns(df)  # Ensure this matches what was done in training
-                
-                predictions = model.predict(df)
+                try:
+                    predictions = model.predict(df)
+                except Exception as e:
+                    # Catch any exception and pass the error message to the template
+                    error_message = str(e)  # Get the string representation of the exception
+                    data['error'] = f"An error occurred: {error_message}"
+                    
+                    return util.myrender(request, 'error.html', data)
+                    
                 columns = ast.literal_eval(trained_model.key_attributes)
                 class_label = str(trained_model.class_label)
                 columns.append(class_label)
