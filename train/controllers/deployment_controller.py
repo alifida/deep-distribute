@@ -16,6 +16,7 @@ import numpy as np
 from PIL import Image
 import ast
 import json
+from common.utils.pandautil import  encode_categorical_columns
 
 import csv
 
@@ -157,7 +158,6 @@ def delete_model(request, pk):
 @permission_required('train.enduser_basic')
 def predict_csv_trained_model(request):
     data = {}
-    #data["prediction_result"] = "Result will come here"
 
     if request.method == 'POST':
         # Retrieve form and file data
@@ -192,6 +192,14 @@ def predict_csv_trained_model(request):
                     expected_features = model.get_params().get('feature_names_in_', None)
                     if expected_features:
                         df = df[expected_features]
+
+                    # Handle categorical features here (this step is likely missing in your original code)
+                    # This assumes that you used some form of categorical encoding during training
+                    # For example, using LabelEncoder or OneHotEncoder
+                    df = encode_categorical_columns(df)  # This function should match the one used during training
+                     # Handle NaN and infinite values
+                    df.replace([np.inf, -np.inf], np.nan, inplace=True)  # Replace infinite values with NaN
+                    df.fillna(0, inplace=True)  # Replace NaN values with 0, or you could fill with the mean/median
 
                     # Make predictions
                     predictions = model.predict(df)
@@ -238,6 +246,11 @@ def predict_csv_trained_model(request):
                 if expected_features:
                     df = df[expected_features]
 
+                # Handle categorical features here (this step is likely missing in your original code)
+                # This assumes that you used some form of categorical encoding during training
+                # For example, using LabelEncoder or OneHotEncoder
+                df = encode_categorical_columns(df)  # Ensure this matches what was done in training
+                
                 predictions = model.predict(df)
                 columns = ast.literal_eval(trained_model.key_attributes)
                 class_label = str(trained_model.class_label)
@@ -259,6 +272,8 @@ def predict_csv_trained_model(request):
                 data["class_label"] = class_label
 
     return util.myrender(request, 'models/result_template.html', data)
+
+
 
 from tensorflow.keras.preprocessing.image import img_to_array
 def preprocess_image(image, model):
