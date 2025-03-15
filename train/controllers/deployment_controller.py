@@ -205,6 +205,8 @@ def predict_csv_trained_model(request):
                     #predictions = model.predict(df)
                     try:
                         predictions = model.predict(df)
+                    except ImportError:
+                        raise
                     except Exception as e:
                         # Catch any exception and pass the error message to the template
                         error_message = str(e)  # Get the string representation of the exception
