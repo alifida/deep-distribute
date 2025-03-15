@@ -236,56 +236,62 @@ def predict_csv_trained_model(request):
                     data["class_label"] = class_label
 
             except ImportError:
-                # If TensorFlow isn't installed, just proceed as normal
-                # Fetch the trained model and load without TensorFlow
-                trained_model = get_object_or_404(TrainedModel, id=model_id)
-                model_path = trained_model.model_file.path
-                model = joblib.load(model_path)
-
-                if file_data:
-                    # Handle the uploaded CSV file
-                    if file_data.name.endswith('.csv'):
-                        df = pd.read_csv(file_data)
-                    elif file_data.name.endswith(('.xls', '.xlsx')):
-                        df = pd.read_excel(file_data)
-                else:
-                    df = pd.DataFrame([form_data])
-
-                expected_features = model.get_params().get('feature_names_in_', None)
-                if expected_features:
-                    df = df[expected_features]
-
-                # Handle categorical features here (this step is likely missing in your original code)
-                # This assumes that you used some form of categorical encoding during training
-                # For example, using LabelEncoder or OneHotEncoder
-                df = encode_categorical_columns(df)  # Ensure this matches what was done in training
                 try:
-                    predictions = model.predict(df)
+                    # If TensorFlow isn't installed, just proceed as normal
+                    # Fetch the trained model and load without TensorFlow
+                    trained_model = get_object_or_404(TrainedModel, id=model_id)
+                    model_path = trained_model.model_file.path
+                    model = joblib.load(model_path)
+
+                    if file_data:
+                        # Handle the uploaded CSV file
+                        if file_data.name.endswith('.csv'):
+                            df = pd.read_csv(file_data)
+                        elif file_data.name.endswith(('.xls', '.xlsx')):
+                            df = pd.read_excel(file_data)
+                    else:
+                        df = pd.DataFrame([form_data])
+
+                    expected_features = model.get_params().get('feature_names_in_', None)
+                    if expected_features:
+                        df = df[expected_features]
+
+                    # Handle categorical features here (this step is likely missing in your original code)
+                    # This assumes that you used some form of categorical encoding during training
+                    # For example, using LabelEncoder or OneHotEncoder
+                    df = encode_categorical_columns(df)  # Ensure this matches what was done in training
+                    try:
+                        predictions = model.predict(df)
+                    except Exception as e:
+                        # Catch any exception and pass the error message to the template
+                        error_message = str(e)  # Get the string representation of the exception
+                        data['error'] = f"An error occurred: {error_message}"
+                        
+                        return util.myrender(request, 'error.html', data)
+                        
+                    columns = ast.literal_eval(trained_model.key_attributes)
+                    class_label = str(trained_model.class_label)
+                    columns.append(class_label)
+
+                    predictions_df = df[columns[:-1]].copy()
+                    predictions_df[class_label] = predictions
+
+                    predictions_list = []
+                    for index, row in predictions_df.iterrows():
+                        row_data = {}
+                        for col in columns:
+                            if col != class_label:
+                                row_data[col] = row[col]
+                        row_data[class_label] = row[class_label]
+                        predictions_list.append(row_data)
+
+                    data['predictions'] = predictions_list
+                    data["class_label"] = class_label
                 except Exception as e:
-                    # Catch any exception and pass the error message to the template
-                    error_message = str(e)  # Get the string representation of the exception
-                    data['error'] = f"An error occurred: {error_message}"
-                    
-                    return util.myrender(request, 'error.html', data)
-                    
-                columns = ast.literal_eval(trained_model.key_attributes)
-                class_label = str(trained_model.class_label)
-                columns.append(class_label)
-
-                predictions_df = df[columns[:-1]].copy()
-                predictions_df[class_label] = predictions
-
-                predictions_list = []
-                for index, row in predictions_df.iterrows():
-                    row_data = {}
-                    for col in columns:
-                        if col != class_label:
-                            row_data[col] = row[col]
-                    row_data[class_label] = row[class_label]
-                    predictions_list.append(row_data)
-
-                data['predictions'] = predictions_list
-                data["class_label"] = class_label
+                        # Catch any exception and pass the error message to the template
+                        error_message = str(e)  # Get the string representation of the exception
+                        data['error'] = f"An error occurred: {error_message}"
+                        return util.myrender(request, 'error.html', data)
 
     return util.myrender(request, 'models/result_template.html', data)
 
