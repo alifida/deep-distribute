@@ -17,7 +17,7 @@ from multiprocessing import Process
 from django.utils import timezone
 import json
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, f1_score
-
+from train.services.KerasCatalogService import KerasCatalogService
 
 
 from tensorflow.keras.applications import ResNet50
@@ -86,6 +86,16 @@ class TrainingServicePS:
 
         # Define `global_batch_size` appropriately
         global_batch_size = 20  # Adjust based on your setup
+        def load_base_dataset():
+            data_dir = job.dataset_img.extracted_path
+            raw_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+                data_dir,
+                image_size=(150, 150),
+                batch_size=global_batch_size,
+                label_mode='categorical'  # changed from 'binary' to support multi-class
+            )
+            class_names = raw_dataset.class_names
+            return raw_dataset.prefetch(tf.data.experimental.AUTOTUNE), len(class_names)
 
         def train_step_fn(images, labels):
             with tf.GradientTape() as tape:
@@ -116,7 +126,8 @@ class TrainingServicePS:
 
             print("Dataset loaded successfully.", flush=True)
             return dataset
-
+        
+         dataset_prefetched, num_classes = load_base_dataset()
         # Create the model under the strategy scope
         with strategy.scope():
             '''model = Sequential([
@@ -131,7 +142,11 @@ class TrainingServicePS:
             optimizer = Adam()
             model.compile(optimizer=optimizer, loss=loss_object, metrics=['accuracy', 'Precision', 'Recall', 'AUC'])
             '''
-            base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
+            #base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
+            
+             # Dynamically load the model based on model_name
+            base_model = KerasCatalogService.get_model_object(training_params['algo_name'])
+
             for layer in base_model.layers:
                 layer.trainable = False
 
