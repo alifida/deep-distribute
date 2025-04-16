@@ -1,21 +1,26 @@
 import tensorflow as tf
-from tensorflow.keras.losses import BinaryCrossentropy
-from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.backend import clear_session
-from django.utils import timezone
-from django.conf import settings
-from train.dao.TrainingJobDAO import TrainingJobDAO
+from tensorflow.keras.applications import ResNet50
+
 from train.utils.JobStatus import JobStatus
+from train.dao.TrainingJobDAO import TrainingJobDAO
 from train.services.KerasCatalogService import KerasCatalogService
+
+from django.conf import settings
+from django.utils import timezone
+
 import requests
 import threading
-import os
-import json
-import time
 from multiprocessing import Process
+import logging
+import json
+import os
+import time
+from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score, f1_score
 
 
 def worker_process(job_id):
@@ -64,34 +69,44 @@ class TrainingServicePS:
         strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
         coordinator = tf.distribute.experimental.coordinator.ClusterCoordinator(strategy)
 
-        global_batch_size = 20
         loss_object = BinaryCrossentropy(from_logits=True, reduction=tf.keras.losses.Reduction.NONE)
+        global_batch_size = 20
 
+        #  Load raw dataset to get number of classes BEFORE prefetch
+        def load_base_dataset():
+            data_dir = job.dataset_img.extracted_path
+            raw_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+                data_dir,
+                image_size=(150, 150),
+                batch_size=global_batch_size,
+                label_mode='categorical'  # changed from 'binary' to support multi-class
+            )
+            class_names = raw_dataset.class_names
+            return raw_dataset.prefetch(tf.data.experimental.AUTOTUNE), len(class_names)
+
+        dataset_prefetched, num_classes = load_base_dataset()
+
+        #  Define dataset_fn to be used for per-worker dataset creation
         def dataset_fn():
             data_dir = job.dataset_img.extracted_path
-            batch_size = global_batch_size
-            img_height = 150
-            img_width = 150
-            dataset = tf.keras.preprocessing.image_dataset_from_directory(
+            return tf.keras.preprocessing.image_dataset_from_directory(
                 data_dir,
-                image_size=(img_height, img_width),
-                batch_size=batch_size,
-                label_mode='binary'
+                image_size=(150, 150),
+                batch_size=global_batch_size,
+                label_mode='categorical'  # same here
             ).prefetch(tf.data.experimental.AUTOTUNE)
-            print("Dataset loaded successfully.", flush=True)
-            return dataset
 
-        raw_dataset = dataset_fn()
-        num_classes = len(raw_dataset.class_names)
-
+        #  Create model inside strategy scope
         with strategy.scope():
             base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
             for layer in base_model.layers:
                 layer.trainable = False
+
             x = base_model.output
             x = GlobalAveragePooling2D()(x)
             x = Dense(1024, activation='relu')(x)
-            predictions = Dense(1, activation='sigmoid')(x)
+            predictions = Dense(num_classes, activation='softmax')(x)
+
             model = Model(inputs=base_model.input, outputs=predictions)
             optimizer = Adam()
             model.compile(optimizer=optimizer, loss=loss_object,
@@ -116,31 +131,28 @@ class TrainingServicePS:
         distributed_iterator = iter(distributed_dataset)
 
         for epoch in range(10):
-            start_epoch = time.time()
             print(f"Starting epoch {epoch + 1}")
             batch_index = 0
             try:
-                while True:
-                    start_batch = time.time()
-                    coordinator.schedule(per_worker_train_step, args=(distributed_iterator,))
-                    print(f"Batch {batch_index} processed in {time.time() - start_batch:.2f} sec")
-                    batch_index += 1
+                coordinator.schedule(per_worker_train_step, args=(distributed_iterator,))
+                batch_index += 1
             except tf.errors.OutOfRangeError:
-                print("End of epoch dataset.")
+                print("No more batches.")
             coordinator.join()
-            print(f"Epoch {epoch + 1} finished in {time.time() - start_epoch:.2f} sec")
+            print(f"Epoch {epoch + 1} done.")
             distributed_iterator = iter(distributed_dataset)
 
         def eval_dataset_fn():
-            return dataset_fn()
+            data_dir = job.dataset_img.extracted_path
+            return tf.keras.preprocessing.image_dataset_from_directory(
+                data_dir,
+                image_size=(150, 150),
+                batch_size=global_batch_size,
+                label_mode='categorical'
+            ).prefetch(tf.data.experimental.AUTOTUNE)
 
         eval_distributed_dataset = coordinator.create_per_worker_dataset(eval_dataset_fn)
         eval_distributed_iterator = iter(eval_distributed_dataset)
-
-        accuracy_metric = tf.keras.metrics.BinaryAccuracy()
-        precision_metric = tf.keras.metrics.Precision()
-        recall_metric = tf.keras.metrics.Recall()
-        auc_metric = tf.keras.metrics.AUC()
 
         @tf.function
         def per_worker_eval_step(iterator):
@@ -153,11 +165,16 @@ class TrainingServicePS:
                 auc_metric.update_state(labels, predictions)
             return strategy.run(step_fn, args=(next(iterator),))
 
-        try:
-            while True:
+        accuracy_metric = tf.keras.metrics.CategoricalAccuracy()
+        precision_metric = tf.keras.metrics.Precision()
+        recall_metric = tf.keras.metrics.Recall()
+        auc_metric = tf.keras.metrics.AUC()
+
+        while True:
+            try:
                 coordinator.schedule(per_worker_eval_step, args=(eval_distributed_iterator,))
-        except tf.errors.OutOfRangeError:
-            pass
+            except tf.errors.OutOfRangeError:
+                break
         coordinator.join()
 
         final_accuracy = accuracy_metric.result().numpy()
@@ -174,8 +191,7 @@ class TrainingServicePS:
             'auc': float(final_auc),
             'f1_score': float(final_f1)
         }
-
         results_json = json.dumps(results)
         TrainingJobDAO.update(job.id, status=JobStatus.COMPLETED.value, result=results_json, ended_at=ended_at)
 
-        print(f'Training complete. Final accuracy: {final_accuracy:.4f}')
+        print(f'Training complete. Final accuracy: {final_accuracy}')
