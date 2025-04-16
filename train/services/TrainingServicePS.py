@@ -67,9 +67,9 @@ class TrainingServicePS:
         process.join()
 
     @staticmethod
-    def start_training(job, model):
+    def start_training(training_params):
         print('Start training called...')
-
+        job = training_params['training_job']
         # Define the cluster specification
         cluster_spec = TrainingServicePS.get_cluster_config()
         
