@@ -6,7 +6,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from train.utils.JobStatus import JobStatus
-from train.dao.TrainingJobDAO import TrainingJobDAO
+
 import logging
 import os
 import time
@@ -34,6 +34,8 @@ def worker_process(training_params):
 
     # Now import any Django-dependent modules
     from train.services import TrainingServicePS
+    
+    
     #from train.models import Training_job
 
     #job = Training_job.objects.get(id=job_id)
@@ -80,7 +82,7 @@ class TrainingServicePS:
     def start_training(training_params):
 
         TrainingServicePS.init_tf_config()
-
+        from train.dao.TrainingJobDAO import TrainingJobDAO
 
         print('Start training called...')
         job = training_params['training_job']
