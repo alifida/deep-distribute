@@ -76,7 +76,8 @@ class TrainingServicePS:
         # Set up the cluster resolver and strategy
         cluster_resolver = tf.distribute.cluster_resolver.SimpleClusterResolver(
             tf.train.ClusterSpec(cluster_spec), rpc_layer="grpc")
-        strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
+        #strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
+        strategy = tf.distribute.MultiWorkerMirroredStrategy(cluster_resolver)
 
         # Setup the coordinator
         coordinator = tf.distribute.experimental.coordinator.ClusterCoordinator(strategy)
