@@ -8,10 +8,10 @@
             "name": "Python Debugger: Django",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\manage.py",
+            "program": "${workspaceFolder}/manage.py",
             "args": [
                 "runserver",
-                "0.0.0.0:89"
+                "0.0.0.0:8900"
             ],
             "django": true,
             "justMyCode": false

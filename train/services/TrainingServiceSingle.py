@@ -52,8 +52,8 @@ class TrainingServiceSingle:
     def start_training_process(training_params):
         print("before starting........")
          
-        async_task(TrainingServiceSingle.start_training, training_params)
-        #TrainingServiceSingle.start_training(training_params)
+        #async_task(TrainingServiceSingle.start_training, training_params)
+        TrainingServiceSingle.start_training(training_params)
         print("after starting........")
 
     def start_training(training_params):
