@@ -1,16 +1,16 @@
-import tensorflow as tf
-import requests
-import socket
 import os
 import json
+import requests
+import socket
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
+
 
 class Command(BaseCommand):
     help = 'Starts a TensorFlow server for distributed training'
 
     def get_cluster_config(self):
-        # URL of the Django API endpoint
         url = settings.CLUSTER_DETAIL_URL
         response = requests.get(url)
         if response.status_code == 200:
@@ -18,9 +18,20 @@ class Command(BaseCommand):
         else:
             raise Exception(f"Failed to retrieve cluster configuration, status code {response.status_code}")
 
+    def get_local_ip(self):
+        try:
+            # More reliable way to detect IP in distributed setup
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception:
+            return socket.gethostbyname(socket.gethostname())
+
     def handle(self, *args, **options):
-        local_ip = socket.gethostbyname(socket.gethostname())
-        print("----------------") 
+        local_ip = self.get_local_ip()
+        print("----------------")
         print(f"Local IP: {local_ip}")
 
         cluster_config = self.get_cluster_config()
@@ -31,6 +42,7 @@ class Command(BaseCommand):
         all_workers = cluster_config.get('worker', [])
         all_ps = cluster_config.get('ps', [])
 
+        matched_indices = []
         if node_type == 'worker':
             matched_indices = [i for i, addr in enumerate(all_workers) if local_ip in addr]
         elif node_type == 'ps':
@@ -43,7 +55,7 @@ class Command(BaseCommand):
 
         index = matched_indices[0]
 
-        # Build TF_CONFIG and set it
+        # Set TF_CONFIG
         tf_config = {
             "cluster": {
                 "worker": all_workers,
@@ -56,8 +68,10 @@ class Command(BaseCommand):
         }
 
         os.environ["TF_CONFIG"] = json.dumps(tf_config)
+        print(f"TF_CONFIG set:\n{json.dumps(tf_config, indent=2)}")
 
-        print(f"TF_CONFIG set on this machine as:\n{json.dumps(tf_config, indent=2)}")
+        # NOW import TensorFlow — only after TF_CONFIG is set
+        import tensorflow as tf
 
         # Optional: enable GPU memory growth
         gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -69,10 +83,12 @@ class Command(BaseCommand):
                 print(f"Error setting memory growth: {e}")
                 return
 
-        # Start TensorFlow server
+        # Start the TF server
         self.start_server(node_type, index, cluster_config)
 
     def start_server(self, node_type, index, cluster_config):
+        import tensorflow as tf
+
         cluster_spec = tf.train.ClusterSpec({
             "worker": cluster_config['worker'],
             "ps": cluster_config['ps']
