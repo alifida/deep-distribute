@@ -268,7 +268,24 @@ class TrainingServicePS:
 
     @staticmethod
     def init_tf_config():
+
+
         import socket
+        
+
+
+        clear_session() 
+
+        gpus = tf.config.list_physical_devices('GPU')
+        if gpus:
+            try:
+                tf.config.set_visible_devices(gpus[0], 'GPU')
+                tf.config.experimental.set_memory_growth(gpus[0], True)
+            except RuntimeError as e:
+                print(e)
+
+        
+        
         cluster_spec = TrainingServicePS.get_cluster_config()
         local_ip = socket.gethostbyname(socket.gethostname())
         node_type = os.getenv('NODE_TYPE', 'worker')  # or determine another way if needed
