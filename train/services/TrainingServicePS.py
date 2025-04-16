@@ -75,6 +75,17 @@ class TrainingServicePS:
         cluster_spec = TrainingServicePS.get_cluster_config()
         
         # Set up the cluster resolver and strategy
+        
+        
+        tf_config = os.environ.get("TF_CONFIG")
+        print("****************************")
+        print(tf_config)
+        print("****************************")
+        if not tf_config:
+            raise ValueError("TF_CONFIG environment variable is not set!")
+
+        cluster_resolver = tf.distribute.cluster_resolver.TFConfigClusterResolver()
+        strategy 
         cluster_resolver = tf.distribute.cluster_resolver.TFConfigClusterResolver()
         strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
 
