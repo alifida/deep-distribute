@@ -3,7 +3,8 @@ from train.models import ClusterNode
 
 def cluster_nodes_json(request):
     # Query all nodes from the database
-    nodes = ClusterNode.objects.all()
+    #nodes = ClusterNode.objects.all()
+    nodes = ClusterNode.objects.filter(cluster__name='ps-cluster-1')
     
     # Construct the JSON data structure
     data = {
