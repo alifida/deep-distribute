@@ -2,6 +2,7 @@ import tensorflow as tf
 import requests
 import socket
 import os
+import json
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
@@ -16,23 +17,49 @@ class Command(BaseCommand):
             return response.json()
         else:
             raise Exception(f"Failed to retrieve cluster configuration, status code {response.status_code}")
-    
-    
 
     def handle(self, *args, **options):
-        # Get local IP address to match against the cluster configuration
         local_ip = socket.gethostbyname(socket.gethostname())
         print("----------------") 
-        print(local_ip)
-        # Get cluster configuration from Django API
+        print(f"Local IP: {local_ip}")
+
         cluster_config = self.get_cluster_config()
         print("----------------")
-        print(cluster_config)
-        # Determine if this machine is a PS or Worker
-        ps_indices = [idx for idx, addr in enumerate(cluster_config['ps']) if local_ip in addr]
-        worker_indices = [idx for idx, addr in enumerate(cluster_config['worker']) if local_ip in addr]
+        print("Cluster config:", cluster_config)
 
-        # Configure TensorFlow GPU memory growth
+        node_type = os.getenv('NODE_TYPE', 'worker')
+        all_workers = cluster_config.get('worker', [])
+        all_ps = cluster_config.get('ps', [])
+
+        if node_type == 'worker':
+            matched_indices = [i for i, addr in enumerate(all_workers) if local_ip in addr]
+        elif node_type == 'ps':
+            matched_indices = [i for i, addr in enumerate(all_ps) if local_ip in addr]
+        else:
+            raise ValueError("Invalid NODE_TYPE specified. Use 'ps' or 'worker'.")
+
+        if not matched_indices:
+            raise ValueError(f"Could not match local IP {local_ip} with any node in cluster config for type '{node_type}'.")
+
+        index = matched_indices[0]
+
+        # Build TF_CONFIG and set it
+        tf_config = {
+            "cluster": {
+                "worker": all_workers,
+                "ps": all_ps
+            },
+            "task": {
+                "type": node_type,
+                "index": index
+            }
+        }
+
+        os.environ["TF_CONFIG"] = json.dumps(tf_config)
+
+        print(f"TF_CONFIG set on this machine as:\n{json.dumps(tf_config, indent=2)}")
+
+        # Optional: enable GPU memory growth
         gpus = tf.config.experimental.list_physical_devices('GPU')
         if gpus:
             try:
@@ -42,93 +69,24 @@ class Command(BaseCommand):
                 print(f"Error setting memory growth: {e}")
                 return
 
-
-        node_type = os.getenv('NODE_TYPE', 'worker')
-        if node_type=='ps':
-            for idx in ps_indices:
-                self.start_server('ps', idx, cluster_config)
-        elif node_type == 'worker':
-            for idx in worker_indices:
-                self.start_server('worker', idx, cluster_config)
-        else:
-            raise ValueError("Invalid NODE_TYPE specified. Use 'ps' or 'worker'.")
+        # Start TensorFlow server
+        self.start_server(node_type, index, cluster_config)
 
     def start_server(self, node_type, index, cluster_config):
         cluster_spec = tf.train.ClusterSpec({
             "worker": cluster_config['worker'],
             "ps": cluster_config['ps']
         })
-        server = tf.distribute.Server(
-            cluster_spec,  # Pass the ClusterSpec object directly
-            job_name=node_type,
-            task_index=index,
-            protocol="grpc"  # Directly set the protocol to 'grpc' if it's constant
-        )
-
-        self.stdout.write(self.style.SUCCESS(f'Started {node_type} server at {cluster_spec.as_dict()[node_type][index]}'))
-        server.join()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''
-import tensorflow as tf
-from django.core.management.base import BaseCommand
-import os
-
-class Command(BaseCommand):
-    help = 'Starts a TensorFlow server for distributed training'
-
-    
-    def handle(self, *args, **options):
-
-        # Configure TensorFlow GPU memory growth
-        gpus = tf.config.experimental.list_physical_devices('GPU')
-        if gpus:
-            try:
-                for gpu in gpus:
-                    tf.config.experimental.set_memory_growth(gpu, True)
-            except RuntimeError as e:
-                print(f"Error setting memory growth: {e}")
-                return
-
-        node_type = os.getenv('NODE_TYPE', 'worker')
-        index = int(os.getenv('NODE_INDEX', '0'))
-
-        self.stdout.write(self.style.SUCCESS(f'Node type: {node_type}, Index: {index}'))
-
-        cluster_spec = {
-            "worker": ["192.168.100.109:2222"],
-            "ps": ["192.168.100.109:2223"]
-        }
-        cluster_resolver = tf.distribute.cluster_resolver.SimpleClusterResolver(
-            cluster_spec=tf.train.ClusterSpec(cluster_spec),
-            rpc_layer="grpc"
-        )
 
         server = tf.distribute.Server(
-            cluster_resolver.cluster_spec(),
+            cluster_spec,
             job_name=node_type,
             task_index=index,
-            protocol=cluster_resolver.rpc_layer
+            protocol="grpc"
         )
 
-        self.stdout.write(self.style.SUCCESS(f'Started {node_type} server at {cluster_spec[node_type][index]}'))
+        self.stdout.write(self.style.SUCCESS(
+            f"Started {node_type} server at {cluster_spec.as_dict()[node_type][index]}"
+        ))
+
         server.join()
-'''

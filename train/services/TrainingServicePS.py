@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
@@ -74,10 +75,7 @@ class TrainingServicePS:
         cluster_spec = TrainingServicePS.get_cluster_config()
         
         # Set up the cluster resolver and strategy
-        cluster_resolver = tf.distribute.cluster_resolver.SimpleClusterResolver(
-            tf.train.ClusterSpec(cluster_spec), rpc_layer="grpc")
-        #strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
-        strategy = tf.distribute.MultiWorkerMirroredStrategy(cluster_resolver)
+        strategy = tf.distribute.MultiWorkerMirroredStrategy()
 
         # Setup the coordinator
         coordinator = tf.distribute.experimental.coordinator.ClusterCoordinator(strategy)
