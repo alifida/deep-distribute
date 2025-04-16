@@ -69,10 +69,14 @@ class TrainingServicePS:
 
     @staticmethod
     def start_training(training_params):
+
+        TrainingServicePS.init_tf_config()
+
+
         print('Start training called...')
         job = training_params['training_job']
         # Define the cluster specification
-        cluster_spec = TrainingServicePS.get_cluster_config()
+       
         
         # Set up the cluster resolver and strategy
         
@@ -252,3 +256,36 @@ class TrainingServicePS:
         TrainingJobDAO.update(job.id, status=JobStatus.COMPLETED.value, result=results_json, ended_at=ended_at)
         
         print(f'Training complete. Final accuracy: {final_accuracy}')
+
+    @staticmethod
+    def init_tf_config():
+        import socket
+        cluster_spec = TrainingServicePS.get_cluster_config()
+        local_ip = socket.gethostbyname(socket.gethostname())
+        node_type = os.getenv('NODE_TYPE', 'worker')  # or determine another way if needed
+
+        all_workers = cluster_spec.get('worker', [])
+        all_ps = cluster_spec.get('ps', [])
+
+        if node_type == 'worker':
+            matched_indices = [i for i, addr in enumerate(all_workers) if local_ip in addr]
+        elif node_type == 'ps':
+            matched_indices = [i for i, addr in enumerate(all_ps) if local_ip in addr]
+        else:
+            matched_indices = []  # Could be 'chief' or coordinator, and might not be in the list
+
+        if matched_indices:
+            index = matched_indices[0]
+            tf_config = {
+                "cluster": {
+                    "worker": all_workers,
+                    "ps": all_ps
+                },
+                "task": {
+                    "type": node_type,
+                    "index": index
+                }
+            }
+            os.environ["TF_CONFIG"] = json.dumps(tf_config)
+        else:
+            print("This node is not part of worker/ps. Assuming chief/coordinator.")
