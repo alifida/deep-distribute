@@ -89,7 +89,7 @@ class TrainingServicePS:
             raise ValueError("TF_CONFIG environment variable is not set!")
 
         cluster_resolver = tf.distribute.cluster_resolver.TFConfigClusterResolver()
-        strategy 
+         
         cluster_resolver = tf.distribute.cluster_resolver.TFConfigClusterResolver()
         strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
 
