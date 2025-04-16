@@ -75,11 +75,11 @@ class TrainingServicePS:
         cluster_spec = TrainingServicePS.get_cluster_config()
         
         # Set up the cluster resolver and strategy
-        strategy = tf.distribute.MultiWorkerMirroredStrategy()
+        cluster_resolver = tf.distribute.cluster_resolver.TFConfigClusterResolver()
+        strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
 
         # Setup the coordinator
         coordinator = tf.distribute.experimental.coordinator.ClusterCoordinator(strategy)
-
         # Loss function with Reduction.NONE
         loss_object = BinaryCrossentropy(from_logits=True, reduction=tf.keras.losses.Reduction.NONE)
 
