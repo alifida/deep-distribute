@@ -57,6 +57,15 @@ class TrainingServicePS:
     @staticmethod
     def start_training_thread(job):
         clear_session() 
+
+        gpus = tf.config.list_physical_devices('GPU')
+        if gpus:
+            try:
+                tf.config.set_visible_devices(gpus[0], 'GPU')
+                tf.config.experimental.set_memory_growth(gpus[0], True)
+            except RuntimeError as e:
+                print(e)
+
         thread = threading.Thread(target=TrainingServicePS.start_training, args=(job,))
         thread.start()
 
