@@ -127,7 +127,7 @@ class TrainingServicePS:
             print("Dataset loaded successfully.", flush=True)
             return dataset
         
-         dataset_prefetched, num_classes = load_base_dataset()
+        dataset_prefetched, num_classes = load_base_dataset()
         # Create the model under the strategy scope
         with strategy.scope():
             '''model = Sequential([
