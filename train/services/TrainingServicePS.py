@@ -27,17 +27,17 @@ from tensorflow.keras.models import Model
 
 
 
-def worker_process(job_id):
+def worker_process(training_params):
     import django
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'deepdistribute.settings')
     django.setup()
 
     # Now import any Django-dependent modules
     from train.services import TrainingServicePS
-    from train.models import Training_job
+    #from train.models import Training_job
 
-    job = Training_job.objects.get(id=job_id)
-    TrainingServicePS.start_training(job)
+    #job = Training_job.objects.get(id=job_id)
+    TrainingServicePS.start_training(training_params)
 
 class TrainingServicePS:
 
@@ -70,9 +70,9 @@ class TrainingServicePS:
         thread.start()
 
     @staticmethod
-    def start_training_process(job_id):
+    def start_training_process(training_params):
         from multiprocessing import Process
-        process = Process(target=worker_process, args=(job_id,))
+        process = Process(target=worker_process, args=(training_params,))
         process.start()
         process.join()
 
@@ -97,7 +97,7 @@ class TrainingServicePS:
         if not tf_config:
             raise ValueError("TF_CONFIG environment variable is not set!")
 
-        cluster_resolver = tf.distribute.cluster_resolver.TFConfigClusterResolver()
+        #cluster_resolver = tf.distribute.cluster_resolver.TFConfigClusterResolver()
          
         cluster_resolver = tf.distribute.cluster_resolver.TFConfigClusterResolver()
         strategy = tf.distribute.experimental.ParameterServerStrategy(cluster_resolver)
