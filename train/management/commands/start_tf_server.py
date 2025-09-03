@@ -74,14 +74,19 @@ class Command(BaseCommand):
         import tensorflow as tf
 
         # Optional: enable GPU memory growth
-        gpus = tf.config.experimental.list_physical_devices('GPU')
+        gpus = tf.config.list_physical_devices('GPU')
         if gpus:
             try:
                 for gpu in gpus:
                     tf.config.experimental.set_memory_growth(gpu, True)
+                print(f"[{node_type}:{index}] ✅ GPUs available: {[gpu.name for gpu in gpus]}")
             except RuntimeError as e:
-                print(f"Error setting memory growth: {e}")
-                return
+                print(f"[{node_type}:{index}] ⚠️ Error enabling GPU memory growth: {e}")
+                print(f"[{node_type}:{index}] ⛔ Falling back to CPU")
+                os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+        else:
+            print(f"[{node_type}:{index}] ❌ No GPUs found. Using CPU only.")
+            os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
         # Start the TF server
         self.start_server(node_type, index, cluster_config)
