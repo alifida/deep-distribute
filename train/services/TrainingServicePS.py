@@ -1,4 +1,5 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
@@ -98,6 +99,22 @@ class TrainingServicePS:
         print("****************************")
         if not tf_config:
             raise ValueError("TF_CONFIG environment variable is not set!")
+
+
+        tf_config = json.loads(tf_config)
+        task_type = tf_config.get("task", {}).get("type")
+        task_index = tf_config.get("task", {}).get("index")
+        cluster = tf_config.get("cluster", {})
+        # 🚨 EARLY EXIT FOR PARAMETER SERVER
+        if task_type == "ps":
+            print(f"[INFO] Starting parameter server {task_index}...")
+            server = tf.distribute.Server(
+                tf.train.ClusterSpec(cluster),
+                job_name="ps",
+                task_index=task_index
+            )
+            server.join()
+            return  # Don't proceed to training logic
 
         #cluster_resolver = tf.distribute.cluster_resolver.TFConfigClusterResolver()
          
@@ -279,12 +296,19 @@ class TrainingServicePS:
         clear_session() 
 
         gpus = tf.config.list_physical_devices('GPU')
-        if gpus:
+        if not gpus:
+            # No GPU found, disable GPU usage entirely
+            print("⚠️ No GPU detected. Falling back to CPU.")
+            os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+        else:
             try:
                 tf.config.set_visible_devices(gpus[0], 'GPU')
                 tf.config.experimental.set_memory_growth(gpus[0], True)
+                os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
             except RuntimeError as e:
-                print(e)
+                print(f"⚠️ GPU setup failed with error: {e}. Falling back to CPU.")
+                os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
         
         
