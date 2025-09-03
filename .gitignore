@@ -48,4 +48,8 @@ Thumbs.db
 *.mov
 *.wmv
 *.zip
+*.csv
+/tmp/
+*.pkl
+*.h5
 
