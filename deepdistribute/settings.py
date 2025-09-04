@@ -27,7 +27,7 @@ DEBUG = True
 
 #ALLOWED_HOSTS = []
 ALLOWED_HOSTS = ['localhost','192.168.10.106', '192.168.10.71','192.168.100.109','192.168.100.112', '192.168.10.12', '192.168.10.92', '192.168.137.80']
-CLUSTER_DETAIL_URL = 'http://192.168.100.112:8000/api/cluster/detail'
+CLUSTER_DETAIL_URL = 'http://192.168.100.120:89/api/cluster/detail'
 SHARED_DIRECTORY = 'E:\\dataset\\training_tmp'
 
 
